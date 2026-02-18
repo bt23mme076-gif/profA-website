@@ -203,7 +203,7 @@ export default function Home() {
     <div className="bg-white">
       
       {/* ========== 1. HERO SECTION ========== */}
-      <section className="min-h-screen grid lg:grid-cols-2 items-center px-6 lg:px-16 py-20 bg-[#faf8f5]">
+      <section className="min-h-screen grid lg:grid-cols-2 items-center px-6 lg:px-16 py-12 bg-[#faf8f5]">
         {/* Left: Large Text */}
         <div className="space-y-8 max-w-2xl">
           <motion.div
@@ -266,10 +266,10 @@ export default function Home() {
       </section>
 
       {/* ========== 2. COURSES SECTION ========== */}
-      <section id="courses" className="py-24 px-6 lg:px-16 bg-white">
+      <section id="courses" className="py-16 px-6 lg:px-16 bg-white">
         <div className="max-w-7xl mx-auto">
           <motion.div 
-            className="text-center mb-16"
+            className="text-center mb-12"
             initial="hidden"
             whileInView="visible"
             viewport={viewportOptions}
@@ -461,7 +461,7 @@ export default function Home() {
       </section>
 
       {/* ========== 3. RECENT BLOG / REFLECTIONS ========== */}
-      <section id="blog" className="py-24 px-6 lg:px-16 bg-[#fff7ed]">
+      <section id="blog" className="py-16 px-6 lg:px-16 bg-[#fff7ed]">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial="hidden"
@@ -611,7 +611,7 @@ export default function Home() {
       </section>
 
       {/* ========== 4. TESTIMONIALS SLIDER ========== */}
-      <section className="py-20 bg-[#fb923c]">
+      <section className="py-16 bg-[#fb923c]">
         {/* Testimonial Slider - One at a time, centered */}
         <div 
           className="max-w-6xl mx-auto px-6 lg:px-20 relative"
@@ -634,7 +634,7 @@ export default function Home() {
           {testimonials && testimonials.length > 0 ? (
             <>
               {/* Single Testimonial Display */}
-              <div className="relative min-h-[400px] flex items-center justify-center py-12">
+              <div className="relative min-h-[400px] flex flex-col items-center justify-center py-12">
                 <motion.div
                   key={currentSlide}
                   initial={{ opacity: 0, y: 20 }}
@@ -660,30 +660,50 @@ export default function Home() {
                   </div>
                 </motion.div>
 
-                {/* Navigation Buttons */}
+                {/* Desktop Navigation Buttons (Side) - Hidden on Mobile */}
                 {testimonials.length > 1 && (
                   <>
                     <button
                       onClick={prevSlide}
-                      className="absolute left-4 lg:left-0 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-[#1a1a1a] p-3 lg:p-4 rounded-full shadow-xl transition-all duration-300 hover:scale-110 z-20"
+                      className="hidden lg:flex absolute left-0 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-[#1a1a1a] p-4 rounded-full shadow-xl transition-all duration-300 hover:scale-110 z-20"
                       aria-label="Previous testimonial"
                     >
                       <FiChevronLeft size={28} strokeWidth={3} />
                     </button>
                     <button
                       onClick={nextSlide}
-                      className="absolute right-4 lg:right-0 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-[#1a1a1a] p-3 lg:p-4 rounded-full shadow-xl transition-all duration-300 hover:scale-110 z-20"
+                      className="hidden lg:flex absolute right-0 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white text-[#1a1a1a] p-4 rounded-full shadow-xl transition-all duration-300 hover:scale-110 z-20"
                       aria-label="Next testimonial"
                     >
                       <FiChevronRight size={28} strokeWidth={3} />
                     </button>
                   </>
                 )}
+
+                {/* Mobile Navigation Buttons (Bottom) - Hidden on Desktop */}
+                {testimonials.length > 1 && (
+                  <div className="flex lg:hidden gap-4 mt-8">
+                    <button
+                      onClick={prevSlide}
+                      className="bg-white/90 hover:bg-white text-[#1a1a1a] p-3 rounded-full shadow-xl transition-all duration-300 hover:scale-110"
+                      aria-label="Previous testimonial"
+                    >
+                      <FiChevronLeft size={24} strokeWidth={3} />
+                    </button>
+                    <button
+                      onClick={nextSlide}
+                      className="bg-white/90 hover:bg-white text-[#1a1a1a] p-3 rounded-full shadow-xl transition-all duration-300 hover:scale-110"
+                      aria-label="Next testimonial"
+                    >
+                      <FiChevronRight size={24} strokeWidth={3} />
+                    </button>
+                  </div>
+                )}
               </div>
             </>
           ) : (
             // Fallback - show 1 sample testimonial
-            <div className="relative min-h-[400px] flex items-center justify-center py-12">
+            <div className="relative min-h-[400px] flex flex-col items-center justify-center py-12">
               <div className="text-center px-4 lg:px-16">
                 {/* Quote */}
                 <p className="text-2xl lg:text-4xl font-['Playfair_Display'] font-bold text-[#1a1a1a] leading-relaxed mb-10 max-w-4xl mx-auto">
@@ -706,7 +726,7 @@ export default function Home() {
       </section>
 
       {/* ========== 5. TRAININGS DELIVERED FOR ========== */}
-      <section className="py-20 bg-[#fff7ed]">
+      <section className="py-16 bg-[#fff7ed]">
         <motion.div 
           className="max-w-7xl mx-auto px-6"
           initial="hidden"
@@ -780,7 +800,7 @@ export default function Home() {
       </section>
 
       {/* ========== 6. BOOKS SECTION ========== */}
-      <section id="books" className="py-24 px-6 lg:px-16 bg-white">
+      <section id="books" className="py-16 px-6 lg:px-16 bg-white">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial="hidden"
@@ -791,7 +811,7 @@ export default function Home() {
             <EditableText
               field="books_heading"
               defaultValue={data.books_heading}
-              className="text-5xl lg:text-6xl font-['Playfair_Display'] font-bold text-[#1a1a1a] text-center mb-16 block"
+              className="text-5xl lg:text-6xl font-['Playfair_Display'] font-bold text-[#1a1a1a] text-center mb-12 block"
             />
           </motion.div>
           
@@ -948,7 +968,7 @@ export default function Home() {
       </section>
 
       {/* ========== 8. NEWSLETTER ========== */}
-      <section id="newsletter" className="py-20 px-6 lg:px-16 bg-[#fff7ed]">
+      <section id="newsletter" className="py-16 px-6 lg:px-16 bg-[#fff7ed]">
         <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-start">
           <motion.div
             initial="hidden"
