@@ -62,7 +62,7 @@ export default function Home() {
     hero_name: "Prof. Vishal Gupta",
     hero_subtitle: "IIM Ahmedabad Professor. Researcher. Thought Leader.",
     hero_description: "Leading expert in strategic management and organizational behavior. Prof. Gupta's research and teaching focus on helping leaders and organizations navigate complexity and drive sustainable growth.",
-    hero_image: "https://i.ibb.co/WvvwbZBt/prof-gupta-jpg.png",
+
     courses_heading: "Management Courses",
     course1_title: "The Science of Leadership",
     course1_description: "Master the art and science of leading high-performing teams in complex organizational environments.",

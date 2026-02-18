@@ -31,12 +31,12 @@ export default function Footer() {
           <div className="grid grid-cols-2 gap-4 md:gap-6 py-6 md:py-0 border-y md:border-none border-white/5">
             <ul className="space-y-2 text-center md:text-left">
               <li><a href="/#home" className="text-base md:text-lg hover:underline opacity-80 hover:opacity-100 transition-all">Home</a></li>
-              <li><a href="/#about" className="text-base md:text-lg hover:underline opacity-80 hover:opacity-100 transition-all">About</a></li>
+              <li><Link to="/about" className="text-base md:text-lg hover:underline opacity-80 hover:opacity-100 transition-all">About</Link></li>
               <li><a href="/#courses" className="text-base md:text-lg hover:underline opacity-80 hover:opacity-100 transition-all">Courses</a></li>
               <li><Link to="/trainings" className="text-base md:text-lg hover:underline opacity-80 hover:opacity-100 transition-all">Trainings</Link></li>
             </ul>
             <ul className="space-y-2 text-center md:text-left">
-              <li><a href="/#blog" className="text-base md:text-lg hover:underline opacity-80 hover:opacity-100 transition-all">Research</a></li>
+              <li><Link to="/research" className="text-base md:text-lg hover:underline opacity-80 hover:opacity-100 transition-all">Research</Link></li>
               <li><a href="https://vishalgupta.kavisha.ai/" target="_blank" rel="noopener noreferrer" className="text-base md:text-lg hover:underline opacity-80 hover:opacity-100 transition-all">Talk to me</a></li>
               <li><a href="/#books" className="text-base md:text-lg hover:underline opacity-80 hover:opacity-100 transition-all">Books</a></li>
             </ul>

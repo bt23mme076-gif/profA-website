@@ -47,8 +47,8 @@ export default function Navbar() {
   };
 
   const navLinks = [
-    { name: 'About me', hash: '#about' },
-    { name: 'Research', hash: '#research' },
+    { name: 'About me', path: '/about' },
+    { name: 'Research', path: '/research' },
     { name: 'Books', hash: '#books' },
     { name: 'Courses', path: '/courses' },
     { name: 'Trainings', path: '/trainings' },
