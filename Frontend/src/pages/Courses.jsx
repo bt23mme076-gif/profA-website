@@ -406,4 +406,4 @@ export default function Courses() {
       </section>
     </div>
   );
-}dsds
+}
