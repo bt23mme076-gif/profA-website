@@ -74,7 +74,7 @@ export default function Trainings() {
               Executive Training Programs
             </h1>
             <p className="text-xl lg:text-2xl text-[#3b82f6] font-['Inter'] max-w-3xl mx-auto">
-              by Prof. Vishal Gupta
+              By Prof. Vishal Gupta
             </p>
             <p className="text-lg text-gray-600 font-['Inter'] max-w-4xl mx-auto mt-6">
               Transform your leadership journey with world-class executive education programs from IIM Ahmedabad
