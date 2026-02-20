@@ -52,7 +52,7 @@ export default function Navbar() {
     { name: 'Books', hash: '#books' },
     { name: 'Courses', path: '/courses' },
     { name: 'Trainings', path: '/trainings' },
-    { name: 'Talk to me', hash: '#contact' },
+    { name: 'Digital Avatar', hash: '#contact' },
     { name: 'Newsletter', hash: '#newsletter' },
   ];
 

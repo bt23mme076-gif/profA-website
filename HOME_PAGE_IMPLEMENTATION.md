@@ -68,7 +68,7 @@ className="font-['Inter']"             // For body text
   - Book titles and descriptions
   - "Buy on Amazon" CTAs
 
-### 6. **Speaking Engagements (Talk to Me)**
+### 6. **Speaking Engagements (Digital Avatar)**
 - **Layout**: Split-screen (50/50 on desktop, stacked on mobile)
 - **Left**: Yellow background with heading, description, and CTA
 - **Right**: Wide-angle speaking image

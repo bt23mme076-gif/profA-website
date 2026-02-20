@@ -37,7 +37,7 @@ export default function Footer() {
             </ul>
             <ul className="space-y-2 text-center md:text-left">
               <li><Link to="/research" className="text-base md:text-lg hover:underline opacity-80 hover:opacity-100 transition-all">Research</Link></li>
-              <li><a href="https://vishalgupta.kavisha.ai/" target="_blank" rel="noopener noreferrer" className="text-base md:text-lg hover:underline opacity-80 hover:opacity-100 transition-all">Talk to me</a></li>
+              <li><a href="https://vishalgupta.kavisha.ai/" target="_blank" rel="noopener noreferrer" className="text-base md:text-lg hover:underline opacity-80 hover:opacity-100 transition-all">Digital Avatar</a></li>
               <li><a href="/#books" className="text-base md:text-lg hover:underline opacity-80 hover:opacity-100 transition-all">Books</a></li>
             </ul>
           </div>
