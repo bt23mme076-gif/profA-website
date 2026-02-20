@@ -19,7 +19,7 @@ export default function Trainings() {
         'Leading Change & Transformation',
         'Networking with Industry Leaders'
       ],
-      color: 'from-blue-500 to-blue-600'
+      color: 'from-[#2A35CC] to-[#1f2a99]'
     },
     {
       id: 'heal',
@@ -55,7 +55,7 @@ export default function Trainings() {
         'Sustainable Business Practices',
         'Global Business Perspectives'
       ],
-      color: 'from-blue-500 to-blue-600'
+      color: 'from-[#2A35CC] to-[#1f2a99]'
     }
   ];
 
@@ -73,7 +73,7 @@ export default function Trainings() {
             <h1 className="text-5xl lg:text-6xl font-['Playfair_Display'] font-bold text-gray-900 mb-6">
               Executive Training Programs
             </h1>
-            <p className="text-xl lg:text-2xl text-[#3b82f6] font-['Inter'] max-w-3xl mx-auto">
+            <p className="text-xl lg:text-2xl text-[#2A35CC] font-['Inter'] max-w-3xl mx-auto">
               By Prof. Vishal Gupta
             </p>
             <p className="text-lg text-gray-600 font-['Inter'] max-w-4xl mx-auto mt-6">
@@ -168,7 +168,7 @@ export default function Trainings() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-br from-[#3b82f6] to-[#2563eb] text-white">
+      <section className="py-16 bg-gradient-to-br from-[#2A35CC] to-[#1f2a99] text-white">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-3xl lg:text-4xl font-['Playfair_Display'] font-bold mb-4">
             Ready to Transform Your Leadership?
@@ -178,7 +178,7 @@ export default function Trainings() {
           </p>
           <a
             href="#contact"
-            className="inline-block px-8 py-4 bg-white text-[#3b82f6] font-['Inter'] font-semibold rounded-lg shadow-lg hover:shadow-xl hover:bg-gray-50 transition-all duration-300"
+            className="inline-block px-8 py-4 bg-white text-[#2A35CC] font-['Inter'] font-semibold rounded-lg shadow-lg hover:shadow-xl hover:bg-gray-50 transition-all duration-300"
           >
             Get in Touch
           </a>

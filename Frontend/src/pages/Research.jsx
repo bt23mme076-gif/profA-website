@@ -133,7 +133,7 @@ export default function Research() {
   return (
     <div className="bg-white">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-[#eff6ff] to-[#fff7ed] py-20 px-6 lg:px-16">
+      <section className="bg-gradient-to-br from-[#e6e8ff] to-[#fff7ed] py-20 px-6 lg:px-16">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial="hidden"
@@ -160,7 +160,7 @@ export default function Research() {
               href="https://scholar.google.co.in/citations?user=_kfodNoAAAAJ&hl=hi" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-[#3b82f6] hover:bg-[#2563eb] text-white px-6 py-3 rounded-lg font-['Inter'] font-semibold transition-all shadow-lg hover:shadow-xl"
+              className="inline-flex items-center gap-2 bg-[#2A35CC] hover:bg-[#1f2a99] text-white px-6 py-3 rounded-lg font-['Inter'] font-semibold transition-all shadow-lg hover:shadow-xl"
             >
               <FiExternalLink /> Google Scholar Citations
             </a>
@@ -189,7 +189,7 @@ export default function Research() {
             <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-4">
               Featured Peer-reviewed Publications
             </h2>
-            <div className="w-24 h-1 bg-[#3b82f6] rounded-full"></div>
+            <div className="w-24 h-1 bg-[#2A35CC] rounded-full"></div>
           </motion.div>
 
           <div className="space-y-6">
@@ -200,7 +200,7 @@ export default function Research() {
                 whileInView="visible"
                 viewport={viewportOptions}
                 variants={fadeInUp}
-                className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow border-l-4 border-[#3b82f6]"
+                className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow border-l-4 border-[#2A35CC]"
               >
                 <p className="font-['Inter'] text-gray-700 mb-2">
                   <span className="font-semibold text-[#1a1a1a]">{pub.authors}</span> ({pub.year}). {pub.title}
@@ -211,7 +211,7 @@ export default function Research() {
                     href={pub.doi} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-[#3b82f6] hover:text-[#2563eb] font-['Inter'] text-sm inline-flex items-center gap-1"
+                    className="text-[#2A35CC] hover:text-[#1f2a99] font-['Inter'] text-sm inline-flex items-center gap-1"
                   >
                     <FiExternalLink size={14} /> View Publication
                   </a>
@@ -257,7 +257,7 @@ export default function Research() {
             variants={fadeInUp}
           >
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 bg-[#3b82f6] rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-[#2A35CC] rounded-lg flex items-center justify-center">
                 <FiBookOpen className="text-white text-xl" />
               </div>
               <h2 className="text-3xl lg:text-4xl font-['Playfair_Display'] font-bold text-[#1a1a1a]">
@@ -265,22 +265,22 @@ export default function Research() {
               </h2>
             </div>
             <ul className="space-y-3">
-              <li className="font-['Inter'] text-gray-700 pl-4 border-l-2 border-[#3b82f6] hover:bg-[#eff6ff] p-2 transition-colors">
+              <li className="font-['Inter'] text-gray-700 pl-4 border-l-2 border-[#2A35CC] hover:bg-[#e6e8ff] p-2 transition-colors">
                 A Note on Decision-Making (IIMA/OB0232TEC)
               </li>
-              <li className="font-['Inter'] text-gray-700 pl-4 border-l-2 border-[#3b82f6] hover:bg-[#eff6ff] p-2 transition-colors">
+              <li className="font-['Inter'] text-gray-700 pl-4 border-l-2 border-[#2A35CC] hover:bg-[#e6e8ff] p-2 transition-colors">
                 Understanding the Design of Organizations (IIMA/OB0226TEC)
               </li>
-              <li className="font-['Inter'] text-gray-700 pl-4 border-l-2 border-[#3b82f6] hover:bg-[#eff6ff] p-2 transition-colors">
+              <li className="font-['Inter'] text-gray-700 pl-4 border-l-2 border-[#2A35CC] hover:bg-[#e6e8ff] p-2 transition-colors">
                 Stress and Our Inner Game (IIMA/OB0228TEC)
               </li>
-              <li className="font-['Inter'] text-gray-700 pl-4 border-l-2 border-[#3b82f6] hover:bg-[#eff6ff] p-2 transition-colors">
+              <li className="font-['Inter'] text-gray-700 pl-4 border-l-2 border-[#2A35CC] hover:bg-[#e6e8ff] p-2 transition-colors">
                 Appreciative Inquiry: A Positive Way of Managing Change (IIMA/OB0229TEC)
               </li>
-              <li className="font-['Inter'] text-gray-700 pl-4 border-l-2 border-[#3b82f6] hover:bg-[#eff6ff] p-2 transition-colors">
+              <li className="font-['Inter'] text-gray-700 pl-4 border-l-2 border-[#2A35CC] hover:bg-[#e6e8ff] p-2 transition-colors">
                 Teaching note for 'The Cybertech Project (A) and (B)' (HBS No. 695-030 and 695-041) (IIMA/OB0214TN)
               </li>
-              <li className="font-['Inter'] text-gray-700 pl-4 border-l-2 border-[#3b82f6] hover:bg-[#eff6ff] p-2 transition-colors">
+              <li className="font-['Inter'] text-gray-700 pl-4 border-l-2 border-[#2A35CC] hover:bg-[#e6e8ff] p-2 transition-colors">
                 Teaching note for 'The Audubon Zoo, 1993', an integrative case published in Daft (2007) (IIMA/OB0215TN)
               </li>
             </ul>
@@ -289,7 +289,7 @@ export default function Research() {
       </section>
 
       {/* PhD Students */}
-      <section className="py-16 px-6 lg:px-16 bg-[#eff6ff]">
+      <section className="py-16 px-6 lg:px-16 bg-[#e6e8ff]">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial="hidden"
@@ -299,14 +299,14 @@ export default function Research() {
             className="mb-12 text-center"
           >
             <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="w-14 h-14 bg-[#3b82f6] rounded-full flex items-center justify-center">
+              <div className="w-14 h-14 bg-[#2A35CC] rounded-full flex items-center justify-center">
                 <FiUsers className="text-white text-2xl" />
               </div>
             </div>
             <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-4">
               PhD Students Guided
             </h2>
-            <div className="w-24 h-1 bg-[#3b82f6] rounded-full mx-auto"></div>
+            <div className="w-24 h-1 bg-[#2A35CC] rounded-full mx-auto"></div>
           </motion.div>
 
           <div className="grid md:grid-cols-2 gap-12">
@@ -323,7 +323,7 @@ export default function Research() {
               </h3>
               <div className="space-y-4">
                 {phdStudents.chairperson.map((student, index) => (
-                  <div key={index} className="border-l-4 border-[#3b82f6] pl-4 py-2 hover:bg-[#eff6ff] transition-colors">
+                  <div key={index} className="border-l-4 border-[#2A35CC] pl-4 py-2 hover:bg-[#e6e8ff] transition-colors">
                     <p className="font-['Inter'] font-semibold text-[#1a1a1a]">{student.name}</p>
                     <p className="font-['Inter'] text-sm text-gray-600">{student.position}</p>
                   </div>

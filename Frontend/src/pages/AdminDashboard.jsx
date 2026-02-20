@@ -786,7 +786,7 @@ export default function AdminDashboard() {
                       <label
                         style={{
                           padding: '0.5rem 1rem',
-                          backgroundColor: homeImageUploading.hero_image ? '#9ca3af' : '#3b82f6',
+                          backgroundColor: homeImageUploading.hero_image ? '#9ca3af' : '#2A35CC',
                           color: 'white',
                           borderRadius: '4px',
                           cursor: homeImageUploading.hero_image ? 'not-allowed' : 'pointer',
@@ -869,7 +869,7 @@ export default function AdminDashboard() {
                           <label
                             style={{
                               padding: '0.4rem 0.8rem',
-                              backgroundColor: homeImageUploading[`blog${num}_image`] ? '#9ca3af' : '#3b82f6',
+                              backgroundColor: homeImageUploading[`blog${num}_image`] ? '#9ca3af' : '#2A35CC',
                               color: 'white',
                               borderRadius: '4px',
                               cursor: homeImageUploading[`blog${num}_image`] ? 'not-allowed' : 'pointer',
@@ -1391,7 +1391,7 @@ function BlogEditor({ blog, onUpdate, onDelete }) {
               <label
                 style={{
                   padding: '0.5rem 1rem',
-                  backgroundColor: uploading ? '#9ca3af' : '#3b82f6',
+                  backgroundColor: uploading ? '#9ca3af' : '#2A35CC',
                   color: 'white',
                   borderRadius: '4px',
                   cursor: uploading ? 'not-allowed' : 'pointer',
@@ -1493,14 +1493,13 @@ function BlogEditor({ blog, onUpdate, onDelete }) {
                 color: 'white',
                 borderRadius: '999px',
                 fontSize: '0.75rem'
-              }}>
-                {blog.published ? 'Published' : 'Draft'}
+              }}>                {blog.published ? 'Published' : 'Draft'}
               </span>
             </div>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button
                 onClick={() => setEditing(true)}
-                style={{ padding: '0.5rem', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                style={{ padding: '0.5rem', backgroundColor: '#2A35CC', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
               >
                 <FiEdit />
               </button>
@@ -1604,7 +1603,7 @@ function CourseEditor({ course, onUpdate, onDelete }) {
               <label
                 style={{
                   padding: '0.5rem 1rem',
-                  backgroundColor: uploading ? '#9ca3af' : '#3b82f6',
+                  backgroundColor: uploading ? '#9ca3af' : '#2A35CC',
                   color: 'white',
                   borderRadius: '4px',
                   cursor: uploading ? 'not-allowed' : 'pointer',
@@ -1727,14 +1726,13 @@ function CourseEditor({ course, onUpdate, onDelete }) {
                 color: 'white',
                 borderRadius: '999px',
                 fontSize: '0.75rem'
-              }}>
-                {course.published ? 'Published' : 'Draft'}
+              }}>                {course.published ? 'Published' : 'Draft'}
               </span>
             </div>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button
                 onClick={() => setEditing(true)}
-                style={{ padding: '0.5rem', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                style={{ padding: '0.5rem', backgroundColor: '#2A35CC', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
               >
                 <FiEdit />
               </button>
@@ -1846,7 +1844,7 @@ function TestimonialEditor({ testimonial, onUpdate, onDelete }) {
               <label
                 style={{
                   padding: '0.5rem 1rem',
-                  backgroundColor: uploading ? '#9ca3af' : '#3b82f6',
+                  backgroundColor: uploading ? '#9ca3af' : '#2A35CC',
                   color: 'white',
                   borderRadius: '4px',
                   cursor: uploading ? 'not-allowed' : 'pointer',
@@ -1965,7 +1963,7 @@ function TestimonialEditor({ testimonial, onUpdate, onDelete }) {
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button
                 onClick={() => setEditing(true)}
-                style={{ padding: '0.5rem', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                style={{ padding: '0.5rem', backgroundColor: '#2A35CC', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
               >
                 <FiEdit />
               </button>
@@ -2050,7 +2048,7 @@ function TrainingLogoEditor({ logo, onUpdate, onDelete }) {
               <label
                 style={{
                   padding: '0.5rem 1rem',
-                  backgroundColor: uploading ? '#9ca3af' : '#3b82f6',
+                  backgroundColor: uploading ? '#9ca3af' : '#2A35CC',
                   color: 'white',
                   borderRadius: '4px',
                   cursor: uploading ? 'not-allowed' : 'pointer',
@@ -2237,7 +2235,7 @@ function TrainingLogoEditor({ logo, onUpdate, onDelete }) {
             <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
               <button
                 onClick={() => setEditing(true)}
-                style={{ padding: '0.5rem', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                style={{ padding: '0.5rem', backgroundColor: '#2A35CC', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
               >
                 <FiEdit />
               </button>

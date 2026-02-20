@@ -78,7 +78,7 @@ export default function About() {
   return (
     <div className="bg-white">
       {/* Hero Section - The Statement */}
-      <section className="min-h-screen grid lg:grid-cols-2 items-center px-6 lg:px-20 py-16 bg-gradient-to-br from-[#eff6ff] to-[#faf8f5]">
+      <section className="min-h-screen grid lg:grid-cols-2 items-center px-6 lg:px-20 py-16 bg-gradient-to-br from-[#e6e8ff] to-[#faf8f5]">
         {/* Left: Text Content */}
         <motion.div
           initial="hidden"
@@ -90,7 +90,7 @@ export default function About() {
           <h1 className="text-6xl lg:text-7xl font-['Playfair_Display'] font-bold text-[#1a1a1a] leading-tight">
             Creating Happy Leaders
           </h1>
-          <p className="text-2xl lg:text-3xl font-['Playfair_Display'] text-[#3b82f6] font-semibold">
+          <p className="text-2xl lg:text-3xl font-['Playfair_Display'] text-[#2A35CC] font-semibold">
             Professor of Organizational Behavior at IIM Ahmedabad.
           </p>
           <p className="text-xl font-['Inter'] text-gray-600 leading-relaxed">
@@ -100,7 +100,7 @@ export default function About() {
             href="https://www.linkedin.com/in/gvishal/" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="inline-block bg-[#3b82f6] hover:bg-[#2563eb] text-white px-8 py-4 rounded-lg font-['Inter'] font-bold transition-all shadow-lg hover:shadow-xl"
+            className="inline-block bg-[#2A35CC] hover:bg-[#1f2a99] text-white px-8 py-4 rounded-lg font-['Inter'] font-bold transition-all shadow-lg hover:shadow-xl"
           >
             Connect on LinkedIn
           </a>
@@ -113,7 +113,7 @@ export default function About() {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="relative mt-12 lg:mt-0"
         >
-          <div className="aspect-[3/4] max-w-lg mx-auto lg:ml-auto rounded-3xl overflow-hidden shadow-2xl bg-gray-200 border-4 border-[#3b82f6]">
+          <div className="aspect-[3/4] max-w-lg mx-auto lg:ml-auto rounded-3xl overflow-hidden shadow-2xl bg-gray-200 border-4 border-[#2A35CC]">
             <img 
               src="https://i.ibb.co/WvvwbZBt/prof-gupta-jpg.png"
               alt="Prof. Vishal Gupta" 
@@ -137,8 +137,8 @@ export default function About() {
             className="grid grid-cols-1 md:grid-cols-3 gap-8"
           >
             {achievements.map((item, i) => (
-              <div key={i} className="border-t-4 border-[#3b82f6] pt-8 space-y-4 group hover:border-[#f97316] transition-all">
-                <div className="w-14 h-14 bg-gradient-to-br from-[#3b82f6] to-[#2563eb] rounded-xl flex items-center justify-center text-white text-2xl shadow-lg group-hover:scale-110 transition-transform">
+              <div key={i} className="border-t-4 border-[#2A35CC] pt-8 space-y-4 group hover:border-[#f97316] transition-all">
+                <div className="w-14 h-14 bg-gradient-to-br from-[#2A35CC] to-[#1f2a99] rounded-xl flex items-center justify-center text-white text-2xl shadow-lg group-hover:scale-110 transition-transform">
                   {item.icon}
                 </div>
                 <h4 className="text-sm uppercase tracking-widest font-bold text-gray-500">{item.title}</h4>
@@ -165,7 +165,7 @@ export default function About() {
             <div className="w-24 h-1 bg-[#f97316] rounded-full mx-auto"></div>
             <div className="space-y-6 text-left">
               <p className="text-xl font-['Inter'] text-gray-700 leading-relaxed">
-                I obtained my doctorate in <span className="font-semibold text-[#3b82f6]">Human Resource Management</span> from the Indian Institute of Management Lucknow in 2013. I hold a Bachelor's degree in <span className="font-semibold text-[#3b82f6]">Electrical and Electronics Engineering</span> from BITS-Pilani, Pilani Campus, India.
+                I obtained my doctorate in <span className="font-semibold text-[#2A35CC]">Human Resource Management</span> from the Indian Institute of Management Lucknow in 2013. I hold a Bachelor's degree in <span className="font-semibold text-[#2A35CC]">Electrical and Electronics Engineering</span> from BITS-Pilani, Pilani Campus, India.
               </p>
               <p className="text-xl font-['Inter'] text-gray-700 leading-relaxed">
                 Prior to joining IIMA, I worked as a <span className="font-semibold text-[#f97316]">Hardware Design Engineer</span> with ST Microelectronics Pvt Ltd., Greater Noida and with Infineon Technologies AG, Munich, Germany where I was involved in the design of high-performance Application-Specific Integrated Circuits (ASICs).
@@ -197,7 +197,7 @@ export default function About() {
             </div>
             <div className="grid md:grid-cols-2 gap-6">
               {awards.map((award, index) => (
-                <div key={index} className="bg-gradient-to-br from-[#eff6ff] to-white p-6 rounded-xl border-l-4 border-[#3b82f6] shadow-md hover:shadow-xl transition-shadow">
+                <div key={index} className="bg-gradient-to-br from-[#e6e8ff] to-white p-6 rounded-xl border-l-4 border-[#2A35CC] shadow-md hover:shadow-xl transition-shadow">
                   <p className="font-['Inter'] text-gray-800 font-medium">{award}</p>
                 </div>
               ))}
@@ -216,7 +216,7 @@ export default function About() {
             variants={fadeInUp}
           >
             <div className="flex items-center gap-4 mb-10">
-              <div className="w-16 h-16 bg-gradient-to-br from-[#3b82f6] to-[#2563eb] rounded-2xl flex items-center justify-center text-white text-3xl shadow-xl">
+              <div className="w-16 h-16 bg-gradient-to-br from-[#2A35CC] to-[#1f2a99] rounded-2xl flex items-center justify-center text-white text-3xl shadow-xl">
                 <FiBookOpen />
               </div>
               <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a]">
@@ -224,7 +224,7 @@ export default function About() {
               </h2>
             </div>
             <div className="grid md:grid-cols-2 gap-6">
-              <div className="bg-white p-8 rounded-2xl shadow-xl border-t-4 border-[#3b82f6] hover:scale-105 transition-transform">
+              <div className="bg-white p-8 rounded-2xl shadow-xl border-t-4 border-[#2A35CC] hover:scale-105 transition-transform">
                 <h3 className="text-2xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-3">
                   First Among Equals
                 </h3>
@@ -257,7 +257,7 @@ export default function About() {
             variants={fadeInUp}
           >
             <div className="flex items-center gap-4 mb-10">
-              <div className="w-16 h-16 bg-gradient-to-br from-[#3b82f6] to-[#2563eb] rounded-2xl flex items-center justify-center text-white text-3xl shadow-xl">
+              <div className="w-16 h-16 bg-gradient-to-br from-[#2A35CC] to-[#1f2a99] rounded-2xl flex items-center justify-center text-white text-3xl shadow-xl">
                 <FiTrendingUp />
               </div>
               <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a]">
@@ -266,9 +266,9 @@ export default function About() {
             </div>
             <div className="space-y-6">
               {workExperience.map((exp, index) => (
-                <div key={index} className="relative pl-8 pb-6 border-l-2 border-[#3b82f6] last:border-0 group">
-                  <div className="absolute -left-3 top-0 w-5 h-5 rounded-full bg-[#3b82f6] group-hover:bg-[#f97316] transition-colors shadow-lg"></div>
-                  <p className="text-sm font-['Inter'] font-semibold text-[#3b82f6] mb-2">{exp.period}</p>
+                <div key={index} className="relative pl-8 pb-6 border-l-2 border-[#2A35CC] last:border-0 group">
+                  <div className="absolute -left-3 top-0 w-5 h-5 rounded-full bg-[#2A35CC] group-hover:bg-[#f97316] transition-colors shadow-lg"></div>
+                  <p className="text-sm font-['Inter'] font-semibold text-[#2A35CC] mb-2">{exp.period}</p>
                   <h3 className="text-xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-1">{exp.role}</h3>
                   <p className="font-['Inter'] text-gray-600">{exp.organization}</p>
                 </div>
@@ -289,7 +289,7 @@ export default function About() {
             variants={fadeInUp}
           >
             <div className="flex items-center gap-3 mb-8">
-              <div className="w-12 h-12 bg-[#3b82f6] rounded-xl flex items-center justify-center text-white text-xl shadow-lg">
+              <div className="w-12 h-12 bg-[#2A35CC] rounded-xl flex items-center justify-center text-white text-xl shadow-lg">
                 <FiUsers />
               </div>
               <h3 className="text-3xl font-['Playfair_Display'] font-bold text-[#1a1a1a]">
@@ -297,7 +297,7 @@ export default function About() {
               </h3>
             </div>
             <div className="space-y-4">
-              <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-[#3b82f6]">
+              <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-[#2A35CC]">
                 <p className="font-['Inter'] font-semibold text-[#1a1a1a]">
                   Independent Director - Gujarat Industries Power Company Limited (GIPCL)
                 </p>
@@ -338,7 +338,7 @@ export default function About() {
             </p>
             <div className="flex flex-wrap gap-3">
               {['Times of India', 'Economic Times', 'Business Line', 'Ahmedabad Mirror', 'Mint', 'DNA'].map((media) => (
-                <span key={media} className="bg-white px-4 py-2 rounded-full text-sm font-['Inter'] font-semibold text-[#3b82f6] shadow-md border border-[#3b82f6]">
+                <span key={media} className="bg-white px-4 py-2 rounded-full text-sm font-['Inter'] font-semibold text-[#2A35CC] shadow-md border border-[#2A35CC]">
                   {media}
                 </span>
               ))}

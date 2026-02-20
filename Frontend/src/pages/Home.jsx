@@ -203,7 +203,7 @@ export default function Home() {
     <div className="bg-white">
       
       {/* ========== 1. HERO SECTION ========== */}
-      <section className="min-h-screen grid lg:grid-cols-2 items-center px-6 lg:px-16 py-8 sm:py-12 bg-[#faf8f5]">
+      <section className="min-h-screen grid lg:grid-cols-2 items-center px-6 lg:px-16 py-8 sm:py-12 bg-gradient-to-br from-[#fff5f0] to-[#ffe8dc]">
         {/* Left: Large Text */}
         <div className="space-y-6 sm:space-y-8 max-w-2xl">
           <motion.div
@@ -220,12 +220,12 @@ export default function Home() {
             <EditableText
               field="hero_name"
               defaultValue={data.hero_name}
-              className="text-4xl sm:text-5xl lg:text-7xl font-['Playfair_Display'] font-bold text-[#3B46FF] leading-tight mb-4 sm:mb-6 block"
+              className="text-4xl sm:text-5xl lg:text-7xl font-['Playfair_Display'] font-bold text-[#2A35CC] leading-tight mb-4 sm:mb-6 block"
             />
             <EditableText
               field="hero_subtitle"
               defaultValue={data.hero_subtitle}
-              className="text-lg sm:text-xl lg:text-2xl font-['Playfair_Display'] text-[#3B46FF] font-semibold mb-6 sm:mb-8 block"
+              className="text-lg sm:text-xl lg:text-2xl font-['Playfair_Display'] text-[#2A35CC] font-semibold mb-6 sm:mb-8 block"
             />
             <EditableText
               field="hero_description"
@@ -239,7 +239,7 @@ export default function Home() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.8 }}
           >
-            <button className="bg-[#3B46FF] hover:bg-[#2A35CC] px-8 py-4 font-['Inter'] font-bold text-white text-base rounded-md transition-all shadow-lg hover:shadow-xl hover:scale-105">
+            <button className="bg-[#2A35CC] hover:bg-[#1f2a99] px-8 py-4 font-['Inter'] font-bold text-white text-base rounded-md transition-all shadow-lg hover:shadow-xl hover:scale-105">
               Learn More
             </button>
           </motion.div>
@@ -341,7 +341,7 @@ export default function Home() {
                       </a>
                     </div>
                   )}
-                  <button className="mt-auto px-6 py-3 bg-[#3B46FF] hover:bg-[#2A35CC] text-white font-['Inter'] font-bold rounded-lg transition-all shadow-md hover:shadow-lg">
+                  <button className="mt-auto px-6 py-3 bg-[#2A35CC] hover:bg-[#1f2a99] text-white font-['Inter'] font-bold rounded-lg transition-all shadow-md hover:shadow-lg">
                     EXPLORE COURSE
                   </button>
                 </motion.div>
@@ -397,7 +397,7 @@ export default function Home() {
                       </div>
                     ) : null;
                   })()}
-                  <button className="mt-auto px-6 py-3 bg-[#3B46FF] hover:bg-[#2A35CC] text-white font-['Inter'] font-bold rounded-lg transition-all shadow-md hover:shadow-lg">
+                  <button className="mt-auto px-6 py-3 bg-[#2A35CC] hover:bg-[#1f2a99] text-white font-['Inter'] font-bold rounded-lg transition-all shadow-md hover:shadow-lg">
                     EXPLORE COURSE
                   </button>
                 </motion.div>
@@ -450,7 +450,7 @@ export default function Home() {
                       </div>
                     ) : null;
                   })()}
-                  <button className="mt-auto px-6 py-3 bg-[#3B46FF] hover:bg-[#2A35CC] text-white font-['Inter'] font-bold rounded-lg transition-all shadow-md hover:shadow-lg">
+                  <button className="mt-auto px-6 py-3 bg-[#2A35CC] hover:bg-[#1f2a99] text-white font-['Inter'] font-bold rounded-lg transition-all shadow-md hover:shadow-lg">
                     EXPLORE COURSE
                   </button>
                 </motion.div>
@@ -603,7 +603,7 @@ export default function Home() {
             viewport={viewportOptions}
             variants={fadeInUp}
           >
-            <button className="bg-[#3B46FF] hover:bg-[#2A35CC] px-12 py-4 font-['Inter'] font-bold text-white text-base rounded-md transition-all shadow-lg hover:shadow-xl hover:scale-105">
+            <button className="bg-[#2A35CC] hover:bg-[#1f2a99] px-12 py-4 font-['Inter'] font-bold text-white text-base rounded-md transition-all shadow-lg hover:shadow-xl hover:scale-105">
               My Research
             </button>
           </motion.div>
@@ -848,7 +848,7 @@ export default function Home() {
               />
               <a 
                 href="#" 
-                className="inline-block bg-[#3B46FF] hover:bg-[#2A35CC] text-white px-6 py-3 font-['Inter'] font-bold text-sm rounded-md transition-all shadow-md hover:shadow-lg"
+                className="inline-block bg-[#2A35CC] hover:bg-[#1f2a99] text-white px-6 py-3 font-['Inter'] font-bold text-sm rounded-md transition-all shadow-md hover:shadow-lg"
               >
                 Buy on Amazon
               </a>
@@ -880,7 +880,7 @@ export default function Home() {
               />
               <a 
                 href="#" 
-                className="inline-block bg-[#3B46FF] hover:bg-[#2A35CC] text-white px-6 py-3 font-['Inter'] font-bold text-sm rounded-md transition-all shadow-md hover:shadow-lg"
+                className="inline-block bg-[#2A35CC] hover:bg-[#1f2a99] text-white px-6 py-3 font-['Inter'] font-bold text-sm rounded-md transition-all shadow-md hover:shadow-lg"
               >
                 Buy on Amazon
               </a>
@@ -912,7 +912,7 @@ export default function Home() {
               />
               <a 
                 href="#" 
-                className="inline-block bg-[#3B46FF] hover:bg-[#2A35CC] text-white px-6 py-3 font-['Inter'] font-bold text-sm rounded-md transition-all shadow-md hover:shadow-lg"
+                className="inline-block bg-[#2A35CC] hover:bg-[#1f2a99] text-white px-6 py-3 font-['Inter'] font-bold text-sm rounded-md transition-all shadow-md hover:shadow-lg"
               >
                 Buy on Amazon
               </a>
@@ -1011,7 +1011,7 @@ export default function Home() {
                 <button 
                   type="submit"
                   disabled={isSubmitting}
-                  className="bg-[#3B46FF] hover:bg-[#2A35CC] px-10 py-4 font-['Inter'] font-bold text-white text-base rounded-md transition-all shadow-md hover:shadow-lg whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="bg-[#2A35CC] hover:bg-[#1f2a99] px-10 py-4 font-['Inter'] font-bold text-white text-base rounded-md transition-all shadow-md hover:shadow-lg whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? (
                     <>
