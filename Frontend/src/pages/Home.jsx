@@ -203,9 +203,9 @@ export default function Home() {
     <div className="bg-white">
       
       {/* ========== 1. HERO SECTION ========== */}
-      <section className="min-h-screen grid lg:grid-cols-2 items-center px-6 lg:px-16 py-12 bg-[#faf8f5]">
+      <section className="min-h-screen grid lg:grid-cols-2 items-center px-6 lg:px-16 py-8 sm:py-12 bg-[#faf8f5]">
         {/* Left: Large Text */}
-        <div className="space-y-8 max-w-2xl">
+        <div className="space-y-6 sm:space-y-8 max-w-2xl">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -220,12 +220,12 @@ export default function Home() {
             <EditableText
               field="hero_name"
               defaultValue={data.hero_name}
-              className="text-6xl lg:text-7xl font-['Playfair_Display'] font-bold text-[#3B46FF] leading-tight mb-6 block"
+              className="text-4xl sm:text-5xl lg:text-7xl font-['Playfair_Display'] font-bold text-[#3B46FF] leading-tight mb-4 sm:mb-6 block"
             />
             <EditableText
               field="hero_subtitle"
               defaultValue={data.hero_subtitle}
-              className="text-xl lg:text-2xl font-['Playfair_Display'] text-[#3B46FF] font-semibold mb-8 block"
+              className="text-lg sm:text-xl lg:text-2xl font-['Playfair_Display'] text-[#3B46FF] font-semibold mb-6 sm:mb-8 block"
             />
             <EditableText
               field="hero_description"
