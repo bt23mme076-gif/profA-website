@@ -10,6 +10,8 @@ import Research from './pages/Research';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import Blog from './pages/Blog';
+import Books from './pages/book';
+
 
 function App() {
   return (
@@ -24,6 +26,7 @@ function App() {
           <Route path="/research" element={<Research />} />
           <Route path="/admin" element={<AdminLogin />} />
            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/book" element={<Books />} />
           <Route path="/blog" element={<Blog />} />
         </Routes>
         <Footer />

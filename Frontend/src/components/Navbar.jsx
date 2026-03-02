@@ -49,7 +49,7 @@ export default function Navbar() {
   const navLinks = [
     { name: 'About me', path: '/about' },
     { name: 'Research', path: '/research' },
-    { name: 'Books', hash: '#books' },
+    { name: 'Books', path: '/book' },
     { name: 'Courses', path: '/courses' },
     { name: 'Trainings', path: '/trainings' },
     { name: 'Digital Avatar', hash: '#contact' },
@@ -93,7 +93,7 @@ export default function Navbar() {
         left: 0, 
         right: 0, 
         zIndex: 50, 
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        backgroundColor: '#ffffff',
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
         borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
@@ -101,11 +101,13 @@ export default function Navbar() {
       }}>
         <div style={{ 
           width: '100%',
-          padding: windowWidth < 768 ? '0 1.25rem' : '0 4rem', 
+          maxWidth: '100vw',
+          padding: windowWidth < 768 ? '0 1rem' : '0 4rem', 
           height: windowWidth < 768 ? '65px' : '80px', 
           display: 'flex', 
           alignItems: 'center', 
-          justifyContent: 'space-between' 
+          justifyContent: 'space-between',
+          boxSizing: 'border-box'
         }}>
           {/* Logo/Brand - Responsive */}
           <Link to="/" onClick={() => { scrollToSection(null); setMobileMenuOpen(false); }} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: windowWidth < 768 ? '0.65rem' : '1rem', flex: 1 }}>
@@ -121,17 +123,22 @@ export default function Navbar() {
               }}
             />
             {/* Text - Clean mobile arrangement */}
-            <div>
+            <div style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}>
               <h1 style={{ 
-                fontSize: windowWidth < 480 ? '0.95rem' : windowWidth < 768 ? '1.1rem' : '1.5rem', 
+                fontSize: windowWidth < 480 ? '0.85rem' : windowWidth < 768 ? '1rem' : '1.5rem', 
                 fontFamily: '"Playfair Display", "Georgia", serif', 
                 fontWeight: 700, 
                 color: '#1a1a1a',
-                letterSpacing: '-0.03em',
+                letterSpacing: windowWidth < 480 ? '-0.02em' : '-0.03em',
                 margin: 0,
-                lineHeight: 1.1,
+                lineHeight: 1.2,
                 textShadow: '0 1px 2px rgba(0,0,0,0.05)',
-                whiteSpace: windowWidth < 768 ? 'nowrap' : 'normal'
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis'
               }}>
                 {windowWidth < 480 ? 'Prof. Vishal Gupta' : 'PROF. VISHAL GUPTA'}
               </h1>
@@ -345,11 +352,11 @@ export default function Navbar() {
               onClick={() => setMobileMenuOpen(false)}
               style={{
                 position: 'fixed',
-                top: 0,
+                top: windowWidth < 768 ? '65px' : '80px',
                 left: 0,
                 right: 0,
                 bottom: 0,
-                backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                backgroundColor: 'rgba(0, 0, 0, 0.3)',
                 zIndex: 39,
                 animation: 'fadeIn 0.2s ease-out'
               }}

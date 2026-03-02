@@ -32,6 +32,56 @@ const staggerContainer = {
 };
 const viewportOptions = { once: true, margin: '0px 0px -60px 0px', amount: 0.15 };
 
+// ─── Styles to remove extra space ─────────────────────────────────────────────
+const styles = {
+  container: {
+    padding: '1rem',
+    maxWidth: '100%',
+    margin: '0 auto',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center', // Center align content
+  },
+  heroSection: {
+    padding: '1rem',
+    margin: '0',
+    textAlign: 'center',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center', // Center align hero section
+  },
+  heroTitle: {
+    margin: '0',
+    padding: '0',
+    fontSize: '2rem',
+    lineHeight: '1.2',
+    textAlign: 'center',
+  },
+  heroSubtitle: {
+    margin: '0.5rem 0',
+    fontSize: '1.2rem',
+    lineHeight: '1.5',
+    textAlign: 'center',
+  },
+  heroDescription: {
+    margin: '0.5rem 0',
+    fontSize: '1rem',
+    lineHeight: '1.5',
+    textAlign: 'center',
+  },
+  button: {
+    marginTop: '1rem',
+    padding: '0.75rem 1.5rem',
+    fontSize: '1rem',
+    borderRadius: '8px',
+    backgroundColor: '#007BFF',
+    color: '#fff',
+    border: 'none',
+    cursor: 'pointer',
+    textAlign: 'center',
+  },
+};
+
 export default function Home() {
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState({ message: '', type: '' });
@@ -171,12 +221,12 @@ export default function Home() {
       {/* ══════════════════════════════════════════════════════
           1. HERO
       ══════════════════════════════════════════════════════ */}
-      <section className="min-h-screen grid lg:grid-cols-2 items-center px-6 lg:px-16 py-8 sm:py-12 bg-gradient-to-br from-white to-[#f0f1ff] relative overflow-hidden">
+      <section className="min-h-screen grid lg:grid-cols-2 items-center px-4 sm:px-6 lg:px-16 py-8 sm:py-12 bg-gradient-to-br from-white to-[#f0f1ff] relative overflow-hidden" style={{ maxWidth: '100vw', boxSizing: 'border-box' }}>
         {/* Decorative orb */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#3333FF]/5 rounded-full blur-3xl pointer-events-none -translate-y-1/4 translate-x-1/4" />
 
         {/* Left: Text */}
-        <div className="space-y-7 max-w-2xl relative z-10">
+        <div className="space-y-7 max-w-2xl relative z-10" style={{ paddingLeft: '0', paddingRight: '0.5rem', boxSizing: 'border-box', overflow: 'hidden' }}>
           <motion.div
             initial={{ opacity: 0, y: 45 }}
             animate={{ opacity: 1, y: 0 }}
@@ -211,14 +261,16 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.7 }}
           >
-            <motion.button
-              whileHover={{ scale: 1.05, backgroundColor: '#2222CC' }}
-              whileTap={{ scale: 0.97 }}
-              transition={{ duration: 0.2 }}
-              className="bg-[#3333FF] px-8 py-4 font-['Inter'] font-bold text-white text-base rounded-md shadow-lg"
-            >
-              Learn More
-            </motion.button>
+            <Link to="/about">
+              <motion.button
+                whileHover={{ scale: 1.05, backgroundColor: '#2222CC' }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.2 }}
+                className="bg-[#3333FF] px-8 py-4 font-['Inter'] font-bold text-white text-base rounded-md shadow-lg"
+              >
+                Learn More
+              </motion.button>
+            </Link>
           </motion.div>
         </div>
 

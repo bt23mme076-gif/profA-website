@@ -1,17 +1,34 @@
 import { motion } from 'framer-motion';
-import { FiYoutube, FiBook, FiUsers, FiTrendingUp, FiBarChart2, FiFileText, FiExternalLink, FiPlay } from 'react-icons/fi';
+import { useState } from 'react';
+import { FiYoutube, FiBook, FiUsers, FiTrendingUp, FiBarChart2, FiFileText, FiExternalLink, FiPlay, FiPlus, FiEdit2, FiTrash2, FiSave, FiX } from 'react-icons/fi';
 import { useFirestoreCollection } from '../hooks/useFirestoreCollection';
-import { where } from 'firebase/firestore';
+import { useAuth } from '../context/AuthContext';
+import { collection, addDoc, updateDoc, deleteDoc, doc, where } from 'firebase/firestore';
+import { db } from '../firebase/config';
 
 export default function Courses() {
-  // Consistent fade animation
-  const fadeIn = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.5, ease: "easeOut" }
+  const { isAdmin } = useAuth() || {};
+  const [showAddCourse, setShowAddCourse] = useState(false);
+  const [editingCourse, setEditingCourse] = useState(null);
+
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.5, ease: "easeOut" }
+    }
+  };
+
+  const viewportOptions = {
+    once: true,
+    margin: "0px 0px -50px 0px",
+    amount: 0.1
   };
 
   // Fetch published courses from Firestore
+  // Note: Admins might want to see all, but for consistency we fetch published ones.
+  // To fetch all for admin, you could conditionally build the query array.
   const { data: courses, loading: coursesLoading } = useFirestoreCollection('courses', [
     where('published', '==', true)
   ]);
@@ -23,20 +40,61 @@ export default function Courses() {
     return match ? match[1] : null;
   };
 
-  // Course card with consistent color and layout
-  const CourseCard = ({ icon: Icon, title, description, link, linkText = "Access Course", badge, children }) => (
+  // Admin functions for managing dynamic courses
+  const addCourse = async (newCourse) => {
+    try {
+      await addDoc(collection(db, 'courses'), {
+        ...newCourse,
+        published: true, // Auto-publish for simplicity, or add a toggle in the form
+        createdAt: new Date()
+      });
+      setShowAddCourse(false);
+      alert('Course added successfully!');
+    } catch (error) {
+      console.error('Error adding course:', error);
+      alert('Failed to add course');
+    }
+  };
+
+  const updateCourse = async (updatedCourse) => {
+    try {
+      const { id, ...updateData } = updatedCourse;
+      await updateDoc(doc(db, 'courses', id), updateData);
+      setEditingCourse(null);
+      alert('Course updated successfully!');
+    } catch (error) {
+      console.error('Error updating course:', error);
+      alert('Failed to update course');
+    }
+  };
+
+  const deleteCourse = async (courseId) => {
+    if (!confirm('Delete this course?')) return;
+    try {
+      await deleteDoc(doc(db, 'courses', courseId));
+      alert('Course deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting course:', error);
+      alert('Failed to delete course');
+    }
+  };
+
+  // Shared Course card mimicking the Research.jsx card styling
+  const CourseCard = ({ icon: Icon, title, description, link, linkText = "Access Course", badge, borderColor = "border-[#2A35CC]", children }) => (
     <motion.div
-      {...fadeIn}
-      whileHover={{ y: -4 }}
-      className="bg-[#fafaf8] rounded-2xl p-8 shadow-md hover:shadow-xl transition-all border border-gray-200"
+      initial="hidden"
+      whileInView="visible"
+      viewport={viewportOptions}
+      variants={fadeInUp}
+      className={`bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow border-l-4 ${borderColor} relative group`}
     >
       <div className="flex items-start gap-4 mb-4">
-        <div className="p-3 bg-gradient-to-br from-[#ffcc00] to-[#f5b800] rounded-xl">
-          <Icon className="w-6 h-6 text-[#1a1a1a]" />
+        <div className={`p-3 rounded-xl ${borderColor === 'border-[#f97316]' ? 'bg-[#fff7ed]' : 'bg-[#e6e8ff]'}`}>
+          <Icon className={`w-6 h-6 ${borderColor === 'border-[#f97316]' ? 'text-[#f97316]' : 'text-[#2A35CC]'}`} />
         </div>
         <div className="flex-1">
           {badge && (
-            <span className="inline-block px-3 py-1 bg-[#fffbe6] text-xs font-['Inter'] font-semibold text-[#1a1a1a] rounded-full mb-2">
+            <span className="inline-block px-3 py-1 bg-gray-100 text-xs font-['Inter'] font-semibold text-[#1a1a1a] rounded-full mb-2">
               {badge}
             </span>
           )}
@@ -45,7 +103,7 @@ export default function Courses() {
           </h3>
         </div>
       </div>
-      <p className="text-gray-800 font-['Inter'] leading-relaxed mb-6">
+      <p className="text-gray-700 font-['Inter'] leading-relaxed mb-6">
         {description}
       </p>
       {children}
@@ -54,7 +112,7 @@ export default function Courses() {
           href={link}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-[#1a1a1a] text-white font-['Inter'] font-semibold rounded-lg hover:bg-[#ffcc00] hover:text-[#1a1a1a] transition-all group"
+          className={`inline-flex items-center gap-2 px-6 py-3 text-white font-['Inter'] font-semibold rounded-lg transition-all shadow-md hover:shadow-lg group ${borderColor === 'border-[#f97316]' ? 'bg-[#fb923c] hover:bg-[#f97316]' : 'bg-[#2A35CC] hover:bg-[#1f2a99]'}`}
         >
           {linkText}
           <FiExternalLink className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -65,13 +123,16 @@ export default function Courses() {
 
   const ResearchLecture = ({ title, description, driveLink }) => (
     <motion.div
-      {...fadeIn}
-      className="bg-gradient-to-br from-[#fafaf8] to-[#f5f5f0] rounded-xl p-6 border border-gray-200"
+      initial="hidden"
+      whileInView="visible"
+      viewport={viewportOptions}
+      variants={fadeInUp}
+      className="bg-gradient-to-br from-[#fff7ed] to-white p-6 rounded-xl shadow-md hover:shadow-xl transition-shadow border-l-4 border-[#f97316]"
     >
       <h4 className="text-xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-3">
         {title}
       </h4>
-      <p className="text-gray-700 font-['Inter'] text-sm leading-relaxed mb-4">
+      <p className="font-['Inter'] text-gray-600 mb-4">
         {description}
       </p>
       {driveLink && (
@@ -79,125 +140,132 @@ export default function Courses() {
           href={driveLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-sm font-['Inter'] font-semibold text-[#1a1a1a] hover:text-[#ffcc00] transition-colors"
+          className="text-[#f97316] hover:text-[#ea580c] font-['Inter'] text-sm inline-flex items-center gap-1 font-semibold"
         >
-          Download Materials
-          <FiExternalLink className="w-4 h-4" />
+          <FiExternalLink size={14} /> Download Materials
         </a>
       )}
     </motion.div>
   );
 
   return (
-    <div className="bg-[#fafaf8] min-h-screen">
+    <div className="bg-white min-h-screen">
       {/* Hero Section */}
-      <section className="pt-32 pb-16 px-6 lg:px-16 bg-gradient-to-b from-[#fafaf8] to-[#fffbe6]">
-        <div className="max-w-6xl mx-auto">
+      <section className="bg-gradient-to-br from-[#e6e8ff] to-[#fff7ed] py-20 px-6 lg:px-16">
+        <div className="max-w-7xl mx-auto">
           <motion.div
-            initial={fadeIn.initial}
-            animate={fadeIn.animate}
-            transition={fadeIn.transition}
-            className="text-center mb-12"
+            initial="hidden"
+            animate="visible"
+            variants={fadeInUp}
+            className="text-center"
           >
-            <div className="inline-block px-4 py-2 bg-[#ffcc00] bg-opacity-20 rounded-full mb-6">
-              <span className="text-sm font-['Inter'] font-semibold text-[#1a1a1a] tracking-wide">
-                LEARNING & DEVELOPMENT
-              </span>
-            </div>
-            <h1 className="text-5xl lg:text-7xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-6 leading-tight">
+            <div className="w-20 h-1 bg-[#f97316] mb-8 rounded-full mx-auto"></div>
+            <h1 className="text-5xl lg:text-7xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-6">
               Courses
             </h1>
-            <p className="text-xl lg:text-2xl font-['Inter'] text-gray-800 max-w-3xl mx-auto leading-relaxed">
-              Welcome to my learning hub for students, researchers, and practitioners. Explore courses on life skills, leadership, and research methods for your personal and professional journey.
+            <p className="text-xl lg:text-2xl font-['Inter'] text-gray-600 max-w-3xl mx-auto">
+              Welcome to my learning hub for students, researchers, and practitioners. Explore courses on life skills, leadership, and research methods.
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* YouTube Channel */}
-      <section className="py-16 px-6 lg:px-16 bg-[#fafaf8]">
-        <div className="max-w-6xl mx-auto">
-          <CourseCard
-            icon={FiYoutube}
-            title="YouTube Channel"
-            description="A comprehensive resource for students, researchers, and practitioners. This channel features videos on life skills, leadership development, and research methodologies to support your personal and professional growth."
-            link="https://www.youtube.com/@ProfVishalGupta"
-            linkText="Visit Channel"
-            badge="FREE RESOURCE"
+      {/* Dynamic Courses Section with Admin Functionality */}
+      <section className="py-16 px-6 lg:px-16 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOptions}
+            variants={fadeInUp}
+            className="mb-12"
           >
-            <div className="mb-6 rounded-lg overflow-hidden">
-              <iframe
-                width="100%"
-                height="315"
-                src="https://www.youtube.com/embed/videoseries?list=UULFProfVishalGupta"
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full"
+            <div className="flex items-center justify-between flex-wrap gap-4">
+              <div>
+                <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-4">
+                  Management Courses
+                </h2>
+                <div className="w-24 h-1 bg-[#2A35CC] rounded-full"></div>
+              </div>
+              {isAdmin && (
+                <button
+                  onClick={() => setShowAddCourse(true)}
+                  className="flex items-center gap-2 bg-[#2A35CC] hover:bg-[#1f2a99] text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-md"
+                >
+                  <FiPlus /> Add Course
+                </button>
+              )}
+            </div>
+          </motion.div>
+
+          {showAddCourse && isAdmin && (
+            <div className="mb-8 p-6 bg-white rounded-xl border-2 border-[#2A35CC] shadow-lg">
+              <CourseForm
+                onSave={addCourse}
+                onCancel={() => setShowAddCourse(false)}
               />
             </div>
-          </CourseCard>
-        </div>
-      </section>
+          )}
 
-      {/* Dynamic Courses from Admin */}
-      {coursesLoading ? (
-        <section className="py-16 px-6 lg:px-16 bg-[#fafaf8]">
-          <div className="max-w-6xl mx-auto text-center">
-            <div className="w-16 h-16 border-4 border-[#ffcc00] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-lg font-['Inter'] text-gray-600">Loading courses...</p>
-          </div>
-        </section>
-      ) : courses && courses.length > 0 ? (
-        <section className="py-16 px-6 lg:px-16 bg-[#fafaf8]">
-          <div className="max-w-6xl mx-auto">
-            <motion.div
-              {...fadeIn}
-              className="text-center mb-12"
-            >
-              <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-4">
-                Management Courses
-              </h2>
-              <p className="text-lg font-['Inter'] text-gray-600 max-w-2xl mx-auto">
-                Explore our curated collection of management and leadership courses
-              </p>
-            </motion.div>
+          {coursesLoading ? (
+             <div className="text-center py-12">
+               <div className="w-12 h-12 border-4 border-[#2A35CC] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+               <p className="text-lg font-['Inter'] text-gray-600">Loading courses...</p>
+             </div>
+          ) : courses && courses.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {courses.map((course, index) => {
                 const videoId = course.youtubeUrl ? extractVideoId(course.youtubeUrl) : null;
-                // Use custom thumbnail if available, otherwise YouTube thumbnail
                 const thumbnailUrl = course.thumbnail || 
                   (videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : null);
+                
                 return (
                   <motion.div
                     key={course.id}
-                    initial={fadeIn.initial}
-                    animate={fadeIn.animate}
-                    transition={{ ...fadeIn.transition, delay: index * 0.06 }}
-                    whileHover={{ y: -4 }}
-                    className="bg-[#fffbe6] rounded-2xl p-6 shadow-md hover:shadow-xl transition-all border border-gray-200"
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={viewportOptions}
+                    variants={fadeInUp}
+                    className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow border-l-4 border-[#2A35CC] relative group flex flex-col"
                   >
-                    <h3 className="text-2xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-3">
+                    {isAdmin && (
+                      <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                        <button
+                          onClick={() => setEditingCourse(course)}
+                          className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow"
+                        >
+                          <FiEdit2 size={16} />
+                        </button>
+                        <button
+                          onClick={() => deleteCourse(course.id)}
+                          className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow"
+                        >
+                          <FiTrash2 size={16} />
+                        </button>
+                      </div>
+                    )}
+                    
+                    <h3 className="text-2xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-3 pr-16">
                       {course.title}
                     </h3>
-                    <p className="text-gray-800 font-['Inter'] leading-relaxed mb-4">
+                    <p className="text-gray-600 font-['Inter'] mb-6 flex-grow">
                       {course.description}
                     </p>
+                    
                     {thumbnailUrl && (
-                      <div className="mb-4">
+                      <div className="mb-6">
                         <a 
                           href={course.youtubeUrl || '#'} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="block relative group"
+                          className="block relative group/video"
                         >
-                          <div className="aspect-video w-full bg-gray-200 rounded-lg overflow-hidden shadow-md">
+                          <div className="aspect-video w-full bg-gray-100 rounded-lg overflow-hidden shadow-md">
                             <img 
                               src={thumbnailUrl}
                               alt={course.title}
-                              className="w-full h-full object-cover group-hover:opacity-90 transition-opacity"
+                              className="w-full h-full object-cover group-hover/video:opacity-90 transition-opacity"
                               onError={(e) => {
-                                // Fallback to lower quality YouTube thumbnail
                                 if (videoId && !course.thumbnail) {
                                   e.target.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
                                 } else {
@@ -206,7 +274,7 @@ export default function Courses() {
                               }}
                             />
                             <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center group-hover:bg-red-700 transition-colors shadow-lg">
+                              <div className="w-12 h-12 bg-[#2A35CC] bg-opacity-90 rounded-full flex items-center justify-center group-hover/video:scale-110 transition-transform shadow-lg">
                                 <FiPlay className="w-6 h-6 text-white ml-1" />
                               </div>
                             </div>
@@ -214,12 +282,13 @@ export default function Courses() {
                         </a>
                       </div>
                     )}
+                    
                     {course.youtubeUrl && (
                       <a
                         href={course.youtubeUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-[#1a1a1a] text-white font-['Inter'] font-semibold rounded-lg hover:bg-[#ffcc00] hover:text-[#1a1a1a] transition-all text-sm"
+                        className="inline-flex items-center justify-center gap-2 w-full px-4 py-3 bg-[#2A35CC] hover:bg-[#1f2a99] text-white font-['Inter'] font-semibold rounded-lg transition-all shadow-md mt-auto"
                       >
                         Watch Course
                         <FiExternalLink className="w-4 h-4" />
@@ -229,27 +298,42 @@ export default function Courses() {
                 );
               })}
             </div>
-          </div>
-        </section>
-      ) : null}
+          ) : (
+            <p className="text-gray-500 font-['Inter']">No management courses available at the moment.</p>
+          )}
+
+          {editingCourse && isAdmin && (
+            <div className="mt-8 p-6 bg-white rounded-xl border-2 border-blue-500 shadow-lg relative z-20">
+              <CourseForm
+                course={editingCourse}
+                onSave={updateCourse}
+                onCancel={() => setEditingCourse(null)}
+              />
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* Featured Courses Section */}
-      <section className="py-16 px-6 lg:px-16 bg-[#fffbe6]">
-        <div className="max-w-6xl mx-auto">
-          <motion.h2
-            {...fadeIn}
-            className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-4 text-center"
+      <section className="py-16 px-6 lg:px-16 bg-[#faf8f5]">
+        <div className="max-w-7xl mx-auto">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOptions}
+            variants={fadeInUp}
+            className="mb-12"
           >
-            Featured Courses
-          </motion.h2>
-          <motion.p
-            {...fadeIn}
-            className="text-lg font-['Inter'] text-gray-600 text-center mb-12 max-w-2xl mx-auto"
-          >
-            Comprehensive online courses combining science, practice, and ancient wisdom
-          </motion.p>
+            <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-4">
+              Featured Courses
+            </h2>
+            <div className="w-24 h-1 bg-[#f97316] rounded-full mb-4"></div>
+            <p className="text-lg font-['Inter'] text-gray-600 max-w-2xl">
+              Comprehensive online courses combining science, practice, and ancient wisdom
+            </p>
+          </motion.div>
+
           <div className="grid lg:grid-cols-2 gap-8">
-            {/* Happiness Course */}
             <CourseCard
               icon={FiBook}
               title="HAPPINESS: Science, Practice and Ancient Indian Wisdom"
@@ -257,23 +341,24 @@ export default function Courses() {
               link="https://www.coursera.org/learn/happiness"
               linkText="Enroll on Coursera"
               badge="COURSERA"
+              borderColor="border-[#f97316]"
             >
               <div className="mb-6 space-y-3">
                 <div className="flex items-center gap-2 text-sm font-['Inter'] text-gray-700">
-                  <FiBook className="w-4 h-4 text-[#ffcc00]" />
+                  <FiBook className="w-4 h-4 text-[#f97316]" />
                   <span>Evidence from science</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm font-['Inter'] text-gray-700">
-                  <FiBook className="w-4 h-4 text-[#ffcc00]" />
+                  <FiBook className="w-4 h-4 text-[#f97316]" />
                   <span>Simple well-being techniques</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm font-['Inter'] text-gray-700">
-                  <FiBook className="w-4 h-4 text-[#ffcc00]" />
+                  <FiBook className="w-4 h-4 text-[#f97316]" />
                   <span>Ancient Indian wisdom</span>
                 </div>
               </div>
             </CourseCard>
-            {/* Leadership Skills Course */}
+
             <CourseCard
               icon={FiUsers}
               title="Leadership Skills"
@@ -281,18 +366,19 @@ export default function Courses() {
               link="https://www.coursera.org/learn/leadershipskills"
               linkText="Enroll on Coursera"
               badge="COURSERA"
+              borderColor="border-[#2A35CC]"
             >
               <div className="mb-6 space-y-3">
                 <div className="flex items-center gap-2 text-sm font-['Inter'] text-gray-700">
-                  <FiUsers className="w-4 h-4 text-[#ffcc00]" />
+                  <FiUsers className="w-4 h-4 text-[#2A35CC]" />
                   <span>Lead across boundaries</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm font-['Inter'] text-gray-700">
-                  <FiUsers className="w-4 h-4 text-[#ffcc00]" />
+                  <FiUsers className="w-4 h-4 text-[#2A35CC]" />
                   <span>Lead with or without authority</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm font-['Inter'] text-gray-700">
-                  <FiUsers className="w-4 h-4 text-[#ffcc00]" />
+                  <FiUsers className="w-4 h-4 text-[#2A35CC]" />
                   <span>Manage leadership stresses</span>
                 </div>
               </div>
@@ -302,61 +388,79 @@ export default function Courses() {
       </section>
 
       {/* Research Methods Section */}
-      <section className="py-16 px-6 lg:px-16 bg-[#fafaf8]">
-        <div className="max-w-6xl mx-auto">
-          <motion.div {...fadeIn} className="text-center mb-12">
+      <section className="py-16 px-6 lg:px-16 bg-white">
+        <div className="max-w-7xl mx-auto">
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOptions}
+            variants={fadeInUp}
+            className="mb-12"
+          >
             <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-4">
               Research Methods
             </h2>
-            <p className="text-lg font-['Inter'] text-gray-600 max-w-2xl mx-auto">
+            <div className="w-24 h-1 bg-[#2A35CC] rounded-full mb-4"></div>
+            <p className="text-lg font-['Inter'] text-gray-600 max-w-2xl">
               Comprehensive lecture series on advanced research methodologies for scholars and practitioners
             </p>
           </motion.div>
+
           <div className="space-y-12">
             {/* Multilevel Modeling */}
-            <div>
-              <motion.div {...fadeIn} className="mb-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-[#ffcc00] bg-opacity-20 rounded-lg">
-                    <FiTrendingUp className="w-5 h-5 text-[#1a1a1a]" />
-                  </div>
-                  <h3 className="text-3xl font-['Playfair_Display'] font-bold text-[#1a1a1a]">
-                    Multilevel Modeling
-                  </h3>
+            <motion.div 
+              initial="hidden"
+              whileInView="visible"
+              viewport={viewportOptions}
+              variants={fadeInUp}
+              className="bg-[#faf8f5] p-8 rounded-xl shadow-md border-l-4 border-[#2A35CC]"
+            >
+              <div className="flex items-center gap-4 mb-4">
+                <div className="p-3 bg-[#e6e8ff] rounded-xl">
+                  <FiTrendingUp className="w-6 h-6 text-[#2A35CC]" />
                 </div>
-                <p className="text-gray-800 font-['Inter'] leading-relaxed mb-4">
-                  Multilevel models (also known as hierarchical linear models, linear mixed-effect model, mixed models, nested data models, or random-effects models) are statistical models of parameters that vary at more than one level. These models are particularly appropriate for research designs where data for participants are organized at more than one level (e.g., employees nested under team leaders).
-                </p>
-                <a
-                  href="https://drive.google.com/drive/folders/1GTHqiJX1sEjSuVlhBmR_Z5DETrUwIHGd"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-[#1a1a1a] font-['Inter'] font-semibold hover:text-[#ffcc00] transition-colors"
-                >
-                  Access Course Materials
-                  <FiExternalLink className="w-4 h-4" />
-                </a>
-              </motion.div>
-            </div>
+                <h3 className="text-3xl font-['Playfair_Display'] font-bold text-[#1a1a1a]">
+                  Multilevel Modeling
+                </h3>
+              </div>
+              <p className="text-gray-700 font-['Inter'] leading-relaxed mb-6">
+                Multilevel models (also known as hierarchical linear models, linear mixed-effect model, mixed models, nested data models, or random-effects models) are statistical models of parameters that vary at more than one level. These models are particularly appropriate for research designs where data for participants are organized at more than one level (e.g., employees nested under team leaders).
+              </p>
+              <a
+                href="https://drive.google.com/drive/folders/1GTHqiJX1sEjSuVlhBmR_Z5DETrUwIHGd"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-[#2A35CC] hover:bg-[#1f2a99] text-white px-6 py-3 rounded-lg font-['Inter'] font-semibold transition-all shadow-md"
+              >
+                Access Course Materials
+                <FiExternalLink className="w-4 h-4" />
+              </a>
+            </motion.div>
+
             {/* Covariance-Based SEM */}
-            <div>
-              <motion.div {...fadeIn} className="mb-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-[#ffcc00] bg-opacity-20 rounded-lg">
-                    <FiBarChart2 className="w-5 h-5 text-[#1a1a1a]" />
-                  </div>
-                  <h3 className="text-3xl font-['Playfair_Display'] font-bold text-[#1a1a1a]">
-                    Covariance-Based SEM
-                  </h3>
+            <motion.div 
+              initial="hidden"
+              whileInView="visible"
+              viewport={viewportOptions}
+              variants={fadeInUp}
+              className="bg-[#faf8f5] p-8 rounded-xl shadow-md border-l-4 border-[#f97316]"
+            >
+              <div className="flex items-center gap-4 mb-4">
+                <div className="p-3 bg-[#fff7ed] rounded-xl">
+                  <FiBarChart2 className="w-6 h-6 text-[#f97316]" />
                 </div>
-                <p className="text-gray-800 font-['Inter'] leading-relaxed mb-4">
-                  Structural Equation Modeling (SEM) is a statistical methodology widely used in social sciences research. SEM allows researchers to test complex models with multiple pathways, model latent variables with multiple indicators, investigate mediation and moderation systematically, and adjust for measurement error in predictor variables. This series provides a general introduction to CB-SEM using AMOS software.
-                </p>
-                <p className="text-gray-600 font-['Inter'] text-sm italic mb-4">
-                  Note: Material link to be updated
-                </p>
-              </motion.div>
-            </div>
+                <h3 className="text-3xl font-['Playfair_Display'] font-bold text-[#1a1a1a]">
+                  Covariance-Based SEM
+                </h3>
+              </div>
+              <p className="text-gray-700 font-['Inter'] leading-relaxed mb-4">
+                Structural Equation Modeling (SEM) is a statistical methodology widely used in social sciences research. SEM allows researchers to test complex models with multiple pathways, model latent variables with multiple indicators, investigate mediation and moderation systematically, and adjust for measurement error in predictor variables. This series provides a general introduction to CB-SEM using AMOS software.
+              </p>
+              <p className="text-gray-500 font-['Inter'] text-sm italic">
+                Note: Material link to be updated
+              </p>
+            </motion.div>
+
             {/* Grid of Research Topics */}
             <div className="grid md:grid-cols-2 gap-6">
               <ResearchLecture
@@ -380,27 +484,110 @@ export default function Courses() {
       </section>
 
       {/* Call to Action */}
-      <section className="py-20 px-6 lg:px-16 bg-gradient-to-br from-[#1a1a1a] to-[#2a2a2a]">
+      <section className="py-20 px-6 lg:px-16 bg-[#e6e8ff]">
         <div className="max-w-4xl mx-auto text-center">
-          <motion.div {...fadeIn}>
-            <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-white mb-6">
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={viewportOptions}
+            variants={fadeInUp}
+          >
+            <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-6">
               Ready to Start Learning?
             </h2>
-            <p className="text-xl font-['Inter'] text-gray-300 mb-8">
+            <p className="text-xl font-['Inter'] text-gray-700 mb-8">
               Explore our courses and begin your journey toward personal and professional excellence.
             </p>
             <a
               href="https://www.youtube.com/@ProfVishalGupta"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-[#ffcc00] text-[#1a1a1a] font-['Inter'] font-bold rounded-lg hover:bg-white transition-all text-lg"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-[#2A35CC] hover:bg-[#1f2a99] text-white font-['Inter'] font-bold rounded-lg transition-all shadow-xl hover:shadow-2xl text-lg"
             >
-              <FiYoutube className="w-5 h-5" />
+              <FiYoutube className="w-6 h-6" />
               Subscribe to YouTube Channel
             </a>
           </motion.div>
         </div>
       </section>
     </div>
+  );
+}
+
+// Course Form Component for Admin
+function CourseForm({ course, onSave, onCancel }) {
+  const [formData, setFormData] = useState(course || {
+    title: '',
+    description: '',
+    youtubeUrl: '',
+    thumbnail: ''
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <h3 className="text-2xl font-bold mb-4 text-[#1a1a1a]">
+        {course ? 'Edit Course' : 'Add New Course'}
+      </h3>
+      <div>
+        <label className="block text-sm font-semibold mb-2 text-gray-700">Course Title</label>
+        <input
+          type="text"
+          value={formData.title}
+          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2A35CC] outline-none transition-shadow"
+          required
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-semibold mb-2 text-gray-700">Description</label>
+        <textarea
+          value={formData.description}
+          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2A35CC] outline-none transition-shadow"
+          rows={4}
+          required
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-semibold mb-2 text-gray-700">YouTube URL</label>
+        <input
+          type="url"
+          value={formData.youtubeUrl}
+          onChange={(e) => setFormData({ ...formData, youtubeUrl: e.target.value })}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2A35CC] outline-none transition-shadow"
+          placeholder="https://www.youtube.com/watch?v=..."
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-semibold mb-2 text-gray-700">Custom Thumbnail URL (optional)</label>
+        <input
+          type="url"
+          value={formData.thumbnail}
+          onChange={(e) => setFormData({ ...formData, thumbnail: e.target.value })}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2A35CC] outline-none transition-shadow"
+          placeholder="Will fallback to YouTube thumbnail if empty"
+        />
+      </div>
+      <div className="flex gap-3 justify-end mt-6">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg font-semibold transition-colors"
+        >
+          <FiX className="inline mr-2" /> Cancel
+        </button>
+        <button
+          type="submit"
+          className="px-6 py-2 bg-[#2A35CC] hover:bg-[#1f2a99] text-white rounded-lg font-semibold transition-colors shadow-md"
+        >
+          <FiSave className="inline mr-2" /> Save Course
+        </button>
+      </div>
+    </form>
   );
 }
