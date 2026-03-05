@@ -1,9 +1,9 @@
 import axios from 'axios';
 
 // Cloudinary configuration
-const CLOUD_NAME = 'URvRGQtLejhcD8mBpW2k17SUDBQ';
+const CLOUD_NAME = 'dsivwxtmp';
 const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
-const UPLOAD_PRESET = 'iima_courses'; // You need to create this in Cloudinary dashboard
+const UPLOAD_PRESET = 'iima_courses'; // Unsigned upload preset - create in Cloudinary dashboard
 
 /**
  * Upload image to Cloudinary
@@ -41,7 +41,6 @@ export const uploadToCloudinary = async (file, type = 'general') => {
   formData.append('file', file);
   formData.append('upload_preset', UPLOAD_PRESET);
   formData.append('folder', folder);
-  formData.append('api_key', '898784168144989');
 
   try {
     const response = await axios.post(CLOUDINARY_URL, formData, {

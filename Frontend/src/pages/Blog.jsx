@@ -286,7 +286,7 @@ export default function Blog() {
                           alt={blog.title}
                           className="w-full h-40 sm:h-36 object-cover hover:opacity-90 transition-opacity duration-300"
                           onError={(e) => {
-                            e.target.src = 'https://via.placeholder.com/600x400/f0f1ff/3333FF?text=Article';
+                            e.target.src = 'https://placehold.co/600x400/f0f1ff/3333FF?text=Article';
                           }}
                         />
                       </Link>

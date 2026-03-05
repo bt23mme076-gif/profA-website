@@ -269,7 +269,7 @@ export default function Courses() {
                                 if (videoId && !course.thumbnail) {
                                   e.target.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
                                 } else {
-                                  e.target.src = 'https://via.placeholder.com/640x360/1a1a1a/ffffff?text=Course+Image';
+                                  e.target.src = 'https://placehold.co/640x360/1a1a1a/ffffff?text=Course+Image';
                                 }
                               }}
                             />

@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { useFirestoreDoc } from '../hooks/useFirestoreDoc';
 import EditableText from '../components/EditableText';
 import { uploadToCloudinary } from '../utils/cloudinaryUpload';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
 export default function About() {
@@ -41,7 +41,8 @@ export default function About() {
     try {
       const imageUrl = await uploadToCloudinary(file, 'about');
       const docRef = doc(db, 'content', 'about');
-      await updateDoc(docRef, { 'hero.profileImage': imageUrl });
+      // Use setDoc with mergeFields so it works even if document doesn't exist yet
+      await setDoc(docRef, { hero: { profileImage: imageUrl } }, { mergeFields: ['hero.profileImage'] });
       console.log('✅ Profile image uploaded:', imageUrl);
     } catch (error) {
       console.error('❌ Image upload failed:', error);
@@ -194,7 +195,7 @@ export default function About() {
               alt="Prof. Vishal Gupta" 
               className="w-full h-full object-cover"
               onError={(e) => {
-                e.target.src = "https://via.placeholder.com/800x1000/cccccc/333333?text=Prof.+Vishal+Gupta";
+                e.target.src = "https://placehold.co/800x1000/cccccc/333333?text=Prof.+Vishal+Gupta";
               }}
             />
             {isAdmin && (
