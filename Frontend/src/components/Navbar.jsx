@@ -8,22 +8,26 @@ import { FiLogOut, FiSettings, FiMenu, FiX, FiEdit2, FiCheck, FiCamera, FiMoreVe
 
 // Default navbar content (fallback when Firestore has no data yet)
 const DEFAULT_NAV_LINKS = [
-  { id: 'about', name: 'About me', path: '/about' },
   { id: 'research', name: 'Research', path: '/research' },
   { id: 'books', name: 'Books', path: '/book' },
+  { id: 'consulting', name: 'Consulting', path: '/about' },
+  { id: 'recognitions', name: 'Recognitions', path: '/about' },
+  { id: 'opinions', name: 'Opinions', hash: '#blog' },
   { id: 'courses', name: 'Courses', path: '/courses' },
-  { id: 'trainings', name: 'Trainings', path: '/trainings' },
-  { id: 'avatar', name: 'Digital Avatar', hash: '#contact' },
-  { id: 'blog', name: 'Blog', hash: '#blog' },
+  { id: 'contact', name: 'Contact', hash: '#contact' },
 ];
 
 export default function Navbar() {
   const [hoveredLink, setHoveredLink] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024);
+  const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { currentUser, isAdmin, logout } = useAuth();
+
+  const isHomePage = location.pathname === '/';
+  const showDark = isHomePage && !scrolled;
 
   // --- Editable navbar state ---
   const [navLinks, setNavLinks] = useState(DEFAULT_NAV_LINKS);
@@ -149,6 +153,14 @@ export default function Navbar() {
     setDragOverIndex(null);
   };
 
+  // --- Scroll detection ---
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 60);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   // --- Window resize ---
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -195,6 +207,27 @@ export default function Navbar() {
     }
   };
 
+  // After navigating home with a pending hash, scroll once the section is in the DOM
+  useEffect(() => {
+    if (location.pathname === '/' && location.state?.scrollTo) {
+      const hash = location.state.scrollTo;
+      // Poll until the element exists (page may still be rendering)
+      let attempts = 0;
+      const interval = setInterval(() => {
+        const el = document.querySelector(hash);
+        if (el) {
+          clearInterval(interval);
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // Clear the state so a page refresh doesn't re-scroll
+          navigate('/', { replace: true, state: {} });
+        } else if (++attempts > 20) {
+          clearInterval(interval);
+        }
+      }, 100);
+      return () => clearInterval(interval);
+    }
+  }, [location]);
+
   const handleNavClick = (link) => {
     setMobileMenuOpen(false); // Close mobile menu on nav click
     if (link.path) {
@@ -204,8 +237,7 @@ export default function Navbar() {
     } else if (link.hash) {
       // Scroll to section on current page or navigate home first
       if (location.pathname !== '/') {
-        navigate('/');
-        setTimeout(() => scrollToSection(link.hash), 100);
+        navigate('/', { state: { scrollTo: link.hash } });
       } else {
         scrollToSection(link.hash);
       }
@@ -221,11 +253,12 @@ export default function Navbar() {
         left: 0, 
         right: 0, 
         zIndex: 50, 
-        backgroundColor: '#ffffff',
+        background: showDark ? 'linear-gradient(135deg, #1a2d52 0%, #1e3461 40%, #162647 100%)' : '#ffffff',
         backdropFilter: 'blur(10px)',
         WebkitBackdropFilter: 'blur(10px)',
-        borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
-        boxShadow: '0 2px 12px rgba(0,0,0,0.08)'
+        borderBottom: showDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(0, 0, 0, 0.08)',
+        boxShadow: showDark ? '0 2px 20px rgba(0,0,0,0.3)' : '0 2px 12px rgba(0,0,0,0.08)',
+        transition: 'background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease'
       }}>
         {/* Admin edit mode banner */}
         {isAdmin && (
@@ -364,12 +397,12 @@ export default function Navbar() {
                       fontSize: windowWidth < 480 ? '0.85rem' : windowWidth < 768 ? '1rem' : '1.5rem',
                       fontFamily: '"Playfair Display", "Georgia", serif',
                       fontWeight: 700,
-                      color: '#1a1a1a',
+                      color: showDark ? '#ffffff' : '#1a1a1a',
                       letterSpacing: windowWidth < 480 ? '-0.02em' : '-0.03em',
                       margin: 0, lineHeight: 1.2,
-                      textShadow: '0 1px 2px rgba(0,0,0,0.05)',
                       whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
+                      transition: 'color 0.3s ease'
                     }}
                   >
                     {windowWidth < 480 ? professorName.replace('PROF. ', 'Prof. ') : professorName}
@@ -418,11 +451,12 @@ export default function Navbar() {
                     <p style={{
                       fontSize: windowWidth < 768 ? '0.65rem' : '0.7rem',
                       fontFamily: '"Inter", -apple-system, sans-serif',
-                      color: '#888888',
+                      color: showDark ? 'rgba(255,255,255,0.45)' : '#888888',
                       margin: 0,
                       letterSpacing: '0.12em',
                       textTransform: 'uppercase',
-                      fontWeight: 500
+                      fontWeight: 500,
+                      transition: 'color 0.3s ease'
                     }}>
                       {subtitle}
                     </p>
@@ -451,10 +485,10 @@ export default function Navbar() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                color: '#1a1a1a',
+                color: showDark ? '#ffffff' : '#1a1a1a',
                 zIndex: 60,
                 marginLeft: '0.5rem',
-                transition: 'transform 0.2s ease'
+                transition: 'transform 0.2s ease, color 0.3s ease'
               }}
               aria-label="Toggle menu"
               onTouchStart={(e) => {
@@ -517,7 +551,9 @@ export default function Navbar() {
                           fontSize: '0.875rem', 
                           fontFamily: '"Inter", -apple-system, sans-serif', 
                           fontWeight: 500, 
-                          color: hoveredLink === link.name ? '#1a1a1a' : '#555555',
+                          color: showDark
+                            ? (hoveredLink === link.name ? '#F5C400' : 'rgba(255,255,255,0.8)')
+                            : (hoveredLink === link.name ? '#1a1a1a' : '#555555'),
                           background: 'none', 
                           border: 'none', 
                           cursor: 'pointer',
@@ -536,7 +572,7 @@ export default function Navbar() {
                             left: 0,
                             right: 0,
                             height: '2px',
-                            backgroundColor: '#1a1a1a',
+                            backgroundColor: showDark ? '#F5C400' : '#1a1a1a',
                             transition: 'all 0.2s ease'
                           }} />
                         )}
@@ -631,21 +667,16 @@ export default function Navbar() {
                 </>
               ) : (
                 <>
-                  {/* Newsletter Button */}
-                  <button
-                    onClick={() => {
-                      if (location.pathname !== '/') {
-                        navigate('/');
-                        setTimeout(() => scrollToSection('#newsletter'), 100);
-                      } else {
-                        scrollToSection('#newsletter');
-                      }
-                    }}
+                  {/* IIMA Profile Button */}
+                  <a
+                    href="https://www.iima.ac.in/faculty-research/faculty-directory/Vishal-Gupta"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     style={{ 
                       padding: '0.7rem 1.6rem', 
-                      backgroundColor: '#1a1a1a', 
-                      color: '#ffffff', 
-                      fontWeight: 600,
+                      backgroundColor: '#F5C400', 
+                      color: '#0B1628', 
+                      fontWeight: 700,
                       fontSize: '0.8rem',
                       borderRadius: '4px',
                       border: 'none',
@@ -653,21 +684,23 @@ export default function Navbar() {
                       letterSpacing: '0.04em',
                       fontFamily: '"Inter", -apple-system, sans-serif',
                       transition: 'all 0.25s ease',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                      textDecoration: 'none',
+                      display: 'inline-block'
                     }}
                     onMouseEnter={(e) => {
-                      e.target.style.backgroundColor = '#000000';
-                      e.target.style.transform = 'translateY(-1px)';
-                      e.target.style.boxShadow = '0 4px 12px rgba(0,0,0,0.25)';
+                      e.currentTarget.style.backgroundColor = '#004B8D';
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.25)';
                     }}
                     onMouseLeave={(e) => {
-                      e.target.style.backgroundColor = '#1a1a1a';
-                      e.target.style.transform = 'translateY(0)';
-                      e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+                      e.currentTarget.style.backgroundColor = '#F5C400';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
                     }}
                   >
-                    JOIN NEWSLETTER
-                  </button>
+                    Join Newsletter
+                  </a>
                 </>
               )}
             </div>
@@ -887,8 +920,7 @@ export default function Navbar() {
                   onClick={() => {
                     setMobileMenuOpen(false);
                     if (location.pathname !== '/') {
-                      navigate('/');
-                      setTimeout(() => scrollToSection('#newsletter'), 100);
+                      navigate('/', { state: { scrollTo: '#newsletter' } });
                     } else {
                       scrollToSection('#newsletter');
                     }

@@ -1,0 +1,68 @@
+type User @table {
+  displayName: String!
+  email: String!
+  createdAt: Timestamp!
+  urlSlug: String!
+  bio: String
+  photoUrl: String
+  institution: String
+  position: String
+  researchInterests: [String]
+  contactEmail: String
+  linkedinUrl: String
+  researchGateUrl: String
+  googleScholarUrl: String
+}
+
+type Publication @table {
+  user: User
+  title: String!
+  type: String!
+  year: Int!
+  createdAt: Timestamp!
+  authors: [String]
+  journalConference: String
+  volume: String
+  issue: String
+  pages: String
+  doi: String
+  abstract: String
+  pdfUrl: String
+  citation: String
+}
+
+type Project @table {
+  user: User
+  title: String!
+  status: String!
+  createdAt: Timestamp!
+  description: String
+  startDate: Date
+  endDate: Date
+  fundingSource: String
+  collaborators: [String]
+  projectUrl: String
+}
+
+type Teaching @table {
+  user: User
+  title: String!
+  academicYear: String!
+  createdAt: Timestamp!
+  description: String
+  role: String
+  courseCode: String
+  institution: String
+  syllabusUrl: String
+}
+
+type WebsiteSetting @table {
+  user: User
+  isPublic: Boolean!
+  theme: String!
+  createdAt: Timestamp!
+  updatedAt: Timestamp!
+  customCss: String
+  headerText: String
+  footerText: String
+}

@@ -1,0 +1,61 @@
+query GetPublicUserProfile($urlSlug: String!) @auth(level: PUBLIC, insecureReason: "This operation is safe to expose to the public as it only retrieves public profile information.") {
+  users(where: { urlSlug: { eq: $urlSlug } }) {
+    displayName
+    bio
+    photoUrl
+    institution
+    position
+    researchInterests
+    googleScholarUrl
+    linkedinUrl
+    researchGateUrl
+  }
+}
+
+query ListUserPublications($userId: UUID!) @auth(level: PUBLIC, insecureReason: "This operation is safe to expose to the public as it retrieves a user's publications, which are typically public.") {
+  publications(where: { userId: { eq: $userId } }) {
+    id
+    title
+    type
+    year
+    authors
+    journalConference
+    doi
+    abstract
+    pdfUrl
+    citation
+  }
+}
+
+mutation CreateNewProject($title: String!, $status: String!, $description: String, $startDate: Date, $endDate: Date, $fundingSource: String, $collaborators: [String!], $projectUrl: String) @auth(level: USER, insecureReason: "This operation is safe to expose to all logged in users as it allows them to create projects associated with their own account.") {
+  project_insert(
+    data: {
+      userId_expr: "auth.uid"
+      title: $title
+      status: $status
+      description: $description
+      startDate: $startDate
+      endDate: $endDate
+      fundingSource: $fundingSource
+      collaborators: $collaborators
+      projectUrl: $projectUrl
+      createdAt_expr: "request.time"
+    }
+  ) {
+    id
+  }
+}
+
+query ListAllWebsiteSettings @auth(expr: "auth.token.admin == true") {
+  websiteSettings {
+    id
+    userId
+    isPublic
+    theme
+    customCss
+    headerText
+    footerText
+    createdAt
+    updatedAt
+  }
+}

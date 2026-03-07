@@ -1,0 +1,24 @@
+mutation CreateSeedData @transaction @auth(level: USER, insecureReason: "This operation is for seeding the database and is safe to expose to all logged in users.") {
+  user1: user_insert(data: {
+    displayName: "Alice Smith",
+    email: "alice.smith@example.com",
+    createdAt: "2023-01-01T10:00:00Z",
+    urlSlug: "alice-smith",
+    bio: "Passionate about research in AI and machine learning."
+  })
+  user2: user_insert(data: {
+    displayName: "Bob Johnson",
+    email: "bob.johnson@example.com",
+    createdAt: "2023-01-02T11:00:00Z",
+    urlSlug: "bob-johnson",
+    institution: "University of Tech",
+    position: "Senior Researcher"
+  })
+  user3: user_insert(data: {
+    displayName: "Charlie Brown",
+    email: "charlie.brown@example.com",
+    createdAt: "2023-01-03T12:00:00Z",
+    urlSlug: "charlie-brown",
+    researchInterests: ["Quantum Computing", "Data Science"]
+  })
+}

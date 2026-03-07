@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useFirestoreCollection } from '../hooks/useFirestoreCollection';
+import { useFirestoreDoc } from '../hooks/useFirestoreDoc';
 import { useAuth } from '../context/AuthContext';
 import EditableText from '../components/EditableText';
 import { FiCalendar, FiArrowRight, FiTag, FiSearch, FiChevronDown, FiChevronUp } from 'react-icons/fi';
@@ -20,16 +21,16 @@ if (typeof document !== 'undefined') {
     _blStyle.id = 'bl-styles';
     _blStyle.textContent = `
       .bl-root{background:#ffffff;min-height:100vh;}
-      .bl-hero{background:linear-gradient(135deg,#e6e8ff 0%,#fff7ed 100%);padding:80px 24px 64px;border-bottom:1px solid rgba(42,53,204,.12);position:relative;overflow:hidden;}
+      .bl-hero{background:linear-gradient(135deg,#dce8f5 0%,#fff7ed 100%);padding:80px 24px 64px;border-bottom:1px solid rgba(0,75,141,.12);position:relative;overflow:hidden;}
       .bl-hero::before{content:'';position:absolute;top:-80px;right:-60px;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(249,115,22,.14) 0%,transparent 70%);pointer-events:none;}
-      .bl-hero::after{content:'';position:absolute;bottom:-80px;left:-40px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(42,53,204,.1) 0%,transparent 70%);pointer-events:none;}
+      .bl-hero::after{content:'';position:absolute;bottom:-80px;left:-40px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(0,75,141,.1) 0%,transparent 70%);pointer-events:none;}
       .bl-hero-inner{max-width:1100px;margin:0 auto;text-align:center;position:relative;z-index:1;}
       .bl-accent-bar{width:80px;height:4px;background:#f97316;border-radius:2px;margin:0 auto 28px;}
       .bl-hero h1{font-family:'Playfair Display',Georgia,serif;font-size:clamp(2.8rem,6vw,5rem);font-weight:700;color:#1a1a1a;line-height:1.1;margin:0 0 20px;letter-spacing:-.02em;}
       .bl-hero p{font-family:'Inter',system-ui,sans-serif;font-size:1.1rem;color:#6b7280;max-width:600px;margin:0 auto 36px;line-height:1.7;}
       .bl-stats{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;}
-      .bl-stat{display:inline-flex;flex-direction:column;align-items:center;background:white;border-radius:12px;padding:16px 28px;box-shadow:0 4px 20px rgba(42,53,204,.1);border:1px solid rgba(42,53,204,.08);}
-      .bl-stat strong{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:#2A35CC;}
+      .bl-stat{display:inline-flex;flex-direction:column;align-items:center;background:white;border-radius:12px;padding:16px 28px;box-shadow:0 4px 20px rgba(0,75,141,.1);border:1px solid rgba(0,75,141,.08);}
+      .bl-stat strong{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:#004B8D;}
       .bl-stat span{font-family:'Inter',sans-serif;font-size:.72rem;font-weight:500;color:#9ca3af;letter-spacing:.09em;text-transform:uppercase;margin-top:2px;}
       .bl-layout{max-width:1100px;margin:0 auto;padding:0 24px 80px;display:grid;grid-template-columns:1fr 264px;gap:0 56px;}
       @media(max-width:900px){.bl-layout{grid-template-columns:1fr;}.bl-sidebar{display:none;}}
@@ -37,10 +38,10 @@ if (typeof document !== 'undefined') {
       .bl-mobile-search{display:none;padding:20px 0;border-bottom:1px solid #f0f0f0;}
       @media(max-width:900px){.bl-mobile-search{display:block;}}
       .bl-search-inp{width:100%;padding:10px 14px;border:1.5px solid #e5e7eb;border-radius:6px;font-family:'Inter',sans-serif;font-size:.875rem;outline:none;transition:border-color .2s;box-sizing:border-box;}
-      .bl-search-inp:focus{border-color:#2A35CC;}
+      .bl-search-inp:focus{border-color:#004B8D;}
       .bl-entry{display:grid;grid-template-columns:52px 220px 1fr;gap:0 32px;padding:52px 0;border-bottom:1px solid #f0f0f0;position:relative;align-items:start;}
       @media(max-width:720px){.bl-entry{grid-template-columns:1fr;gap:20px;}.bl-entry-num{display:none;}}
-      .bl-entry-num{font-family:'Playfair Display',serif;font-size:4.5rem;font-weight:700;color:transparent;-webkit-text-stroke:1.5px rgba(42,53,204,.15);line-height:1;padding-top:4px;user-select:none;}
+      .bl-entry-num{font-family:'Playfair Display',serif;font-size:4.5rem;font-weight:700;color:transparent;-webkit-text-stroke:1.5px rgba(0,75,141,.15);line-height:1;padding-top:4px;user-select:none;}
       .bl-thumb-wrap{border-radius:6px;overflow:hidden;aspect-ratio:4/3;background:#f3f4f6;box-shadow:4px 8px 24px rgba(0,0,0,.12),1px 3px 8px rgba(0,0,0,.08);transition:transform .35s cubic-bezier(.16,1,.3,1),box-shadow .35s ease;}
       .bl-thumb-wrap:hover{transform:translateY(-5px);box-shadow:6px 16px 40px rgba(0,0,0,.14),2px 5px 12px rgba(0,0,0,.07);}
       .bl-thumb-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:opacity .3s;}
@@ -51,15 +52,15 @@ if (typeof document !== 'undefined') {
       .bl-date-tag{display:inline-flex;align-items:center;gap:5px;font-family:'Inter',sans-serif;font-size:.72rem;color:#9ca3af;}
       .bl-title{font-family:'Playfair Display',Georgia,serif;font-size:clamp(1.35rem,2.2vw,1.8rem);font-weight:700;color:#1a1a1a;line-height:1.25;margin:0 0 14px;letter-spacing:-.01em;}
       .bl-title-link{color:inherit;text-decoration:none;transition:color .2s;}
-      .bl-title-link:hover{color:#2A35CC;}
+      .bl-title-link:hover{color:#004B8D;}
       .bl-excerpt-wrap{border-left:3px solid #f97316;padding-left:16px;margin-bottom:20px;}
       .bl-excerpt{font-family:'Playfair Display',Georgia,serif;font-style:italic;font-size:.95rem;color:#6b7280;line-height:1.7;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
       .bl-divider{width:36px;height:2px;background:#f97316;margin-bottom:20px;border-radius:1px;}
-      .bl-read-btn{display:inline-flex;align-items:center;gap:7px;font-family:'Inter',sans-serif;font-size:.8rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#2A35CC;background:transparent;border:2px solid #2A35CC;padding:9px 18px;border-radius:6px;cursor:pointer;transition:background .2s,color .2s,transform .15s;text-decoration:none;}
-      .bl-read-btn:hover{background:#2A35CC;color:white;transform:translateY(-1px);}
+      .bl-read-btn{display:inline-flex;align-items:center;gap:7px;font-family:'Inter',sans-serif;font-size:.8rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#004B8D;background:transparent;border:2px solid #004B8D;padding:9px 18px;border-radius:6px;cursor:pointer;transition:background .2s,color .2s,transform .15s;text-decoration:none;}
+      .bl-read-btn:hover{background:#004B8D;color:white;transform:translateY(-1px);}
       .bl-expand{overflow:hidden;transition:max-height .4s cubic-bezier(.16,1,.3,1),opacity .3s;max-height:0;opacity:0;}
       .bl-expand.open{max-height:600px;opacity:1;}
-      .bl-expand-inner{background:#f5f6ff;border-radius:8px;padding:20px 22px;margin-top:16px;font-family:'Inter',sans-serif;font-size:.9rem;color:#374151;line-height:1.75;border-left:3px solid #2A35CC;}
+      .bl-expand-inner{background:#f0f5fa;border-radius:8px;padding:20px 22px;margin-top:16px;font-family:'Inter',sans-serif;font-size:.9rem;color:#374151;line-height:1.75;border-left:3px solid #004B8D;}
       .bl-empty{padding:80px 24px;text-align:center;}
       .bl-empty p:first-child{font-family:'Playfair Display',serif;font-size:2rem;color:#d1d5db;margin-bottom:6px;}
       .bl-empty p:last-child{font-family:'Inter',sans-serif;font-size:.875rem;color:#9ca3af;}
@@ -73,8 +74,8 @@ if (typeof document !== 'undefined') {
       .bl-sidebar-label{font-family:'Inter',sans-serif;font-size:.65rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#1a1a1a;margin-bottom:12px;}
       .bl-sidebar-divider{height:1px;background:#f0f0f0;}
       .bl-month-btn{width:100%;text-align:left;font-family:'Inter',sans-serif;font-size:.875rem;color:#6b7280;padding:7px 10px;background:transparent;border:none;cursor:pointer;border-radius:4px;transition:background .15s,color .15s;display:flex;justify-content:space-between;align-items:center;}
-      .bl-month-btn:hover{background:#f5f6ff;color:#1a1a1a;}
-      .bl-month-btn.active{font-weight:600;color:#2A35CC;background:#e6e8ff;}
+      .bl-month-btn:hover{background:#f0f5fa;color:#1a1a1a;}
+      .bl-month-btn.active{font-weight:600;color:#004B8D;background:#dce8f5;}
       .bl-month-count{font-size:.72rem;color:#9ca3af;}
       .bl-count-note{font-family:'Inter',sans-serif;font-size:.75rem;color:#9ca3af;line-height:1.5;}
       .bl-count-note strong{color:#1a1a1a;}
@@ -102,6 +103,10 @@ const getMonthYear = (dateVal) => {
 
 export default function Blog() {
   const { isAdmin } = useAuth() || {};
+  const { data: pageData } = useFirestoreDoc('content', 'blog', {
+    page_heading: 'Blog',
+    page_subtitle: 'Thoughts on leadership, strategy, and the human side of management.',
+  });
   const [activeMonth, setActiveMonth] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [openBlogId, setOpenBlogId] = useState(null);
@@ -134,10 +139,23 @@ export default function Blog() {
             className="font-['Playfair_Display'] font-bold text-black leading-none"
             style={{ fontSize: 'clamp(3rem, 8vw, 5.5rem)' }}
           >
-            Blog
+            <EditableText
+              collection="content"
+              docId="blog"
+              field="page_heading"
+              defaultValue={pageData?.page_heading || 'Blog'}
+              className="font-['Playfair_Display'] font-bold text-black"
+            />
           </h1>
           <p className="mt-3 font-['Inter'] text-gray-500 text-base max-w-lg">
-            Thoughts on leadership, strategy, and the human side of management.
+            <EditableText
+              collection="content"
+              docId="blog"
+              field="page_subtitle"
+              defaultValue={pageData?.page_subtitle || 'Thoughts on leadership, strategy, and the human side of management.'}
+              className="font-['Inter'] text-gray-500 text-base"
+              multiline
+            />
           </p>
         </div>
       </div>
@@ -203,7 +221,7 @@ export default function Blog() {
                     ) : (
                       <Link
                         to={`/blog/${blog.slug || blog.id}`}
-                        className="hover:text-[#3333FF] transition-colors duration-200"
+                        className="hover:text-[#004B8D] transition-colors duration-200"
                       >
                         {blog.title}
                       </Link>
@@ -215,7 +233,7 @@ export default function Blog() {
 
                     {/* Left: excerpt + meta + CTA */}
                     <div className="flex-1 min-w-0">
-                      <blockquote className="border-l-4 border-[#FF6600] pl-4 mb-5">
+                      <blockquote className="border-l-4 border-[#004B8D] pl-4 mb-5">
                         <p className="font-['Playfair_Display'] italic text-gray-600 text-base leading-relaxed line-clamp-4">
                           {isAdmin ? (
                             <EditableText
@@ -240,7 +258,7 @@ export default function Blog() {
                           </span>
                         )}
                         {blog.category && (
-                          <span className="flex items-center gap-1.5 text-[#FF6600]">
+                          <span className="flex items-center gap-1.5 text-[#004B8D]">
                             <FiTag size={11} />
                             {blog.category}
                           </span>
@@ -249,7 +267,7 @@ export default function Blog() {
 
                       {/* Read Blog & Expand Description */}
                       <button
-                        className={`inline-flex items-center gap-2 font-['Inter'] font-bold text-sm text-[#3333FF] group focus:outline-none ${openBlogId === blog.id ? 'underline' : ''}`}
+                        className={`inline-flex items-center gap-2 font-['Inter'] font-bold text-sm text-[#004B8D] group focus:outline-none ${openBlogId === blog.id ? 'underline' : ''}`}
                         onClick={() => setOpenBlogId(openBlogId === blog.id ? null : blog.id)}
                       >
                         <span className="underline underline-offset-2 hover:no-underline">Read Blog</span>
@@ -260,7 +278,7 @@ export default function Blog() {
                         className={`overflow-hidden transition-all duration-400 ${openBlogId === blog.id ? 'max-h-[500px] opacity-100 mt-4' : 'max-h-0 opacity-0'}`}
                       >
                         {openBlogId === blog.id && (
-                          <div className="bg-[#f0f1ff] rounded-lg p-5 text-gray-700 font-['Inter'] text-base shadow-sm">
+                          <div className="bg-[#ebf2f8] rounded-lg p-5 text-gray-700 font-['Inter'] text-base shadow-sm">
                             {isAdmin ? (
                               <EditableText
                                 collection="blogs"
@@ -324,7 +342,7 @@ export default function Blog() {
                         onClick={() => setActiveMonth(month)}
                         className={`w-full text-left text-sm font-['Inter'] py-1.5 px-2 transition-colors ${
                           activeMonth === month
-                            ? 'font-bold text-[#3333FF] bg-[#f0f1ff]'
+                            ? 'font-bold text-[#004B8D] bg-[#ebf2f8]'
                             : 'text-gray-500 hover:text-black'
                         }`}
                       >

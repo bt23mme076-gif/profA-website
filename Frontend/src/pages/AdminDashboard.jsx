@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase/config';
-import { doc, getDoc, updateDoc, setDoc, collection, addDoc, deleteDoc, getDocs } from 'firebase/firestore';
-import { FiSave, FiPlus, FiTrash2, FiEdit, FiX, FiBookOpen, FiYoutube, FiFileText, FiDownload, FiStar, FiImage, FiUpload, FiUsers, FiBriefcase, FiExternalLink } from 'react-icons/fi';
+import { doc, getDoc, updateDoc, setDoc, collection, addDoc, deleteDoc, getDocs, query, where } from 'firebase/firestore';
+import { FiSave, FiPlus, FiTrash2, FiEdit, FiX, FiBookOpen, FiYoutube, FiFileText, FiDownload, FiStar, FiImage, FiUpload, FiUsers, FiBriefcase, FiExternalLink, FiMail, FiSend, FiInbox, FiRefreshCw } from 'react-icons/fi';
 import { uploadToCloudinary } from '../utils/cloudinaryUpload';
 
 // Add mobile responsive styles
@@ -245,6 +245,54 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
+
+  // Newsletter state
+  const [newsletterSubject, setNewsletterSubject] = useState('');
+  const [newsletterBody, setNewsletterBody] = useState('');
+  const [newsletterSending, setNewsletterSending] = useState(false);
+  const [newsletterSent, setNewsletterSent] = useState(false);
+  const [newsletterResult, setNewsletterResult] = useState(null); // { sent, failed }
+  const [subscribers, setSubscribers] = useState([]);
+  const [subscribersLoading, setSubscribersLoading] = useState(false);
+  const [campaigns, setCampaigns] = useState([]);
+
+  const loadSubscribers = async () => {
+    setSubscribersLoading(true);
+    try {
+      const snap = await getDocs(collection(db, 'newsletter_subscribers'));
+      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      list.sort((a, b) => new Date(b.subscribedAt || 0) - new Date(a.subscribedAt || 0));
+      setSubscribers(list);
+    } catch (err) {
+      alert('Error loading subscribers: ' + err.message);
+    } finally {
+      setSubscribersLoading(false);
+    }
+  };
+
+  const exportSubscribersCSV = () => {
+    if (!subscribers.length) return;
+    const rows = [['#', 'Email', 'Status', 'Subscribed On', 'Source']];
+    subscribers.forEach((s, i) => {
+      rows.push([
+        i + 1,
+        s.email,
+        s.status || 'active',
+        s.subscribedAt ? new Date(s.subscribedAt).toLocaleDateString('en-IN') : '',
+        s.source || 'website'
+      ]);
+    });
+    const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `newsletter_subscribers_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click(); URL.revokeObjectURL(url);
+  };
+
+  // Blog comments state
+  const [blogComments, setBlogComments] = useState([]);
+  const [commentsLoading, setCommentsLoading] = useState(false);
   
   // Home content image upload states
   const [homeImageUploading, setHomeImageUploading] = useState({});
@@ -263,6 +311,20 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchAllData();
   }, []);
+
+  // Auto-load subscribers & campaigns when newsletter tab is opened
+  useEffect(() => {
+    if (activeTab === 'newsletter') {
+      if (subscribers.length === 0) loadSubscribers();
+      if (campaigns.length === 0) {
+        getDocs(collection(db, 'newsletter_campaigns')).then(snap => {
+          const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          list.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+          setCampaigns(list);
+        }).catch(() => {});
+      }
+    }
+  }, [activeTab]);
 
   const fetchAllData = async () => {
     try {
@@ -354,6 +416,48 @@ export default function AdminDashboard() {
       console.error('Error fetching data:', error);
       setMessage({ text: `Error loading data: ${error.message}`, type: 'error' });
       setLoading(false);
+    }
+  };
+
+  // Fetch blog comments (all - for admin moderation)
+  const fetchBlogComments = async () => {
+    setCommentsLoading(true);
+    try {
+      const snap = await getDocs(collection(db, 'blog_comments'));
+      const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      data.sort((a, b) => {
+        const aTime = a.createdAt?.toDate?.()?.getTime() || 0;
+        const bTime = b.createdAt?.toDate?.()?.getTime() || 0;
+        return bTime - aTime;
+      });
+      setBlogComments(data);
+    } catch (err) {
+      console.error('Error fetching comments:', err);
+    } finally {
+      setCommentsLoading(false);
+    }
+  };
+
+  const approveComment = async (commentId) => {
+    try {
+      await updateDoc(doc(db, 'blog_comments', commentId), { approved: true });
+      setBlogComments(prev => prev.map(c => c.id === commentId ? { ...c, approved: true } : c));
+      setMessage({ text: 'Comment approved!', type: 'success' });
+      setTimeout(() => setMessage({ text: '', type: '' }), 2000);
+    } catch (err) {
+      setMessage({ text: 'Error approving comment', type: 'error' });
+    }
+  };
+
+  const deleteComment = async (commentId) => {
+    if (!confirm('Delete this comment?')) return;
+    try {
+      await deleteDoc(doc(db, 'blog_comments', commentId));
+      setBlogComments(prev => prev.filter(c => c.id !== commentId));
+      setMessage({ text: 'Comment deleted!', type: 'success' });
+      setTimeout(() => setMessage({ text: '', type: '' }), 2000);
+    } catch (err) {
+      setMessage({ text: 'Error deleting comment', type: 'error' });
     }
   };
 
@@ -799,6 +903,40 @@ export default function AdminDashboard() {
           >
             <FiBriefcase /> <span>Trainings</span>
           </button>
+          <button
+            className="admin-tab"
+            onClick={() => setActiveTab('newsletter')}
+            style={{
+              padding: '1rem 2rem',
+              border: 'none',
+              background: 'none',
+              borderBottom: activeTab === 'newsletter' ? '3px solid #1a1a1a' : 'none',
+              fontWeight: activeTab === 'newsletter' ? 600 : 400,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}
+          >
+            <FiDownload /> <span>Newsletter</span>
+          </button>
+          <button
+            className="admin-tab"
+            onClick={() => setActiveTab('comments')}
+            style={{
+              padding: '1rem 2rem',
+              border: 'none',
+              background: 'none',
+              borderBottom: activeTab === 'comments' ? '3px solid #1a1a1a' : 'none',
+              fontWeight: activeTab === 'comments' ? 600 : 400,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}
+          >
+            <FiInbox /> <span>Comments</span>
+          </button>
         </div>
 
         {/* Home Content Tab */}
@@ -856,7 +994,7 @@ export default function AdminDashboard() {
                       <label
                         style={{
                           padding: '0.5rem 1rem',
-                          backgroundColor: homeImageUploading.hero_image ? '#9ca3af' : '#2A35CC',
+                          backgroundColor: homeImageUploading.hero_image ? '#9ca3af' : '#004B8D',
                           color: 'white',
                           borderRadius: '4px',
                           cursor: homeImageUploading.hero_image ? 'not-allowed' : 'pointer',
@@ -939,7 +1077,7 @@ export default function AdminDashboard() {
                           <label
                             style={{
                               padding: '0.4rem 0.8rem',
-                              backgroundColor: homeImageUploading[`blog${num}_image`] ? '#9ca3af' : '#2A35CC',
+                              backgroundColor: homeImageUploading[`blog${num}_image`] ? '#9ca3af' : '#004B8D',
                               color: 'white',
                               borderRadius: '4px',
                               cursor: homeImageUploading[`blog${num}_image`] ? 'not-allowed' : 'pointer',
@@ -1105,7 +1243,7 @@ export default function AdminDashboard() {
                             href={homeContent[`book${num}_link`]}
                             target="_blank"
                             rel="noopener noreferrer"
-                            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.35rem', fontSize: '0.78rem', color: '#2A35CC', textDecoration: 'underline' }}
+                            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.35rem', fontSize: '0.78rem', color: '#004B8D', textDecoration: 'underline' }}
                           >
                             <FiExternalLink size={12} /> Open link
                           </a>
@@ -1121,7 +1259,7 @@ export default function AdminDashboard() {
                           <label
                             style={{
                               padding: '0.45rem 1rem',
-                              backgroundColor: homeImageUploading[`book${num}_image`] ? '#9ca3af' : '#2A35CC',
+                              backgroundColor: homeImageUploading[`book${num}_image`] ? '#9ca3af' : '#004B8D',
                               color: 'white',
                               borderRadius: '6px',
                               cursor: homeImageUploading[`book${num}_image`] ? 'not-allowed' : 'pointer',
@@ -1499,7 +1637,7 @@ export default function AdminDashboard() {
                 disabled={saving}
                 style={{
                   padding: '0.75rem 1.5rem',
-                  backgroundColor: '#2A35CC',
+                  backgroundColor: '#004B8D',
                   color: 'white',
                   border: 'none',
                   borderRadius: '4px',
@@ -1566,7 +1704,7 @@ export default function AdminDashboard() {
                 disabled={saving}
                 style={{
                   padding: '0.75rem 1.5rem',
-                  backgroundColor: '#2A35CC',
+                  backgroundColor: '#004B8D',
                   color: 'white',
                   border: 'none',
                   borderRadius: '4px',
@@ -1583,6 +1721,314 @@ export default function AdminDashboard() {
             </p>
           </div>
         )}
+
+        {/* ═══════════════════════════════════════════════════════
+            NEWSLETTER TAB
+        ════════════════════════════════════════════════════════ */}
+        {activeTab === 'newsletter' && (
+          <div>
+            {/* Compose & Send */}
+            <div className="admin-card admin-content-section" style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', marginBottom: '2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                <div style={{ width: 40, height: 40, background: '#004B8D', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}><FiMail /></div>
+                <div>
+                  <h2 style={{ fontSize: '1.4rem', fontWeight: 700, margin: 0 }}>Send Newsletter</h2>
+                  <p style={{ margin: 0, color: '#666', fontSize: '0.85rem' }}>Compose and broadcast a message to all active subscribers</p>
+                </div>
+              </div>
+
+              {newsletterSent && newsletterResult && (
+                <div style={{ background: '#d1fae5', border: '1px solid #6ee7b7', borderRadius: '6px', padding: '1rem', marginBottom: '1.5rem', color: '#065f46', fontWeight: 500 }}>
+                  ✅ Newsletter sent to <strong>{newsletterResult.sent}</strong> subscriber(s)!
+                  {newsletterResult.failed > 0 && (
+                    <span style={{ color: '#b45309', marginLeft: '0.75rem' }}>⚠️ {newsletterResult.failed} delivery failed.</span>
+                  )}
+                </div>
+              )}
+
+              <div style={{ display: 'grid', gap: '1.25rem' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>Subject *</label>
+                  <input
+                    type="text"
+                    value={newsletterSubject}
+                    onChange={(e) => { setNewsletterSubject(e.target.value); setNewsletterSent(false); }}
+                    placeholder="e.g. New research on leadership mindfulness..."
+                    style={{ width: '100%', padding: '0.75rem', border: '1.5px solid #ddd', borderRadius: '6px', fontSize: '1rem', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>Message Body *</label>
+                  <p style={{ margin: '0 0 0.5rem', color: '#888', fontSize: '0.8rem' }}>HTML is supported. Use &lt;p&gt;, &lt;b&gt;, &lt;a href="..."&gt; etc.</p>
+                  <textarea
+                    value={newsletterBody}
+                    onChange={(e) => { setNewsletterBody(e.target.value); setNewsletterSent(false); }}
+                    placeholder={`<p>Dear Subscriber,</p>\n<p>I'm excited to share...</p>\n<p>Best regards,<br/>Prof. Vishal Gupta</p>`}
+                    rows={12}
+                    style={{ width: '100%', padding: '0.75rem', border: '1.5px solid #ddd', borderRadius: '6px', fontFamily: 'monospace', fontSize: '0.9rem', resize: 'vertical', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                {/* Preview */}
+                {newsletterBody && (
+                  <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem', color: '#666' }}>Preview</label>
+                    <div
+                      style={{ border: '1.5px solid #e5e5e5', borderRadius: '6px', padding: '1.5rem', background: '#fafafa', maxHeight: 280, overflowY: 'auto' }}
+                      dangerouslySetInnerHTML={{ __html: newsletterBody }}
+                    />
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+                  <button
+                    onClick={async () => {
+                      if (!newsletterSubject.trim() || !newsletterBody.trim()) {
+                        alert('Please fill in both Subject and Message Body.');
+                        return;
+                      }
+                      if (!window.confirm(`Send this email to ALL active subscribers?`)) return;
+                      setNewsletterSending(true);
+                      setNewsletterSent(false);
+                      try {
+                        // Fetch active subscribers
+                        const subSnap = await getDocs(
+                          query(collection(db, 'newsletter_subscribers'), where('status', '==', 'active'))
+                        );
+                        const emails = subSnap.docs.map(d => d.data().email).filter(Boolean);
+
+                        if (!emails.length) {
+                          alert('No active subscribers found.');
+                          setNewsletterSending(false);
+                          return;
+                        }
+
+                        // Send emails via backend
+                        const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+                        const sendRes = await fetch(`${apiBase}/newsletter/send`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({
+                            subject: newsletterSubject.trim(),
+                            body: newsletterBody.trim(),
+                            subscribers: emails
+                          })
+                        });
+                        const sendData = await sendRes.json();
+                        if (!sendRes.ok) throw new Error(sendData.error || 'Send failed');
+
+                        // Log campaign to Firestore
+                        await addDoc(collection(db, 'newsletter_campaigns'), {
+                          subject: newsletterSubject.trim(),
+                          body: newsletterBody.trim(),
+                          status: 'sent',
+                          sentCount: sendData.sent,
+                          failedCount: sendData.failed || 0,
+                          createdAt: new Date()
+                        });
+                        setNewsletterResult({ sent: sendData.sent, failed: sendData.failed || 0 });
+                        setNewsletterSent(true);
+                        setNewsletterSubject('');
+                        setNewsletterBody('');
+                        // Refresh campaigns list
+                        const snap = await getDocs(collection(db, 'newsletter_campaigns'));
+                        const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                        list.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+                        setCampaigns(list);
+                      } catch (err) {
+                        alert('Failed to send: ' + err.message);
+                      } finally {
+                        setNewsletterSending(false);
+                      }
+                    }}
+                    disabled={newsletterSending}
+                    style={{ padding: '0.75rem 2rem', background: newsletterSending ? '#888' : '#004B8D', color: 'white', border: 'none', borderRadius: '6px', cursor: newsletterSending ? 'not-allowed' : 'pointer', fontWeight: 700, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                  >
+                    <FiSend /> {newsletterSending ? 'Sending...' : 'Send to All Subscribers'}
+                  </button>
+                  <span style={{ color: '#888', fontSize: '0.85rem' }}>Sends via Gmail through the backend server to all <strong>{subscribers.filter(s => s.status !== 'unsubscribed').length}</strong> active subscriber(s).</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Past Campaigns */}
+            <div className="admin-card" style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', marginBottom: '2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div style={{ width: 36, height: 36, background: '#f97316', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}><FiInbox /></div>
+                  <h3 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>Past Campaigns</h3>
+                </div>
+                <button
+                  onClick={async () => {
+                    const snap = await getDocs(collection(db, 'newsletter_campaigns'));
+                    const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                    list.sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
+                    setCampaigns(list);
+                  }}
+                  style={{ padding: '0.5rem 1rem', border: '1px solid #ddd', borderRadius: '6px', cursor: 'pointer', background: 'white', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem' }}
+                >
+                  <FiRefreshCw /> Refresh
+                </button>
+              </div>
+              {campaigns.length === 0 ? (
+                <p style={{ color: '#999', textAlign: 'center', padding: '2rem 0' }}>No campaigns yet. Click Refresh to load.</p>
+              ) : (
+                <div style={{ display: 'grid', gap: '0.75rem' }}>
+                  {campaigns.map(c => (
+                    <div key={c.id} style={{ padding: '1rem', border: '1px solid #e5e5e5', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <div>
+                        <p style={{ margin: '0 0 4px', fontWeight: 600 }}>{c.subject}</p>
+                        <p style={{ margin: 0, fontSize: '0.8rem', color: '#888' }}>
+                          {c.createdAt?.seconds ? new Date(c.createdAt.seconds * 1000).toLocaleString('en-IN') : 'Unknown date'}
+                        </p>
+                      </div>
+                      <span style={{ padding: '4px 12px', borderRadius: '999px', fontSize: '0.78rem', fontWeight: 600, background: c.status === 'sent' ? '#d1fae5' : '#fef3c7', color: c.status === 'sent' ? '#065f46' : '#92400e' }}>
+                        {c.status === 'sent' ? '✅ Sent' : c.status === 'send' ? '⏳ Queued' : c.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Subscriber List */}
+            <div className="admin-card" style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div style={{ width: 36, height: 36, background: '#10b981', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}><FiUsers /></div>
+                  <div>
+                    <h3 style={{ fontSize: '1.15rem', fontWeight: 700, margin: 0 }}>Subscribers</h3>
+                    {subscribers.length > 0 && <p style={{ margin: 0, fontSize: '0.8rem', color: '#666' }}>{subscribers.filter(s => s.status === 'active').length} active · {subscribers.length} total</p>}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button
+                    onClick={loadSubscribers}
+                    style={{ padding: '0.5rem 1rem', border: '1px solid #ddd', borderRadius: '6px', cursor: 'pointer', background: 'white', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem' }}
+                  >
+                    <FiRefreshCw /> {subscribersLoading ? 'Loading...' : 'Refresh'}
+                  </button>
+                  {subscribers.length > 0 && (
+                    <button
+                      onClick={exportSubscribersCSV}
+                      style={{ padding: '0.5rem 1rem', border: '1px solid #10b981', borderRadius: '6px', cursor: 'pointer', background: '#f0fdf4', color: '#065f46', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem', fontWeight: 600 }}
+                    >
+                      <FiDownload /> Export CSV
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {subscribers.length === 0 ? (
+                <p style={{ color: '#999', textAlign: 'center', padding: '2rem 0' }}>Click "Load Subscribers" to view the list.</p>
+              ) : (
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '2px solid #e5e5e5', textAlign: 'left' }}>
+                        <th style={{ padding: '0.6rem 1rem', fontWeight: 600 }}>#</th>
+                        <th style={{ padding: '0.6rem 1rem', fontWeight: 600 }}>Email</th>
+                        <th style={{ padding: '0.6rem 1rem', fontWeight: 600 }}>Status</th>
+                        <th style={{ padding: '0.6rem 1rem', fontWeight: 600 }}>Subscribed On</th>
+                        <th style={{ padding: '0.6rem 1rem', fontWeight: 600 }}>Source</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {subscribers.map((s, i) => (
+                        <tr key={s.id} style={{ borderBottom: '1px solid #f0f0f0', background: i % 2 === 0 ? '#fafafa' : 'white' }}>
+                          <td style={{ padding: '0.6rem 1rem', color: '#888' }}>{i + 1}</td>
+                          <td style={{ padding: '0.6rem 1rem', fontWeight: 500 }}>{s.email}</td>
+                          <td style={{ padding: '0.6rem 1rem' }}>
+                            <span style={{ padding: '2px 10px', borderRadius: '999px', fontSize: '0.78rem', fontWeight: 600, background: s.status === 'active' ? '#d1fae5' : '#fef3c7', color: s.status === 'active' ? '#065f46' : '#92400e' }}>
+                              {s.status || 'active'}
+                            </span>
+                          </td>
+                          <td style={{ padding: '0.6rem 1rem', color: '#666' }}>
+                            {s.subscribedAt ? new Date(s.subscribedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                          </td>
+                          <td style={{ padding: '0.6rem 1rem', color: '#888', fontSize: '0.85rem' }}>{s.source || 'website'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ═══════════════════════════════════════════════════════
+            COMMENTS TAB
+        ════════════════════════════════════════════════════════ */}
+        {activeTab === 'comments' && (
+          <div className="admin-card admin-content-section" style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>Blog Comments</h2>
+                <p style={{ color: '#6b7280', fontSize: '0.85rem', margin: '4px 0 0' }}>Approve or delete reader comments</p>
+              </div>
+              <button
+                onClick={fetchBlogComments}
+                disabled={commentsLoading}
+                style={{ padding: '0.6rem 1.2rem', border: '1px solid #ddd', borderRadius: '6px', cursor: 'pointer', background: 'white', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem' }}
+              >
+                <FiRefreshCw size={13} /> {commentsLoading ? 'Loading…' : 'Refresh'}
+              </button>
+            </div>
+
+            {commentsLoading ? (
+              <p style={{ color: '#9ca3af', padding: '2rem 0', textAlign: 'center' }}>Loading comments…</p>
+            ) : blogComments.length === 0 ? (
+              <div style={{ padding: '3rem', textAlign: 'center', background: '#f9fafb', borderRadius: '8px' }}>
+                <FiInbox size={32} style={{ color: '#d1d5db', marginBottom: 12 }} />
+                <p style={{ color: '#6b7280', fontFamily: 'Inter, sans-serif', margin: 0 }}>No comments yet. Click Refresh to load.</p>
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gap: '1rem' }}>
+                {/* Pending first */}
+                {[false, true].map(isApproved => {
+                  const group = blogComments.filter(c => !!c.approved === isApproved);
+                  if (group.length === 0) return null;
+                  return (
+                    <div key={String(isApproved)}>
+                      <h3 style={{ fontSize: '1rem', fontWeight: 700, color: isApproved ? '#065f46' : '#92400e', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        {isApproved ? '✅ Approved' : '⏳ Pending Moderation'} ({group.length})
+                      </h3>
+                      <div style={{ display: 'grid', gap: '0.75rem' }}>
+                        {group.map(c => (
+                          <div key={c.id} style={{ border: `1px solid ${isApproved ? '#d1fae5' : '#fde68a'}`, borderRadius: '8px', padding: '1rem 1.25rem', background: isApproved ? '#f0fdf4' : '#fffbeb', display: 'flex', gap: '1rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                            <div style={{ flex: 1, minWidth: 200 }}>
+                              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'baseline', flexWrap: 'wrap', marginBottom: 6 }}>
+                                <strong style={{ fontSize: '0.9rem' }}>{c.name}</strong>
+                                {c.email && <span style={{ fontSize: '0.78rem', color: '#6b7280' }}>&lt;{c.email}&gt;</span>}
+                                <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>on <em>{c.blogSlug || c.blogId}</em></span>
+                              </div>
+                              <p style={{ margin: 0, fontSize: '0.9rem', color: '#374151', lineHeight: 1.6 }}>{c.comment}</p>
+                              <p style={{ margin: '6px 0 0', fontSize: '0.72rem', color: '#9ca3af' }}>
+                                {c.createdAt?.toDate ? c.createdAt.toDate().toLocaleString('en-IN') : 'Unknown date'}
+                              </p>
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+                              {!c.approved && (
+                                <button onClick={() => approveComment(c.id)} style={{ padding: '6px 14px', background: '#10b981', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}>
+                                  Approve
+                                </button>
+                              )}
+                              <button onClick={() => deleteComment(c.id)} style={{ padding: '6px 12px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '0.8rem' }}>
+                                <FiTrash2 size={13} />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
       </div>
       </div>
     </>
@@ -1663,7 +2109,7 @@ function BlogEditor({ blog, onUpdate, onDelete }) {
               <label
                 style={{
                   padding: '0.5rem 1rem',
-                  backgroundColor: uploading ? '#9ca3af' : '#2A35CC',
+                  backgroundColor: uploading ? '#9ca3af' : '#004B8D',
                   color: 'white',
                   borderRadius: '4px',
                   cursor: uploading ? 'not-allowed' : 'pointer',
@@ -1735,6 +2181,15 @@ function BlogEditor({ blog, onUpdate, onDelete }) {
               />
               Published
             </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.25rem 0.75rem', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '6px' }}>
+              <input
+                type="checkbox"
+                checked={!!editedBlog.showOnHome}
+                onChange={(e) => setEditedBlog({ ...editedBlog, showOnHome: e.target.checked })}
+                style={{ accentColor: '#004B8D' }}
+              />
+              <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#004B8D' }}>Show on Home</span>
+            </label>
           </div>
           <div className="admin-editor-actions" style={{ display: 'flex', gap: '1rem' }}>
             <button
@@ -1767,11 +2222,16 @@ function BlogEditor({ blog, onUpdate, onDelete }) {
                 fontSize: '0.75rem'
               }}>                {blog.published ? 'Published' : 'Draft'}
               </span>
+              {blog.showOnHome && (
+                <span style={{ display: 'inline-block', marginTop: '0.5rem', marginLeft: '0.5rem', padding: '0.25rem 0.75rem', backgroundColor: '#004B8D', color: 'white', borderRadius: '999px', fontSize: '0.75rem' }}>
+                  🏠 Home
+                </span>
+              )}
             </div>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button
                 onClick={() => setEditing(true)}
-                style={{ padding: '0.5rem', backgroundColor: '#2A35CC', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                style={{ padding: '0.5rem', backgroundColor: '#004B8D', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
               >
                 <FiEdit />
               </button>
@@ -1875,7 +2335,7 @@ function CourseEditor({ course, onUpdate, onDelete }) {
               <label
                 style={{
                   padding: '0.5rem 1rem',
-                  backgroundColor: uploading ? '#9ca3af' : '#2A35CC',
+                  backgroundColor: uploading ? '#9ca3af' : '#004B8D',
                   color: 'white',
                   borderRadius: '4px',
                   cursor: uploading ? 'not-allowed' : 'pointer',
@@ -2004,7 +2464,7 @@ function CourseEditor({ course, onUpdate, onDelete }) {
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button
                 onClick={() => setEditing(true)}
-                style={{ padding: '0.5rem', backgroundColor: '#2A35CC', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                style={{ padding: '0.5rem', backgroundColor: '#004B8D', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
               >
                 <FiEdit />
               </button>
@@ -2116,7 +2576,7 @@ function TestimonialEditor({ testimonial, onUpdate, onDelete }) {
               <label
                 style={{
                   padding: '0.5rem 1rem',
-                  backgroundColor: uploading ? '#9ca3af' : '#2A35CC',
+                  backgroundColor: uploading ? '#9ca3af' : '#004B8D',
                   color: 'white',
                   borderRadius: '4px',
                   cursor: uploading ? 'not-allowed' : 'pointer',
@@ -2208,34 +2668,73 @@ function TestimonialEditor({ testimonial, onUpdate, onDelete }) {
         </div>
       ) : (
         <>
-          <div className="admin-form-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
-            <div style={{ flex: 1 }}>
-              <p style={{ fontSize: '1rem', fontStyle: 'italic', color: '#333', marginBottom: '1rem', lineHeight: '1.6' }}>
-                "{testimonial.quote}"
-              </p>
-              <div style={{ fontSize: '0.9rem', color: '#666' }}>
-                <p style={{ fontWeight: 600, marginBottom: '0.25rem' }}>— {testimonial.author}</p>
-                <p style={{ marginBottom: '0.25rem' }}>{testimonial.role}</p>
-                {testimonial.organization && <p>{testimonial.organization}</p>}
+          <div className="admin-form-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: '1rem' }}>
+            <div className="logo-info-wrapper" style={{ display: 'flex', alignItems: 'start', gap: '1rem', flex: 1 }}>
+              <div className="logo-preview-container" style={{ 
+                minWidth: '180px', 
+                width: '180px',
+                height: '100px', 
+                backgroundColor: '#ffffff', 
+                border: '2px solid #e5e5e5',
+                borderRadius: '8px', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                padding: '1rem',
+                flexShrink: 0,
+                position: 'relative'
+              }}>
+                {logo.logoUrl ? (
+                  <img 
+                    src={logo.logoUrl} 
+                    alt={logo.name}
+                    style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
+                    onError={(e) => e.target.style.display = 'none'}
+                  />
+                ) : (
+                  <div style={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    textAlign: 'center',
+                    color: '#999',
+                    fontSize: '0.75rem'
+                  }}>
+                    <FiImage size={24} color="#ccc" />
+                    <span style={{ marginTop: '0.5rem' }}>No Logo</span>
+                  </div>
+                )}
               </div>
-              <div style={{ marginTop: '0.5rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                <span style={{ 
-                  display: 'inline-block', 
-                  padding: '0.25rem 0.75rem', 
-                  backgroundColor: testimonial.published ? '#10b981' : '#6b7280',
-                  color: 'white',
-                  borderRadius: '999px',
-                  fontSize: '0.75rem'
-                }}>
-                  {testimonial.published ? 'Published' : 'Draft'}
-                </span>
-                <span style={{ fontSize: '0.85rem', color: '#999' }}>Order: {testimonial.order}</span>
+              <div className="logo-card-content" style={{ flex: 1, minWidth: 0 }}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>{logo.name}</h3>
+                <p className="logo-url-text" style={{ 
+                  fontSize: '0.75rem', 
+                  color: '#999', 
+                  marginBottom: '0.75rem',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}>{logo.logoUrl}</p>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <span style={{ 
+                    display: 'inline-block', 
+                    padding: '0.25rem 0.75rem', 
+                    backgroundColor: logo.published ? '#10b981' : '#6b7280',
+                    color: 'white',
+                    borderRadius: '999px',
+                    fontSize: '0.75rem'
+                  }}>
+                    {logo.published ? 'Published' : 'Draft'}
+                  </span>
+                  <span style={{ fontSize: '0.85rem', color: '#999' }}>Order: {logo.order}</span>
+                </div>
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
               <button
                 onClick={() => setEditing(true)}
-                style={{ padding: '0.5rem', backgroundColor: '#2A35CC', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                style={{ padding: '0.5rem', backgroundColor: '#004B8D', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
               >
                 <FiEdit />
               </button>
@@ -2320,7 +2819,7 @@ function TrainingLogoEditor({ logo, onUpdate, onDelete }) {
               <label
                 style={{
                   padding: '0.5rem 1rem',
-                  backgroundColor: uploading ? '#9ca3af' : '#2A35CC',
+                  backgroundColor: uploading ? '#9ca3af' : '#004B8D',
                   color: 'white',
                   borderRadius: '4px',
                   cursor: uploading ? 'not-allowed' : 'pointer',
@@ -2358,7 +2857,7 @@ function TrainingLogoEditor({ logo, onUpdate, onDelete }) {
             />
             {editedLogo.logoUrl ? (
               <div style={{ marginTop: '1rem' }}>
-                <div style={{ padding: '1rem', backgroundColor: '#f9f9f9', borderRadius: '8px', display: 'flex', justifyContent: 'center', minHeight: '120px', alignItems: 'center' }}>
+                <div style={{ padding: '1rem', backgroundColor: '#f9fafb', borderRadius: '8px', display: 'flex', justifyContent: 'center', minHeight: '120px', alignItems: 'center' }}>
                   <img 
                     src={editedLogo.logoUrl} 
                     alt={editedLogo.name}
@@ -2507,7 +3006,7 @@ function TrainingLogoEditor({ logo, onUpdate, onDelete }) {
             <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
               <button
                 onClick={() => setEditing(true)}
-                style={{ padding: '0.5rem', backgroundColor: '#2A35CC', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                style={{ padding: '0.5rem', backgroundColor: '#004B8D', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
               >
                 <FiEdit />
               </button>

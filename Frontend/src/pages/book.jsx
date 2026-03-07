@@ -2,6 +2,8 @@ import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { FiShoppingCart, FiAward, FiVideo, FiMic, FiEdit2, FiTrash2, FiPlus, FiBookOpen, FiX } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
+import { useFirestoreDoc } from '../hooks/useFirestoreDoc';
+import EditableText from '../components/EditableText';
 import { collection, addDoc, updateDoc, deleteDoc, doc, query, where, getDocs, setDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { uploadToCloudinary } from '../utils/cloudinaryUpload';
@@ -16,28 +18,28 @@ if (typeof document !== 'undefined') {
   const _bkStyle = document.createElement('style');
   _bkStyle.textContent = `
     .bk-root{background:#ffffff;min-height:100vh;}
-    .bk-hero{background:linear-gradient(135deg,#e6e8ff 0%,#fff7ed 100%);padding:80px 24px 64px;border-bottom:1px solid rgba(42,53,204,.12);position:relative;overflow:hidden;}
+    .bk-hero{background:linear-gradient(135deg,#dce8f5 0%,#fff7ed 100%);padding:80px 24px 64px;border-bottom:1px solid rgba(0,75,141,.12);position:relative;overflow:hidden;}
     .bk-hero::before{content:'';position:absolute;top:-80px;right:-60px;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(249,115,22,.14) 0%,transparent 70%);pointer-events:none;}
-    .bk-hero::after{content:'';position:absolute;bottom:-80px;left:-40px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(42,53,204,.1) 0%,transparent 70%);pointer-events:none;}
+    .bk-hero::after{content:'';position:absolute;bottom:-80px;left:-40px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(0,75,141,.1) 0%,transparent 70%);pointer-events:none;}
     .bk-hero-inner{max-width:900px;margin:0 auto;text-align:center;position:relative;z-index:1;}
     .bk-accent-bar{width:80px;height:4px;background:#f97316;border-radius:2px;margin:0 auto 28px;}
     .bk-hero h1{font-family:'Playfair Display',Georgia,serif;font-size:clamp(2.8rem,6vw,5rem);font-weight:700;color:#1a1a1a;line-height:1.1;margin:0 0 20px;letter-spacing:-.02em;}
     .bk-hero p{font-family:'Inter',system-ui,sans-serif;font-size:1.1rem;color:#6b7280;max-width:600px;margin:0 auto 36px;line-height:1.7;}
     .bk-stats{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;}
-    .bk-stat{display:inline-flex;flex-direction:column;align-items:center;background:white;border-radius:12px;padding:16px 28px;box-shadow:0 4px 20px rgba(42,53,204,.1);border:1px solid rgba(42,53,204,.08);}
-    .bk-stat strong{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:#2A35CC;}
+    .bk-stat{display:inline-flex;flex-direction:column;align-items:center;background:white;border-radius:12px;padding:16px 28px;box-shadow:0 4px 20px rgba(0,75,141,.1);border:1px solid rgba(0,75,141,.08);}
+    .bk-stat strong{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;color:#004B8D;}
     .bk-stat span{font-family:'Inter',sans-serif;font-size:.72rem;font-weight:500;color:#9ca3af;letter-spacing:.09em;text-transform:uppercase;margin-top:2px;}
     .bk-admin-bar{background:#faf8f5;border-bottom:1px solid #e5e7eb;padding:12px 24px;display:flex;justify-content:flex-end;}
     .bk-admin-bar-inner{max-width:1100px;width:100%;margin:0 auto;display:flex;justify-content:flex-end;}
     .bk-list{max-width:1100px;margin:0 auto;padding:0 24px 80px;}
     .bk-entry{display:grid;grid-template-columns:56px 200px 1fr;gap:0 36px;padding:56px 0;border-bottom:1px solid #f0f0f0;position:relative;align-items:start;}
     @media(max-width:900px){.bk-entry{grid-template-columns:1fr;gap:24px;}.bk-entry-num{display:none;}}
-    .bk-entry-num{font-family:'Playfair Display',serif;font-size:4.5rem;font-weight:700;color:transparent;-webkit-text-stroke:1.5px rgba(42,53,204,.15);line-height:1;padding-top:6px;user-select:none;}
+    .bk-entry-num{font-family:'Playfair Display',serif;font-size:4.5rem;font-weight:700;color:transparent;-webkit-text-stroke:1.5px rgba(0,75,141,.15);line-height:1;padding-top:6px;user-select:none;}
     .bk-cover-wrap{border-radius:4px;overflow:hidden;aspect-ratio:2/3;background:#f3f4f6;box-shadow:6px 10px 32px rgba(0,0,0,.18),2px 4px 10px rgba(0,0,0,.1);transform:perspective(800px) rotateY(-5deg);transition:transform .4s cubic-bezier(.16,1,.3,1),box-shadow .4s ease;cursor:pointer;}
     .bk-cover-wrap:hover{transform:perspective(800px) rotateY(0deg) translateY(-6px);box-shadow:10px 24px 56px rgba(0,0,0,.18),2px 6px 14px rgba(0,0,0,.08);}
     .bk-cover-wrap img{width:100%;height:100%;object-fit:cover;display:block;}
     .bk-content{padding-top:4px;}
-    .bk-year-tag{display:inline-block;font-family:'Inter',sans-serif;font-size:.68rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2A35CC;background:#e6e8ff;padding:3px 10px;border-radius:2px;margin-bottom:14px;}
+    .bk-year-tag{display:inline-block;font-family:'Inter',sans-serif;font-size:.68rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#004B8D;background:#dce8f5;padding:3px 10px;border-radius:2px;margin-bottom:14px;}
     .bk-title{font-family:'Playfair Display',Georgia,serif;font-size:clamp(1.5rem,2.4vw,2rem);font-weight:700;color:#1a1a1a;line-height:1.2;margin:0 0 10px;letter-spacing:-.01em;}
     .bk-authors{font-family:'Inter',sans-serif;font-size:.9rem;color:#4b5563;margin-bottom:4px;line-height:1.5;}
     .bk-publisher{font-family:'Inter',sans-serif;font-size:.82rem;color:#9ca3af;margin-bottom:24px;}
@@ -47,25 +49,25 @@ if (typeof document !== 'undefined') {
     .bk-award a{font-family:'Inter',sans-serif;font-size:.85rem;color:#1a1a1a;text-decoration:none;line-height:1.5;transition:color .2s;}
     .bk-award a:hover{color:#f97316;}
     .bk-section-label{display:flex;align-items:center;gap:8px;font-family:'Inter',sans-serif;font-size:.65rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#9ca3af;margin-bottom:10px;}
-    .bk-section-label .blue{color:#2A35CC;} .bk-section-label .orange{color:#f97316;}
+    .bk-section-label .blue{color:#004B8D;} .bk-section-label .orange{color:#f97316;}
     .bk-items{list-style:none;padding:0;margin:0 0 20px;}
     .bk-items li{display:flex;align-items:baseline;gap:10px;margin-bottom:8px;font-family:'Inter',sans-serif;font-size:.875rem;color:#374151;line-height:1.6;}
-    .bk-dot{width:5px;height:5px;border-radius:50%;background:#2A35CC;flex-shrink:0;margin-top:7px;}
+    .bk-dot{width:5px;height:5px;border-radius:50%;background:#004B8D;flex-shrink:0;margin-top:7px;}
     .bk-dot-o{background:#f97316;}
     .bk-items a{color:#374151;text-decoration:none;border-bottom:1px solid transparent;transition:border-color .2s,color .2s;}
-    .bk-items a:hover{color:#2A35CC;border-bottom-color:#2A35CC;}
+    .bk-items a:hover{color:#004B8D;border-bottom-color:#004B8D;}
     .bk-items .ml:hover{color:#f97316;border-bottom-color:#f97316;}
     .bk-btn-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px;}
-    .bk-btn-p{display:inline-flex;align-items:center;gap:7px;background:#2A35CC;color:white;font-family:'Inter',sans-serif;font-size:.8rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:11px 22px;border:2px solid #2A35CC;border-radius:6px;text-decoration:none;transition:background .2s,color .2s,transform .15s;box-shadow:0 2px 8px rgba(42,53,204,.25);}
-    .bk-btn-p:hover{background:transparent;color:#2A35CC;transform:translateY(-1px);}
+    .bk-btn-p{display:inline-flex;align-items:center;gap:7px;background:#004B8D;color:white;font-family:'Inter',sans-serif;font-size:.8rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:11px 22px;border:2px solid #004B8D;border-radius:6px;text-decoration:none;transition:background .2s,color .2s,transform .15s;box-shadow:0 2px 8px rgba(0,75,141,.25);}
+    .bk-btn-p:hover{background:transparent;color:#004B8D;transform:translateY(-1px);}
     .bk-btn-s{display:inline-flex;align-items:center;gap:7px;background:transparent;color:#1a1a1a;font-family:'Inter',sans-serif;font-size:.8rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:11px 22px;border:2px solid #1a1a1a;border-radius:6px;text-decoration:none;transition:background .2s,color .2s,transform .15s;}
     .bk-btn-s:hover{background:#1a1a1a;color:white;transform:translateY(-1px);}
     .bk-admin-btns{position:absolute;top:56px;right:0;display:flex;gap:8px;opacity:0;transition:opacity .2s;}
     .bk-entry:hover .bk-admin-btns{opacity:1;}
-    .bk-edit-btn{padding:7px 10px;background:#2A35CC;color:white;border:none;border-radius:4px;cursor:pointer;}
+    .bk-edit-btn{padding:7px 10px;background:#004B8D;color:white;border:none;border-radius:4px;cursor:pointer;}
     .bk-del-btn{padding:7px 10px;background:#ef4444;color:white;border:none;border-radius:4px;cursor:pointer;}
-    .bk-add-btn{display:inline-flex;align-items:center;gap:7px;background:#2A35CC;color:white;font-family:'Inter',sans-serif;font-size:.85rem;font-weight:600;padding:10px 20px;border:none;border-radius:6px;cursor:pointer;transition:background .2s;box-shadow:0 2px 8px rgba(42,53,204,.25);}
-    .bk-add-btn:hover{background:#1f2a99;}
+    .bk-add-btn{display:inline-flex;align-items:center;gap:7px;background:#004B8D;color:white;font-family:'Inter',sans-serif;font-size:.85rem;font-weight:600;padding:10px 20px;border:none;border-radius:6px;cursor:pointer;transition:background .2s;box-shadow:0 2px 8px rgba(0,75,141,.25);}
+    .bk-add-btn:hover{background:#003870;}
     .bk-overlay{position:fixed;inset:0;z-index:50;background:rgba(26,26,26,.65);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;}
     .bk-modal{background:white;max-width:740px;width:100%;border-radius:12px;box-shadow:0 24px 80px rgba(0,0,0,.3);margin:auto;}
     .bk-modal-hd{padding:24px 28px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center;}
@@ -76,20 +78,20 @@ if (typeof document !== 'undefined') {
     .bk-field{margin-bottom:16px;}
     .bk-field label{display:block;font-family:'Inter',sans-serif;font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6b7280;margin-bottom:6px;}
     .bk-inp{width:100%;padding:9px 13px;border:1.5px solid #e5e7eb;border-radius:6px;font-family:'Inter',sans-serif;font-size:.875rem;outline:none;transition:border-color .2s;box-sizing:border-box;}
-    .bk-inp:focus{border-color:#2A35CC;}
+    .bk-inp:focus{border-color:#004B8D;}
     .bk-g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
     .bk-alabel{display:flex;justify-content:space-between;align-items:center;font-family:'Inter',sans-serif;font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6b7280;margin-bottom:8px;}
     .bk-arow{display:flex;gap:6px;margin-bottom:6px;}
     .bk-arow .bk-inp{flex:1;}
-    .bk-radd{background:none;border:1.5px solid #2A35CC;color:#2A35CC;padding:2px 9px;border-radius:4px;cursor:pointer;font-family:'Inter',sans-serif;font-size:.72rem;font-weight:600;transition:background .15s,color .15s;}
-    .bk-radd:hover{background:#2A35CC;color:white;}
+    .bk-radd{background:none;border:1.5px solid #004B8D;color:#004B8D;padding:2px 9px;border-radius:4px;cursor:pointer;font-family:'Inter',sans-serif;font-size:.72rem;font-weight:600;transition:background .15s,color .15s;}
+    .bk-radd:hover{background:#004B8D;color:white;}
     .bk-rrem{background:none;border:1.5px solid #fca5a5;color:#ef4444;padding:0 9px;border-radius:4px;cursor:pointer;transition:background .15s;}
     .bk-rrem:hover{background:#fee2e2;}
     .bk-modal-ft{padding:16px 28px;border-top:1px solid #f0f0f0;display:flex;justify-content:flex-end;gap:10px;}
     .bk-cancel{padding:9px 20px;background:transparent;color:#374151;border:1.5px solid #d1d5db;border-radius:6px;font-family:'Inter',sans-serif;font-size:.85rem;font-weight:500;cursor:pointer;transition:background .15s;}
     .bk-cancel:hover{background:#f9fafb;}
-    .bk-save{padding:9px 22px;background:#2A35CC;color:white;border:2px solid #2A35CC;border-radius:6px;font-family:'Inter',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;transition:background .2s;}
-    .bk-save:hover{background:#1f2a99;}
+    .bk-save{padding:9px 22px;background:#004B8D;color:white;border:2px solid #004B8D;border-radius:6px;font-family:'Inter',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;transition:background .2s;}
+    .bk-save:hover{background:#003870;}
     .bk-save:disabled{opacity:.5;cursor:not-allowed;}
     .bk-error{background:#fee2e2;border:1px solid #fca5a5;color:#991b1b;padding:10px 14px;border-radius:6px;font-family:'Inter',sans-serif;font-size:.85rem;margin-bottom:14px;}
     .bk-prev{height:80px;object-fit:cover;border-radius:4px;margin-top:6px;}
@@ -383,6 +385,11 @@ function BookEditModal({ book, onClose, onSave }) {
 /* ─── Main Page ──────────────────────────────────────── */
 export default function Books() {
   const { isAdmin } = useAuth() || {};
+  const { data: pageData } = useFirestoreDoc('content', 'books', {
+    page_heading: 'Books',
+    page_heading_em: 'Authored',
+    page_subtitle: 'Published works bridging organizational theory, leadership dynamics, and ancient wisdom for the modern world.',
+  });
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingBook, setEditingBook] = useState(null);
@@ -390,12 +397,14 @@ export default function Books() {
 
   useEffect(() => { load(); }, []);
 
+  const sortByYearDesc = (arr) => [...arr].sort((a, b) => parseInt(b.year) - parseInt(a.year));
+
   const load = async () => {
     try {
       const data = await fetchBooks();
-      setBooks(data.length ? data : INITIAL_BOOKS);
+      setBooks(data.length ? sortByYearDesc(data) : sortByYearDesc(INITIAL_BOOKS));
     } catch {
-      setBooks(INITIAL_BOOKS);
+      setBooks(sortByYearDesc(INITIAL_BOOKS));
     } finally {
       setLoading(false);
     }
@@ -439,8 +448,30 @@ export default function Books() {
         <motion.div className="bk-hero-inner" initial="hidden" animate="visible" variants={stg}>
           <motion.div variants={fy}>
             <div className="bk-accent-bar" />
-            <h1>Books <em style={{ fontStyle: 'italic', fontWeight: 400, color: '#6b7280' }}>Authored</em></h1>
-            <p>Published works bridging organizational theory, leadership dynamics, and ancient wisdom for the modern world.</p>
+            <h1>
+              <EditableText
+                collection="content"
+                docId="books"
+                field="page_heading"
+                defaultValue={pageData?.page_heading || 'Books'}
+              />{' '}<em style={{ fontStyle: 'italic', fontWeight: 400, color: '#6b7280' }}>
+                <EditableText
+                  collection="content"
+                  docId="books"
+                  field="page_heading_em"
+                  defaultValue={pageData?.page_heading_em || 'Authored'}
+                />
+              </em>
+            </h1>
+            <p>
+              <EditableText
+                collection="content"
+                docId="books"
+                field="page_subtitle"
+                defaultValue={pageData?.page_subtitle || 'Published works bridging organizational theory, leadership dynamics, and ancient wisdom for the modern world.'}
+                multiline
+              />
+            </p>
           </motion.div>
           <motion.div variants={fy} className="bk-stats">
             <div className="bk-stat"><strong>{books.length || INITIAL_BOOKS.length}</strong><span>Books Published</span></div>
@@ -486,6 +517,18 @@ export default function Books() {
               <div className="bk-content">
                 {isAdmin && (
                   <div className="bk-admin-btns">
+                    <button
+                      title={book.showOnHome ? 'Remove from Home page' : 'Show on Home page'}
+                      onClick={async () => {
+                        try {
+                          await updateDoc(doc(db, 'books', String(book.id)), { showOnHome: !book.showOnHome });
+                          await load();
+                        } catch (err) { alert(err.message); }
+                      }}
+                      style={{ padding: '5px 10px', background: book.showOnHome ? '#004B8D' : '#e5e7eb', color: book.showOnHome ? 'white' : '#374151', border: 'none', borderRadius: 4, cursor: 'pointer', fontSize: 11, fontWeight: 600, whiteSpace: 'nowrap' }}
+                    >
+                      {book.showOnHome ? '🏠 On Home' : '+ Home'}
+                    </button>
                     <button className="bk-edit-btn" onClick={() => setEditingBook(book)}><FiEdit2 size={14} /></button>
                     <button className="bk-del-btn" onClick={() => handleDelete(book.id)}><FiTrash2 size={14} /></button>
                   </div>

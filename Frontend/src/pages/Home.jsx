@@ -1,16 +1,16 @@
-import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import EditableText from '../components/EditableText';
-import { FiArrowRight, FiBookOpen, FiStar, FiChevronLeft, FiChevronRight, FiCheck, FiCalendar } from 'react-icons/fi';
+import { FiArrowRight, FiBookOpen, FiStar, FiCheck, FiCalendar } from 'react-icons/fi';
 import { useFirestoreDoc } from '../hooks/useFirestoreDoc';
 import { useFirestoreCollection } from '../hooks/useFirestoreCollection';
 import { subscribeToNewsletter } from '../utils/newsletter';
 import { where, orderBy, limit } from 'firebase/firestore';
 
 // ─── Color palette (Website_colours.pdf)
-// bg-white    → sections 1,2,4,6   bg-[#f0f1ff] → sections 3,5,8 (subtle blue-tint)
-// #3333FF / #2222CC → blue  |  #FF6600 / #CC5200 → orange  |  #111111 → text
+// bg-white    → sections 1,2,4,6   bg-[#ebf2f8] → sections 3,5,8 (subtle blue-tint)
+// #004B8D / #004B8D → blue  |  #004B8D / #CC5200 → orange  |  #111111 → text
 
 
 // ─── Animation variants ──────────────────────────────────────────────────────
@@ -36,8 +36,6 @@ export default function Home() {
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState({ message: '', type: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
 
   // ─── Helpers ───────────────────────────────────────────────────────────────
   const extractVideoId = (url) => {
@@ -56,10 +54,16 @@ export default function Home() {
 
   // ─── Firestore ─────────────────────────────────────────────────────────────
   const { data, loading } = useFirestoreDoc('content', 'home', {
-    hero_greeting: "Hey there! Meet",
+    hero_greeting: "PROFESSOR • RESEARCHER • AUTHOR",
+    hero_title: "Creating Happy Leaders",
     hero_name: "Prof. Vishal Gupta",
     hero_subtitle: "IIM Ahmedabad Professor. Researcher. Thought Leader.",
-    hero_description: "Leading expert in strategic management and organizational behavior. Prof. Gupta's research and teaching focus on helping leaders and organizations navigate complexity and drive sustainable growth.",
+    hero_description: "Professor in Organizational Behavior at the Indian Institute of Management Ahmedabad (IIMA)",
+    hero_credential1: "Fellow, IIM Lucknow",
+    hero_credential2: "B.E. (Hons.) EEE, BITS-Pilani",
+    hero_linkedin: "https://in.linkedin.com/in/vishal-gupta-iima",
+    hero_address: "502, Forum Tower, IIMA New Campus",
+    hero_phone: "+91-79-7152-4935",
     courses_heading: "Management Courses",
     course1_title: "The Science of Leadership",
     course1_description: "Master the art and science of leading high-performing teams in complex organizational environments.",
@@ -115,6 +119,10 @@ export default function Home() {
   ]);
   const trainingLogos = trainingLogosRaw?.sort((a, b) => (a.order || 0) - (b.order || 0)) || [];
 
+  const { data: booksData, loading: booksLoading } = useFirestoreCollection('books', [
+    where('published', '==', true)
+  ]);
+
   // ─── Newsletter ────────────────────────────────────────────────────────────
   const handleNewsletterSubmit = async (e) => {
     e.preventDefault();
@@ -129,29 +137,12 @@ export default function Home() {
     setIsSubmitting(false);
   };
 
-  // ─── Testimonial slider ────────────────────────────────────────────────────
-  const totalTestimonials = testimonials ? testimonials.length : 0;
-  const nextSlide = () => { if (totalTestimonials > 0) setCurrentSlide((p) => (p + 1) % totalTestimonials); };
-  const prevSlide = () => { if (totalTestimonials > 0) setCurrentSlide((p) => (p - 1 + totalTestimonials) % totalTestimonials); };
-
-  useEffect(() => {
-    if (!isPaused && totalTestimonials > 0) {
-      const interval = setInterval(nextSlide, 8000);
-      return () => clearInterval(interval);
-    }
-  }, [currentSlide, isPaused, totalTestimonials]);
-
-  useEffect(() => {
-    console.log('Testimonials data:', testimonials);
-    console.log('Testimonials count:', testimonials?.length || 0);
-  }, [testimonials]);
-
   // ─── Loading ───────────────────────────────────────────────────────────────
-  if (loading || blogsLoading || coursesLoading || testimonialsLoading || logosLoading) {
+  if (loading || blogsLoading || coursesLoading || testimonialsLoading || logosLoading || booksLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-gray-200 border-t-[#3333FF] rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-gray-200 border-t-[#004B8D] rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-lg font-['Inter'] text-gray-600">Loading...</p>
         </div>
       </div>
@@ -159,10 +150,19 @@ export default function Home() {
   }
 
   // ─── Blog fallback data ────────────────────────────────────────────────────
-  const recentBlogs = (blogs && blogs.length > 0) ? blogs : [
+  const homeBlogs = (blogs || []).filter(b => b.showOnHome);
+  const recentBlogs = homeBlogs.length > 0 ? homeBlogs : (blogs && blogs.length > 0) ? blogs : [
     { id: 'b1', title: data.blog1_title, excerpt: data.blog1_excerpt, imageUrl: data.blog1_image, date: '2026-02-01', slug: 'blog-1' },
     { id: 'b2', title: data.blog2_title, excerpt: data.blog2_excerpt, imageUrl: data.blog2_image, date: '2026-01-28', slug: 'blog-2' },
     { id: 'b3', title: data.blog3_title, excerpt: data.blog3_excerpt, imageUrl: data.blog3_image, date: '2026-01-15', slug: 'blog-3' },
+  ];
+
+  // ─── Books data ─────────────────────────────────────────────────────────────
+  const homeBooksList = (booksData || []).filter(b => b.showOnHome);
+  const staticBooksList = [
+    { tf: 'book1_title', df: 'book1_description', imgf: 'book1_image', linkf: 'book1_link', fb: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=600&fit=crop' },
+    { tf: 'book2_title', df: 'book2_description', imgf: 'book2_image', linkf: 'book2_link', fb: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=600&fit=crop' },
+    { tf: 'book3_title', df: 'book3_description', imgf: 'book3_image', linkf: 'book3_link', fb: 'https://images.unsplash.com/photo-1589998059171-988d887df646?w=400&h=600&fit=crop' },
   ];
 
   return (
@@ -171,39 +171,40 @@ export default function Home() {
       {/* ══════════════════════════════════════════════════════
           1. HERO
       ══════════════════════════════════════════════════════ */}
-<section 
-  className="min-h-screen grid lg:grid-cols-2 items-center px-4 sm:px-6 lg:px-16 py-8 sm:py-12 lg:py-16 bg-gradient-to-br from-white to-[#f0f1ff] relative" 
-  style={{ maxWidth: '100vw', boxSizing: 'border-box', overflowX: 'hidden' }}
->        {/* Decorative orb */}
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#3333FF]/5 rounded-full blur-3xl pointer-events-none -translate-y-1/4 translate-x-1/4" />
-
+      <section
+        className="min-h-screen grid lg:grid-cols-2 items-center px-4 sm:px-6 lg:px-16 pt-0 pb-12 relative overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #1a2d52 0%, #1e3461 40%, #162647 100%)' }}
+      >
         {/* Left: Text */}
-        <div className="space-y-4 sm:space-y-6 max-w-2xl relative z-10">
+        <div className="space-y-5 sm:space-y-6 max-w-2xl relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 45 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
           >
-            <div className="w-16 sm:w-20 h-1 bg-[#FF6600] mb-4 sm:mb-6 rounded-full" />
+            {/* Gold tag line */}
             <EditableText
               field="hero_greeting"
               defaultValue={data.hero_greeting}
-              className="text-base sm:text-lg font-['Inter'] text-gray-600 mb-2 sm:mb-4 block"
+              className="text-xs sm:text-sm font-['Inter'] font-semibold tracking-[0.25em] uppercase text-[#F5C400] mb-5 block"
             />
+            {/* Big white heading */}
+            <EditableText
+              field="hero_title"
+              defaultValue={data.hero_title || 'Creating Happy Leaders'}
+              className="text-4xl sm:text-5xl lg:text-[5rem] font-['Playfair_Display'] font-bold text-white leading-[1.05] mb-3 block"
+            />
+            {/* Gold name subtitle */}
             <EditableText
               field="hero_name"
               defaultValue={data.hero_name}
-              className="text-3xl sm:text-5xl lg:text-7xl font-['Playfair_Display'] font-bold text-[#000000] leading-tight mb-2 sm:mb-4 lg:mb-6 block"
+              className="text-xl sm:text-2xl lg:text-3xl font-['Playfair_Display'] text-[#F5C400] font-semibold mb-5 block"
             />
-            <EditableText
-              field="hero_subtitle"
-              defaultValue={data.hero_subtitle}
-              className="text-base sm:text-xl lg:text-2xl font-['Playfair_Display'] text-[#000000] font-semibold mb-3 sm:mb-6 lg:mb-8 block"
-            />
+            {/* Description */}
             <EditableText
               field="hero_description"
               defaultValue={data.hero_description}
-              className="text-sm sm:text-base lg:text-lg font-['Inter'] text-gray-600 leading-relaxed block"
+              className="text-sm sm:text-base lg:text-lg font-['Inter'] text-gray-300 leading-relaxed block mb-5"
               multiline={true}
             />
           </motion.div>
@@ -212,33 +213,44 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.7 }}
+            className="space-y-4"
           >
-            <Link to="/about">
-              <motion.button
-                whileHover={{ scale: 1.05, backgroundColor: '#2222CC' }}
-                whileTap={{ scale: 0.97 }}
-                transition={{ duration: 0.2 }}
-                className="bg-[#3333FF] px-8 py-4 font-['Inter'] font-bold text-white text-base rounded-md shadow-lg"
-              >
-                Learn More
-              </motion.button>
-            </Link>
+            {/* CTA Button */}
+            <div className="flex flex-wrap gap-3">
+              <Link to="/about">
+                <motion.button
+                  whileHover={{ scale: 1.05, backgroundColor: '#004B8D' }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ duration: 0.2 }}
+                  className="bg-[#F5C400] px-7 py-3.5 font-['Inter'] font-bold text-[#0B1628] text-sm rounded-md shadow-lg"
+                >
+                  Get in Touch
+                </motion.button>
+              </Link>
+            </div>
           </motion.div>
         </div>
 
-        {/* Right: Portrait */}
+        {/* Right: Square Portrait */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95, x: 30 }}
           animate={{ opacity: 1, scale: 1, x: 0 }}
           transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
-          className="relative mt-8 sm:mt-12 lg:mt-0 z-10"
+          className="relative mt-12 lg:mt-0 z-10 flex items-center justify-center"
         >
-          <div className="aspect-[3/4] max-w-lg mx-auto lg:ml-auto rounded-2xl overflow-hidden shadow-2xl bg-gray-200 border-4 border-[#FF6600]">
+          {/* Square portrait */}
+          <div
+            className="relative overflow-hidden rounded-2xl w-64 sm:w-80 lg:w-[400px]"
+            style={{
+              aspectRatio: '3/4',
+              boxShadow: '0 30px 60px rgba(0,0,0,0.5)',
+            }}
+          >
             <img
               src={data.hero_image || '/prof-gupta.jpg'}
               alt="Prof. Vishal Gupta"
-              className="w-full h-full object-cover"
-              onError={(e) => { e.target.src = 'https://via.placeholder.com/800x1000/cccccc/333333?text=Prof.+Vishal+Gupta'; }}
+              className="w-full h-full object-cover object-top"
+              onError={(e) => { e.target.src = 'https://via.placeholder.com/600x800/1a2d4f/ffffff?text=Prof.+Vishal+Gupta'; }}
             />
           </div>
         </motion.div>
@@ -247,10 +259,10 @@ export default function Home() {
       {/* ══════════════════════════════════════════════════════
           2. COURSES
       ══════════════════════════════════════════════════════ */}
-      <section id="courses" className="py-12 sm:py-16 px-4 sm:px-6 lg:px-16 bg-white">
+      <section id="courses" className="py-8 sm:py-10 px-4 sm:px-6 lg:px-16 bg-white">
         <div className="max-w-7xl mx-auto">
           <motion.div
-            className="text-center mb-12"
+            className="text-center mb-6"
             initial="hidden"
             whileInView="visible"
             viewport={viewportOptions}
@@ -259,9 +271,9 @@ export default function Home() {
             <EditableText
               field="courses_heading"
               defaultValue={data.courses_heading}
-              className="text-3xl sm:text-5xl lg:text-6xl font-['Playfair_Display'] font-bold text-[#111111] mb-4 block"
+              className="text-2xl sm:text-3xl lg:text-4xl font-['Playfair_Display'] font-bold text-[#111111] mb-3 block"
             />
-            <div className="w-24 h-1 bg-[#3333FF] rounded-full mx-auto" />
+            <div className="w-24 h-1 bg-[#004B8D] rounded-full mx-auto" />
           </motion.div>
 
           <motion.div
@@ -271,8 +283,8 @@ export default function Home() {
             viewport={viewportOptions}
             variants={staggerContainer}
           >
-            {courses && courses.length > 0 ? (
-              courses.slice(0, 2).map((course) => {
+            {courses && courses.filter(c => c.showOnHome).length > 0 ? (
+              courses.filter(c => c.showOnHome).map((course) => {
                 const videoId = course.youtubeUrl ? extractVideoId(course.youtubeUrl) : null;
                 const thumbnailUrl = course.thumbnail || (videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : null);
                 return (
@@ -281,12 +293,12 @@ export default function Home() {
                     variants={fadeInUp}
                     whileHover={{ scale: 1.02, y: -4 }}
                     transition={{ duration: 0.3 }}
-                    className="bg-[#f0f1ff] rounded-2xl p-8 flex flex-col shadow-md hover:shadow-2xl transition-all border-l-4 border-[#3333FF]"
+                    className="bg-[#ebf2f8] rounded-2xl p-5 flex flex-col shadow-md hover:shadow-2xl transition-all border-l-4 border-[#004B8D]"
                   >
-                    <h3 className="text-3xl lg:text-4xl font-['Playfair_Display'] font-bold text-[#111111] mb-4 leading-tight">
+                    <h3 className="text-xl lg:text-2xl font-['Playfair_Display'] font-bold text-[#111111] mb-2 leading-tight">
                       {course.title}
                     </h3>
-                    <p className="text-base font-['Inter'] text-gray-700 mb-6 leading-relaxed">{course.description}</p>
+                    <p className="text-sm font-['Inter'] text-gray-700 mb-4 leading-relaxed">{course.description}</p>
                     {thumbnailUrl && (
                       <div className="w-full mb-6">
                         <a href={course.youtubeUrl || '#'} target="_blank" rel="noopener noreferrer" className="block relative group">
@@ -304,8 +316,8 @@ export default function Home() {
                       </div>
                     )}
                     <motion.button
-                      whileHover={{ backgroundColor: '#2222CC' }}
-                      className="mt-auto px-6 py-3 bg-[#3333FF] text-white font-['Inter'] font-bold rounded-lg transition-colors shadow-md text-sm tracking-wide"
+                      whileHover={{ backgroundColor: '#004B8D' }}
+                      className="mt-auto px-6 py-3 bg-[#004B8D] text-white font-['Inter'] font-bold rounded-lg transition-colors shadow-md text-sm tracking-wide"
                     >
                       EXPLORE COURSE
                     </motion.button>
@@ -322,12 +334,12 @@ export default function Home() {
                   variants={fadeInUp}
                   whileHover={{ scale: 1.02, y: -4 }}
                   transition={{ duration: 0.3 }}
-                  className="bg-[#f0f1ff] rounded-2xl p-8 flex flex-col shadow-md hover:shadow-2xl transition-all border-l-4 border-[#3333FF]"
+                  className="bg-[#ebf2f8] rounded-2xl p-5 flex flex-col shadow-md hover:shadow-2xl transition-all border-l-4 border-[#004B8D]"
                 >
                   <EditableText field={c.titleF} defaultValue={data[c.titleF]}
-                    className="text-3xl lg:text-4xl font-['Playfair_Display'] font-bold text-[#111111] mb-4 leading-tight block" />
+                    className="text-xl lg:text-2xl font-['Playfair_Display'] font-bold text-[#111111] mb-2 leading-tight block" />
                   <EditableText field={c.descF} defaultValue={data[c.descF]}
-                    className="text-base font-['Inter'] text-gray-700 mb-6 leading-relaxed block" multiline />
+                    className="text-sm font-['Inter'] text-gray-700 mb-4 leading-relaxed block" multiline />
                   {data[c.ytF] && (() => {
                     const videoId = extractVideoId(data[c.ytF]);
                     return videoId ? (
@@ -348,8 +360,8 @@ export default function Home() {
                     ) : null;
                   })()}
                   <motion.button
-                    whileHover={{ backgroundColor: '#2222CC' }}
-                    className="mt-auto px-6 py-3 bg-[#3333FF] text-white font-['Inter'] font-bold rounded-lg transition-colors shadow-md text-sm tracking-wide"
+                    whileHover={{ backgroundColor: '#004B8D' }}
+                    className="mt-auto px-6 py-3 bg-[#004B8D] text-white font-['Inter'] font-bold rounded-lg transition-colors shadow-md text-sm tracking-wide"
                   >
                     EXPLORE COURSE
                   </motion.button>
@@ -363,7 +375,7 @@ export default function Home() {
       {/* ══════════════════════════════════════════════════════
           3. BLOGS
       ══════════════════════════════════════════════════════ */}
-      <section id="blog" className="py-12 sm:py-16 px-4 sm:px-6 lg:px-16 bg-[#f0f1ff]">
+      <section id="blog" className="py-12 sm:py-16 px-4 sm:px-6 lg:px-16 bg-[#ebf2f8]">
         <div className="max-w-7xl mx-auto">
 
           {/* Header */}
@@ -376,7 +388,7 @@ export default function Home() {
                   defaultValue={data.blog_heading}
                   className="text-3xl sm:text-5xl lg:text-6xl font-['Playfair_Display'] font-bold text-[#111111] block"
                 />
-                <div className="w-24 h-1 bg-[#3333FF] rounded-full mt-4" />
+                <div className="w-24 h-1 bg-[#004B8D] rounded-full mt-4" />
               </div>
             </div>
           </motion.div>
@@ -384,7 +396,7 @@ export default function Home() {
           {/* Recent Blogs sub-label */}
           <motion.div className="flex items-center gap-3 mb-8"
             initial="hidden" whileInView="visible" viewport={viewportOptions} variants={fadeInLeft}>
-            <div className="w-8 h-8 rounded-full bg-[#FF6600] flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 rounded-full bg-[#004B8D] flex items-center justify-center flex-shrink-0">
               <FiBookOpen size={14} className="text-white" />
             </div>
             <h3 className="text-lg sm:text-xl font-['Playfair_Display'] font-bold text-[#111111]">Recent Blogs</h3>
@@ -405,7 +417,7 @@ export default function Home() {
                 variants={fadeInUp}
                 whileHover={{ scale: 1.025, y: -5 }}
                 transition={{ duration: 0.3 }}
-                className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all border-l-4 border-[#3333FF] flex flex-col"
+                className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all border-l-4 border-[#004B8D] flex flex-col"
               >
                 {/* Image */}
                 <div className="h-44 bg-gray-200 overflow-hidden">
@@ -418,10 +430,10 @@ export default function Home() {
                 </div>
 
                 {/* Content */}
-                <div className="p-5 flex flex-col flex-1 hover:bg-[#f0f1ff] transition-colors">
+                <div className="p-5 flex flex-col flex-1 hover:bg-[#ebf2f8] transition-colors">
                   {blog.date && (
                     <div className="flex items-center gap-1.5 mb-2">
-                      <FiCalendar size={11} className="text-[#FF6600]" />
+                      <FiCalendar size={11} className="text-[#004B8D]" />
                       <p className="text-xs font-['Inter'] text-gray-500 tracking-wide uppercase">{formatDate(blog.date)}</p>
                     </div>
                   )}
@@ -433,7 +445,7 @@ export default function Home() {
                   </p>
                   <Link
                     to={blog.slug ? `/blog/${blog.slug}` : '#'}
-                    className="inline-flex items-center gap-2 text-[#3333FF] hover:text-[#2222CC] font-['Inter'] font-semibold text-sm transition-all group"
+                    className="inline-flex items-center gap-2 text-[#004B8D] hover:text-[#004B8D] font-['Inter'] font-semibold text-sm transition-all group"
                   >
                     Read More
                     <FiArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
@@ -450,9 +462,9 @@ export default function Home() {
           >
             <Link to="/blog">
               <motion.button
-                whileHover={{ scale: 1.05, backgroundColor: '#2222CC' }}
+                whileHover={{ scale: 1.05, backgroundColor: '#004B8D' }}
                 whileTap={{ scale: 0.97 }}
-                className="bg-[#3333FF] px-12 py-4 font-['Inter'] font-bold text-white text-base rounded-md shadow-lg transition-colors"
+                className="bg-[#004B8D] px-12 py-4 font-['Inter'] font-bold text-white text-base rounded-md shadow-lg transition-colors"
               >
                 My Blogs
               </motion.button>
@@ -462,223 +474,267 @@ export default function Home() {
       </section>
 
       {/* ══════════════════════════════════════════════════════
-          4. TESTIMONIALS
+          4. TESTIMONIALS — infinite scrolling strip
       ══════════════════════════════════════════════════════ */}
-      <section className="py-12 sm:py-16 bg-white relative">
-        {/* Decorative quote mark */}
-        <div className="absolute top-4 left-6 text-[160px] font-['Playfair_Display'] text-[#3333FF]/6 leading-none select-none pointer-events-none">"</div>
-        <div className="absolute bottom-0 right-6 text-[160px] font-['Playfair_Display'] text-[#3333FF]/6 leading-none select-none pointer-events-none rotate-180">"</div>
+      <section className="py-12 sm:py-16 bg-white overflow-hidden relative">
+        {/* CSS for marquee animations */}
+        <style>{`
+          @keyframes marquee-left {
+            0%   { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+          .testimonial-track-left {
+            display: flex;
+            width: max-content;
+            animation: marquee-left 40s linear infinite;
+          }
+          .testimonial-track-left:hover {
+            animation-play-state: paused;
+          }
+        `}</style>
 
-        <div
-          className="max-w-2xl mx-auto px-4 sm:px-6 relative"
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
-        >
-          {/* Label */}
-          <motion.div className="text-center mb-12"
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-10">
+          <motion.div className="text-center"
             initial="hidden" whileInView="visible" viewport={viewportOptions} variants={fadeInUp}>
             <div className="flex items-center justify-center gap-3 mb-3">
-              <div className="h-px w-10 bg-[#FF6600]" />
-              <FiStar className="text-[#FF6600]" size={14} />
-              <div className="h-px w-10 bg-[#FF6600]" />
+              <div className="h-px w-10 bg-[#004B8D]" />
+              <FiStar className="text-[#004B8D]" size={14} />
+              <div className="h-px w-10 bg-[#004B8D]" />
             </div>
             <h2 className="text-2xl sm:text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#111111] mb-2">What People Say</h2>
-            <div className="w-24 h-1 bg-[#3333FF] rounded-full mx-auto" />
+            <div className="w-24 h-1 bg-[#004B8D] rounded-full mx-auto" />
           </motion.div>
+        </div>
 
-          {/* Debug info when empty */}
-          {(!testimonials || testimonials.length === 0) && (
-            <div className="text-center py-4 mb-4">
-              <p className="text-[#3333FF] font-['Inter'] font-bold text-sm">
-                No testimonials found. Check console for details.
+        {(() => {
+          const allItems = testimonials && testimonials.length > 0 ? testimonials : [
+            { id: 'f1', quote: "I have to admit that I wasn't sure what would be involved with your course, but I consider myself very blessed to have been a part of it. The historical aspect of Mahabharata was fascinating by itself, and I enjoyed the way you incorporated the epic with current leadership practices.", author: "Colene Sassmann", role: "Class Participant 2023, MBA course", organization: "University of Northern Iowa" },
+            { id: 'f2', quote: "observing you from the sidelines, I learnt many things. Chief amongst them, your dhairya, humility and a steadfast bold vision. Your course and its reflections on the ego & self as a leader made a deep impression.", author: "Rupal Nayar", role: "Director, Industry & University Partnerships", organization: "Coursera" },
+            { id: 'f3', quote: "We thank you for conducting the session for the Principals of Delhi Public Schools. The session was rewarding and much appreciated by all participants.", author: "Vanita Sehgal", role: "Executive Director, HRDC", organization: "DPSS" },
+            { id: 'f4', quote: "Thank you for such wonderful mentor / coach / guide / teacher. I am really feeling happy to be your student. The way you put up the topic is so interesting, I am loving it.", author: "Vijay Vyas", role: "Group Head, HR", organization: "Rushil Decor Limited" },
+            { id: 'f5', quote: "Your classes were a real value addition in FDP course. Thank you for teaching us so patiently. You made a complicated course quite easy for us.", author: "Irfana Rashid", role: "FDP 2017 Participant", organization: "IIM Ahmedabad" },
+            { id: 'f6', quote: "Just wanted to thank you for the lecture today. It was, probably, the most important lecture that I ever attended.", author: "Kaustubh Korde", role: "PGPX 2018 Participant", organization: "IIM Ahmedabad" },
+          ];
+          // Duplicate for seamless loop
+          const row1 = [...allItems, ...allItems];
+
+          const Card = ({ t }) => (
+            <div className="flex-shrink-0 w-[320px] sm:w-[380px] mx-3 bg-white rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-[#004B8D] px-6 py-5">
+              <p className="text-sm sm:text-[0.9rem] font-['Playfair_Display'] italic text-gray-700 leading-relaxed mb-4 line-clamp-4">
+                "{t.quote}"
+              </p>
+              <div className="h-px bg-gray-100 mb-3" />
+              <p className="text-xs font-['Inter'] font-semibold text-[#004B8D]">— {t.author}</p>
+              <p className="text-xs font-['Inter'] text-gray-400 italic">
+                {t.role}{t.organization ? `, ${t.organization}` : ''}
               </p>
             </div>
-          )}
+          );
 
-          {testimonials && testimonials.length > 0 ? (
-            <div className="relative min-h-[300px] flex flex-col items-center justify-center">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={currentSlide}
-                  initial={{ opacity: 0, y: 24 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -24 }}
-                  transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-                  className="w-full"
-                >
-                  {/* Card */}
-                  <div className="bg-white rounded-xl shadow-lg px-5 sm:px-8 py-6 sm:py-8 border-l-4 border-[#3333FF] mb-6">
-                    <p className="text-sm sm:text-base lg:text-lg font-['Playfair_Display'] italic text-gray-700 leading-relaxed mb-6">
-                      "{testimonials[currentSlide]?.quote}"
-                    </p>
-                    <div className="h-px bg-gray-100 mb-5" />
-                    <p className="text-sm font-['Inter'] font-semibold text-[#3333FF] mb-1">
-                      — {testimonials[currentSlide]?.author}
-                    </p>
-                    <p className="text-xs font-['Inter'] text-gray-500 italic">
-                      {testimonials[currentSlide]?.role}
-                      {testimonials[currentSlide]?.organization ? `, ${testimonials[currentSlide].organization}` : ''}
-                    </p>
-                  </div>
-                </motion.div>
-              </AnimatePresence>
-
-              {/* Navigation */}
-              {testimonials.length > 1 && (
-                <div className="flex items-center gap-3 mt-2">
-                  <button onClick={prevSlide}
-                    className="bg-white/90 hover:bg-white text-[#111111] p-2.5 rounded-full shadow-md transition-all hover:scale-110">
-                    <FiChevronLeft size={20} strokeWidth={2.5} />
-                  </button>
-                  {testimonials.map((_, i) => (
-                    <button key={i} onClick={() => setCurrentSlide(i)}
-                      className={`h-2 rounded-full transition-all duration-300 ${i === currentSlide ? 'bg-[#3333FF] w-6' : 'bg-[#3333FF]/30 hover:bg-[#3333FF]/60 w-2'}`}
-                    />
-                  ))}
-                  <button onClick={nextSlide}
-                    className="bg-white/90 hover:bg-white text-[#111111] p-2.5 rounded-full shadow-md transition-all hover:scale-110">
-                    <FiChevronRight size={20} strokeWidth={2.5} />
-                  </button>
+          return (
+            <div className="flex flex-col gap-5">
+              {/* Row 1 — scrolls left */}
+              <div className="overflow-hidden">
+                <div className="testimonial-track-left">
+                  {row1.map((t, i) => <Card key={`r1-${i}`} t={t} />)}
                 </div>
-              )}
-            </div>
-          ) : (
-            // Fallback
-            <div className="flex flex-col items-center">
-              <div className="bg-white rounded-xl shadow-lg px-8 py-8 border-l-4 border-[#3333FF] max-w-xl mx-auto">
-                <p className="text-base lg:text-lg font-['Playfair_Display'] italic text-gray-700 leading-relaxed mb-6">
-                  "I have to admit that I wasn't sure what would be involved with your course, but I consider myself very blessed to have been a part of it. The historical aspect of Mahabharata was fascinating by itself, and I enjoyed the way you incorporated the epic with current leadership practices. Thank you very much for this unique opportunity!"
-                </p>
-                <div className="h-px bg-gray-100 mb-5" />
-                <p className="text-sm font-['Inter'] font-semibold text-[#3333FF] mb-1">— Colene Sassmann</p>
-                <p className="text-xs font-['Inter'] text-gray-500 italic">Class Participant 2023, MBA course, University of Northern Iowa</p>
               </div>
             </div>
-          )}
-        </div>
+          );
+        })()}
       </section>
 
       {/* ══════════════════════════════════════════════════════
-          5. TRAININGS DELIVERED
+          5. TRAININGS DELIVERED — auto-sliding logos
       ══════════════════════════════════════════════════════ */}
-      <section className="py-12 sm:py-16 bg-[#f0f1ff]">
+      <section className="py-12 sm:py-16 bg-[#ebf2f8] overflow-hidden">
+        <style>{`
+          @keyframes logos-scroll {
+            0%   { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+          .logos-track {
+            display: flex;
+            align-items: center;
+            width: max-content;
+            animation: logos-scroll 30s linear infinite;
+          }
+          .logos-track:hover { animation-play-state: paused; }
+        `}</style>
+
         <motion.div
-          className="max-w-7xl mx-auto px-4 sm:px-6 text-center mb-12"
+          className="max-w-7xl mx-auto px-4 sm:px-6 text-center mb-10"
           initial="hidden" whileInView="visible" viewport={viewportOptions} variants={fadeInUp}
         >
           <h2 className="text-3xl sm:text-5xl lg:text-6xl font-['Playfair_Display'] font-bold text-[#111111] mb-4">
             Trainings Delivered For
           </h2>
-          <div className="w-24 h-1 bg-[#FF6600] rounded-full mx-auto mb-6" />
+          <div className="w-24 h-1 bg-[#004B8D] rounded-full mx-auto mb-6" />
           <p className="text-sm sm:text-base text-gray-600 font-['Inter'] max-w-3xl mx-auto">
             From leading academic institutions to global corporations, Prof. Gupta has delivered transformative training programs.
           </p>
         </motion.div>
 
-        <motion.div
-          className="max-w-7xl mx-auto px-4 sm:px-6"
-          initial="hidden" whileInView="visible" viewport={viewportOptions} variants={staggerContainer}
-        >
-          {trainingLogos && trainingLogos.length > 0 ? (
-            <div className="flex flex-wrap justify-center items-center gap-8 lg:gap-12">
-              {trainingLogos.map((logo) => (
-                <motion.div key={logo.id} variants={fadeInUp} whileHover={{ scale: 1.08 }}
-                  className="flex items-center justify-center h-16 lg:h-20 px-5 py-3 bg-white rounded-lg shadow-sm border border-gray-200 hover:bg-[#f0f1ff] transition-colors">
-                  <img src={logo.logoUrl} alt={logo.name}
-                    className="max-h-full w-auto object-contain" style={{ maxWidth: '160px' }}
-                    onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }} />
-                  <span className="font-['Inter'] font-bold text-gray-700 text-center hidden">{logo.name}</span>
-                </motion.div>
-              ))}
+        {(() => {
+          const logoItems = trainingLogos && trainingLogos.length > 0 ? trainingLogos : [
+            { id: 'f1', name: 'IIM Ahmedabad', logoUrl: '' },
+            { id: 'f2', name: 'Coursera', logoUrl: '' },
+            { id: 'f3', name: 'Delhi Public Schools', logoUrl: '' },
+            { id: 'f4', name: 'Rushil Decor', logoUrl: '' },
+            { id: 'f5', name: 'University of Northern Iowa', logoUrl: '' },
+            { id: 'f6', name: 'University of Mumbai', logoUrl: '' },
+            { id: 'f7', name: 'ISRO', logoUrl: '' },
+            { id: 'f8', name: 'Larsen & Toubro', logoUrl: '' },
+          ];
+          const doubled = [...logoItems, ...logoItems];
+
+          return (
+            <div className="overflow-hidden">
+              <div className="logos-track">
+                {doubled.map((logo, i) => (
+                  <div key={`logo-${i}`}
+                    className="flex-shrink-0 flex items-center justify-center h-16 lg:h-20 px-6 py-3 mx-3 bg-white rounded-lg shadow-sm border border-gray-200 hover:bg-white transition-colors"
+                    style={{ maxWidth: '140px' }}
+                  >
+                    {logo.logoUrl ? (
+                      <>
+                        <img src={logo.logoUrl} alt={logo.name}
+                          className="max-h-full w-auto object-contain"
+                          onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }} />
+                        <span className="font-['Inter'] font-bold text-gray-700 text-center hidden text-sm">{logo.name}</span>
+                      </>
+                    ) : (
+                      <span className="font-['Inter'] font-bold text-gray-700 text-center text-sm lg:text-base whitespace-nowrap">{logo.name}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
-          ) : (
-            <div className="flex flex-wrap justify-center items-center gap-6 lg:gap-10">
-              {['IIM Ahmedabad', 'Coursera', 'Delhi Public Schools', 'Rushil Decor', 'University of Northern Iowa', 'University of Mumbai'].map((name) => (
-                <motion.div key={name} variants={fadeInUp} whileHover={{ scale: 1.06 }}
-                  className="flex items-center justify-center h-14 px-6 py-3 bg-white rounded-lg shadow-sm border border-gray-200 hover:bg-[#f0f1ff] transition-colors">
-                  <span className="font-['Inter'] font-bold text-gray-700 text-center text-sm lg:text-base">{name}</span>
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </motion.div>
+          );
+        })()}
       </section>
 
       {/* ══════════════════════════════════════════════════════
           6. BOOKS
       ══════════════════════════════════════════════════════ */}
-      <section id="books" className="py-16 sm:py-24 px-4 sm:px-6 lg:px-16 bg-white">
+      <section id="books" className="py-8 sm:py-10 px-4 sm:px-6 lg:px-16 bg-white">
         <div className="max-w-7xl mx-auto">
-          <motion.div className="text-center mb-16"
-            initial="hidden" whileInView="visible" viewport={viewportOptions} variants={fadeInUp}>
+          <motion.div className="text-center mb-8"
+            initial="hidden" whileInView="visible" viewport={viewportOptions} variants={fadeInUp}
+          >
             <EditableText
               field="books_heading"
               defaultValue={data.books_heading}
-              className="text-3xl sm:text-5xl lg:text-6xl font-['Playfair_Display'] font-bold text-[#111111] block mb-4"
+              className="text-2xl sm:text-3xl lg:text-4xl font-['Playfair_Display'] font-bold text-[#111111] block mb-3"
             />
-            <div className="w-24 h-1 bg-[#3333FF] rounded-full mx-auto" />
+            <div className="w-24 h-1 bg-[#004B8D] rounded-full mx-auto" />
           </motion.div>
 
           <motion.div
-            className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto"
+            className="grid md:grid-cols-3 gap-5 max-w-4xl mx-auto"
             initial="hidden" whileInView="visible" viewport={viewportOptions} variants={staggerContainer}
           >
-            {[
-              { tf: 'book1_title', df: 'book1_description', imgf: 'book1_image', linkf: 'book1_link', fb: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=600&fit=crop' },
-              { tf: 'book2_title', df: 'book2_description', imgf: 'book2_image', linkf: 'book2_link', fb: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=400&h=600&fit=crop' },
-              { tf: 'book3_title', df: 'book3_description', imgf: 'book3_image', linkf: 'book3_link', fb: 'https://images.unsplash.com/photo-1589998059171-988d887df646?w=400&h=600&fit=crop' },
-            ].map((book, i) => (
-              <motion.div
-                key={i}
-                variants={fadeInUp}
-                whileHover={{ y: -8 }}
-                transition={{ duration: 0.3 }}
-                className="group flex flex-col bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-[#3333FF]/30"
-              >
-                {/* Book Cover Image */}
-                <div className="relative overflow-hidden bg-gray-100" style={{ aspectRatio: '3/4' }}>
-                  <img
-                    src={data[book.imgf] || book.fb}
-                    alt="Book cover"
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    onError={(e) => { e.target.src = 'https://via.placeholder.com/600x800/e6e8ff/2A35CC?text=Book'; }}
-                  />
-                  {/* Overlay gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                </div>
+            {homeBooksList.length > 0 ? (
+              /* ── Firestore books with showOnHome == true ── */
+              homeBooksList.map((book) => (
+                <motion.div
+                  key={book.id}
+                  variants={fadeInUp}
+                  whileHover={{ y: -8 }}
+                  transition={{ duration: 0.3 }}
+                  className="group flex flex-col bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-[#004B8D]/30"
+                >
+                  <div className="relative overflow-hidden bg-gray-100" style={{ aspectRatio: '3/4' }}>
+                    <img
+                      src={book.coverUrl || 'https://via.placeholder.com/600x800/e6e8ff/2A35CC?text=Book'}
+                      alt={book.title}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      onError={(e) => { e.target.src = 'https://via.placeholder.com/600x800/e6e8ff/2A35CC?text=Book'; }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                  <div className="flex flex-col flex-1 p-4">
+                    <h3 className="text-sm sm:text-base font-['Playfair_Display'] font-bold text-[#111111] mb-1 leading-snug">{book.title}</h3>
+                    {book.authors && <p className="text-xs font-['Inter'] text-gray-500 mb-1">{book.authors}</p>}
+                    {book.year && <p className="text-xs font-['Inter'] text-[#004B8D] font-semibold mb-2">{book.year} · {book.publisher}</p>}
+                    <div className="w-10 h-0.5 bg-[#004B8D] rounded-full mb-2" />
+                    <div className="flex-1" />
+                    <motion.a
+                      href={book.amazonLink || 'https://www.amazon.in'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      whileHover={{ scale: 1.03, backgroundColor: '#004B8D' }}
+                      whileTap={{ scale: 0.97 }}
+                      className="w-full text-center bg-[#004B8D] hover:bg-[#004B8D] text-white px-6 py-3 font-['Inter'] font-bold text-sm rounded-lg transition-colors shadow-md flex items-center justify-center gap-2 mt-auto"
+                    >
+                      Buy on Amazon
+                      <FiArrowRight size={14} />
+                    </motion.a>
+                  </div>
+                </motion.div>
+              ))
+            ) : (
+              /* ── Static fallback books from home content doc ── */
+              staticBooksList.map((book, i) => (
+                <motion.div
+                  key={i}
+                  variants={fadeInUp}
+                  whileHover={{ y: -8 }}
+                  transition={{ duration: 0.3 }}
+                  className="group flex flex-col bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 border border-gray-100 hover:border-[#004B8D]/30"
+                >
+                  <div className="relative overflow-hidden bg-gray-100" style={{ aspectRatio: '3/4' }}>
+                    <img
+                      src={data[book.imgf] || book.fb}
+                      alt="Book cover"
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      onError={(e) => { e.target.src = 'https://via.placeholder.com/600x800/e6e8ff/2A35CC?text=Book'; }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  </div>
+                  <div className="flex flex-col flex-1 p-4">
+                    <EditableText
+                      field={book.tf}
+                      defaultValue={data[book.tf]}
+                      className="text-sm sm:text-base font-['Playfair_Display'] font-bold text-[#111111] mb-2 block leading-snug"
+                    />
+                    <div className="w-10 h-0.5 bg-[#004B8D] rounded-full mb-2" />
+                    <EditableText
+                      field={book.df}
+                      defaultValue={data[book.df]}
+                      className="text-xs font-['Inter'] text-gray-500 leading-relaxed block flex-1 mb-4"
+                      multiline={true}
+                    />
+                    <motion.a
+                      href={data[book.linkf] || 'https://www.amazon.in'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      whileHover={{ scale: 1.03, backgroundColor: '#004B8D' }}
+                      whileTap={{ scale: 0.97 }}
+                      className="w-full text-center bg-[#004B8D] hover:bg-[#004B8D] text-white px-6 py-3 font-['Inter'] font-bold text-sm rounded-lg transition-colors shadow-md flex items-center justify-center gap-2 mt-auto"
+                    >
+                      Buy on Amazon
+                      <FiArrowRight size={14} />
+                    </motion.a>
+                  </div>
+                </motion.div>
+              ))
+            )}
+          </motion.div>
 
-                {/* Card Content — flex-1 so all cards stretch equally */}
-                <div className="flex flex-col flex-1 p-6">
-                  {/* Title */}
-                  <EditableText
-                    field={book.tf}
-                    defaultValue={data[book.tf]}
-                    className="text-lg sm:text-xl font-['Playfair_Display'] font-bold text-[#111111] mb-3 block leading-snug"
-                  />
-                  {/* Blue accent line */}
-                  <div className="w-10 h-0.5 bg-[#3333FF] rounded-full mb-3" />
-                  {/* Description — flex-1 pushes button to bottom */}
-                  <EditableText
-                    field={book.df}
-                    defaultValue={data[book.df]}
-                    className="text-sm font-['Inter'] text-gray-500 leading-relaxed block flex-1 mb-6"
-                    multiline={true}
-                  />
-                  {/* Button — always at bottom */}
-                  <motion.a
-                    href={data[book.linkf] || 'https://www.amazon.in'}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    whileHover={{ scale: 1.03, backgroundColor: '#2222CC' }}
-                    whileTap={{ scale: 0.97 }}
-                    className="w-full text-center bg-[#3333FF] hover:bg-[#2222CC] text-white px-6 py-3 font-['Inter'] font-bold text-sm rounded-lg transition-colors shadow-md flex items-center justify-center gap-2 mt-auto"
-                  >
-                    Buy on Amazon
-                    <FiArrowRight size={14} />
-                  </motion.a>
-                </div>
-              </motion.div>
-            ))}
+          {/* Link to all books */}
+          <motion.div className="text-center mt-8"
+            initial="hidden" whileInView="visible" viewport={viewportOptions} variants={fadeInUp}
+          >
+            <Link to="/book">
+              <motion.button
+                whileHover={{ scale: 1.05, backgroundColor: '#004B8D' }}
+                whileTap={{ scale: 0.97 }}
+                className="bg-[#004B8D] px-12 py-4 font-['Inter'] font-bold text-white text-base rounded-md shadow-lg transition-colors"
+              >
+                All Books
+              </motion.button>
+            </Link>
           </motion.div>
         </div>
       </section>
@@ -688,11 +744,11 @@ export default function Home() {
       ══════════════════════════════════════════════════════ */}
       <section id="contact" className="grid lg:grid-cols-2 min-h-[600px]">
         <motion.div
-          className="bg-[#f0f1ff] p-6 sm:p-12 lg:p-20 flex flex-col justify-center items-start order-2 lg:order-1 relative overflow-hidden border-l-4 border-[#FF6600]"
+          className="bg-[#ebf2f8] p-6 sm:p-12 lg:p-20 flex flex-col justify-center items-start order-2 lg:order-1 relative overflow-hidden border-l-4 border-[#004B8D]"
           initial="hidden" whileInView="visible" viewport={viewportOptions} variants={fadeInLeft}
         >
-          <div className="absolute top-0 left-0 w-64 h-64 bg-[#FF6600]/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
-          <div className="w-20 h-1 bg-[#FF6600] mb-6 rounded-full" />
+          <div className="absolute top-0 left-0 w-64 h-64 bg-[#004B8D]/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+          <div className="w-20 h-1 bg-[#004B8D] mb-6 rounded-full" />
           <EditableText
             field="speaking_heading"
             defaultValue={data.speaking_heading}
@@ -709,7 +765,7 @@ export default function Home() {
             target="_blank"
             rel="noopener noreferrer"
             whileHover={{ scale: 1.04, backgroundColor: '#CC5200' }}
-            className="relative z-10 inline-block bg-[#FF6600] hover:bg-[#FF6600] text-white px-10 py-4 font-['Inter'] font-bold text-base rounded-md shadow-lg transition-colors"
+            className="relative z-10 inline-block bg-[#004B8D] hover:bg-[#004B8D] text-white px-10 py-4 font-['Inter'] font-bold text-base rounded-md shadow-lg transition-colors"
           >
             Digital Avatar
           </motion.a>
@@ -736,7 +792,7 @@ export default function Home() {
           <motion.div
             initial="hidden" whileInView="visible" viewport={viewportOptions} variants={fadeInLeft}
           >
-            <div className="w-12 h-1 bg-[#FF6600] mb-5 rounded-full" />
+            <div className="w-12 h-1 bg-[#004B8D] mb-5 rounded-full" />
             <EditableText
                 field="newsletter_heading"
                 defaultValue={data.newsletter_heading}
@@ -761,14 +817,14 @@ export default function Home() {
                   placeholder="Your email address"
                   required
                   disabled={isSubmitting}
-                  className="flex-1 px-5 py-4 border-2 border-gray-300 rounded-md font-['Inter'] bg-white focus:outline-none focus:border-[#3333FF] transition-colors disabled:opacity-50"
+                  className="flex-1 px-5 py-4 border-2 border-gray-300 rounded-md font-['Inter'] bg-white focus:outline-none focus:border-[#004B8D] transition-colors disabled:opacity-50"
                 />
                 <motion.button
                   type="submit"
                   disabled={isSubmitting}
-                  whileHover={{ backgroundColor: '#2222CC' }}
+                  whileHover={{ backgroundColor: '#004B8D' }}
                   whileTap={{ scale: 0.97 }}
-                  className="bg-[#3333FF] px-10 py-4 font-['Inter'] font-bold text-white text-base rounded-md transition-colors shadow-md whitespace-nowrap disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="bg-[#004B8D] px-10 py-4 font-['Inter'] font-bold text-white text-base rounded-md transition-colors shadow-md whitespace-nowrap disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   {isSubmitting ? (
                     <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>Subscribing...</>

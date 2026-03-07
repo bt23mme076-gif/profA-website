@@ -2,7 +2,16 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const admin = require('firebase-admin');
+const nodemailer = require('nodemailer');
 require('dotenv').config();
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD
+  }
+});
 
 // Initialize Firebase Admin
 try {
@@ -118,7 +127,7 @@ app.post('/api/newsletter/subscribe', async (req, res) => {
     }
 
     // Check if email already exists
-    const existingSubscriber = await db.collection('newsletterSubscribers')
+    const existingSubscriber = await db.collection('newsletter_subscribers')
       .where('email', '==', email)
       .limit(1)
       .get();
@@ -136,7 +145,7 @@ app.post('/api/newsletter/subscribe', async (req, res) => {
       status: 'active'
     };
 
-    const docRef = await db.collection('newsletterSubscribers').add(subscriberData);
+    const docRef = await db.collection('newsletter_subscribers').add(subscriberData);
     console.log('Newsletter subscriber saved with ID:', docRef.id);
     
     res.json({ 
@@ -149,6 +158,84 @@ app.post('/api/newsletter/subscribe', async (req, res) => {
     console.error('Newsletter subscription error:', error);
     res.status(500).json({ error: 'Failed to subscribe' });
   }
+});
+
+// Newsletter send route
+app.post('/api/newsletter/send', async (req, res) => {
+  const { subject, body, subscribers } = req.body;
+
+  if (!subject || !body || !subscribers?.length) {
+    return res.status(400).json({ error: 'Missing required fields: subject, body, subscribers' });
+  }
+
+  // Wrap body in a fully branded HTML email template
+  const htmlTemplate = (content) => `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${subject}</title>
+</head>
+<body style="margin:0;padding:0;background:#f4f4f4;font-family:'Segoe UI',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:30px 0;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+          <!-- Header -->
+          <tr>
+            <td style="background:#004B8D;padding:28px 36px;text-align:center;">
+              <p style="margin:0;color:#ffffff;font-size:13px;letter-spacing:2px;text-transform:uppercase;font-weight:600;">IIM Ahmedabad</p>
+              <h1 style="margin:6px 0 0;color:#ffffff;font-size:24px;font-weight:700;">Prof. Vishal Gupta</h1>
+              <p style="margin:4px 0 0;color:rgba(255,255,255,0.75);font-size:13px;">Professor of Organizational Behavior</p>
+            </td>
+          </tr>
+          <!-- Orange accent bar -->
+          <tr><td style="height:4px;background:#f97316;"></td></tr>
+          <!-- Body -->
+          <tr>
+            <td style="padding:36px;color:#333333;font-size:15px;line-height:1.7;">
+              ${content}
+            </td>
+          </tr>
+          <!-- Divider -->
+          <tr><td style="padding:0 36px;"><hr style="border:none;border-top:1px solid #e5e5e5;margin:0;" /></td></tr>
+          <!-- Footer -->
+          <tr>
+            <td style="padding:24px 36px;text-align:center;color:#999;font-size:12px;line-height:1.6;">
+              <p style="margin:0 0 8px;">You are receiving this because you subscribed at <strong>iima-professor.com</strong></p>
+              <p style="margin:0;">Prof. Vishal Gupta · IIM Ahmedabad · Vastrapur, Ahmedabad 380015</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+  const sent = [];
+  const failed = [];
+
+  for (const email of subscribers) {
+    try {
+      await transporter.sendMail({
+        from: `"Prof. Vishal Gupta | IIM Ahmedabad" <${process.env.GMAIL_USER}>`,
+        to: email,
+        subject: subject,
+        html: htmlTemplate(body),
+        // Plain text fallback (strip HTML tags)
+        text: body.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim()
+      });
+      sent.push(email);
+      console.log(`Newsletter sent to: ${email}`);
+    } catch (err) {
+      console.error(`Failed to send to ${email}:`, err.message);
+      failed.push({ email, error: err.message });
+    }
+  }
+
+  console.log(`Newsletter: ${sent.length} sent, ${failed.length} failed`);
+  res.json({ success: true, sent: sent.length, failed: failed.length, failedList: failed });
 });
 
 // Health check endpoint

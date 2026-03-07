@@ -10,6 +10,7 @@ import Research from './pages/Research';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import Blog from './pages/Blog';
+import BlogPost from './pages/BlogPost';
 import Books from './pages/book';
 
 
@@ -28,6 +29,7 @@ function App() {
            <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/book" element={<Books />} />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
         </Routes>
         <Footer />
       </Router>

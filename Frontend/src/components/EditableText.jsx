@@ -97,7 +97,7 @@ export default function EditableText({
       onMouseLeave={() => !isEditing && setShowEditIcon(false)}
     >
       {!isEditing ? (
-        <div className="relative cursor-pointer border border-transparent hover:border-blue-400/30 transition-all rounded px-1">
+        <div className="relative cursor-pointer border border-transparent hover:border-[#004B8D]/30 transition-all rounded px-1">
           {multiline ? (
             <p className={className}>{defaultValue}</p>
           ) : (

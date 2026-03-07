@@ -1,7 +1,17 @@
 import { motion } from 'framer-motion';
 import { FiExternalLink, FiCalendar, FiClock, FiMapPin, FiTarget } from 'react-icons/fi';
+import { useAuth } from '../context/AuthContext';
+import { useFirestoreDoc } from '../hooks/useFirestoreDoc';
+import EditableText from '../components/EditableText';
 
 export default function Trainings() {
+  const { isAdmin } = useAuth() || {};
+  const { data: pageData } = useFirestoreDoc('content', 'trainings', {
+    page_heading: 'Executive Training Programs',
+    page_subtitle: 'By Prof. Vishal Gupta',
+    page_description: 'Transform your leadership journey with world-class executive education programs from IIM Ahmedabad',
+  });
+
   const programs = [
     {
       id: 'leap-emb',
@@ -19,7 +29,7 @@ export default function Trainings() {
         'Leading Change & Transformation',
         'Networking with Industry Leaders'
       ],
-      color: 'from-[#2A35CC] to-[#1f2a99]'
+      color: 'from-[#004B8D] to-[#003870]'
     },
     {
       id: 'heal',
@@ -55,14 +65,14 @@ export default function Trainings() {
         'Sustainable Business Practices',
         'Global Business Perspectives'
       ],
-      color: 'from-[#2A35CC] to-[#1f2a99]'
+      color: 'from-[#004B8D] to-[#003870]'
     }
   ];
 
   return (
-    <div className="min-h-screen bg-white pt-20">
+    <div className="bg-white">
       {/* Header Section */}
-      <section className="py-20 bg-gradient-to-br from-[#fff7ed] to-white border-b-4 border-[#f97316]">
+      <section className="bg-gradient-to-br from-[#dce8f5] to-[#fff7ed] py-20 px-6 lg:px-16">
         <div className="max-w-7xl mx-auto px-6 lg:px-16">
           <motion.div
             initial={{ opacity: 0.85, y: 8 }}
@@ -70,21 +80,41 @@ export default function Trainings() {
             transition={{ duration: 0.35 }}
             className="text-center"
           >
-            <h1 className="text-5xl lg:text-6xl font-['Playfair_Display'] font-bold text-gray-900 mb-6">
-              Executive Training Programs
+            <div className="w-20 h-1 bg-[#f97316] mb-8 rounded-full mx-auto"></div>
+            <h1 className="text-5xl lg:text-6xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-6">
+              <EditableText
+                collection="content"
+                docId="trainings"
+                field="page_heading"
+                defaultValue={pageData?.page_heading || 'Executive Training Programs'}
+                className="text-5xl lg:text-6xl font-['Playfair_Display'] font-bold text-[#1a1a1a]"
+              />
             </h1>
-            <p className="text-xl lg:text-2xl text-[#2A35CC] font-['Inter'] max-w-3xl mx-auto">
-              By Prof. Vishal Gupta
+            <p className="text-xl lg:text-2xl text-[#004B8D] font-['Inter'] max-w-3xl mx-auto">
+              <EditableText
+                collection="content"
+                docId="trainings"
+                field="page_subtitle"
+                defaultValue={pageData?.page_subtitle || 'By Prof. Vishal Gupta'}
+                className="text-xl lg:text-2xl text-[#004B8D] font-['Inter']"
+              />
             </p>
             <p className="text-lg text-gray-600 font-['Inter'] max-w-4xl mx-auto mt-6">
-              Transform your leadership journey with world-class executive education programs from IIM Ahmedabad
+              <EditableText
+                collection="content"
+                docId="trainings"
+                field="page_description"
+                defaultValue={pageData?.page_description || 'Transform your leadership journey with world-class executive education programs from IIM Ahmedabad'}
+                className="text-lg text-gray-600 font-['Inter']"
+                multiline
+              />
             </p>
           </motion.div>
         </div>
       </section>
 
       {/* Programs Section */}
-      <section className="py-20 px-6 lg:px-16 bg-gradient-to-b from-white to-[#fff7ed]">
+      <section className="py-20 px-6 lg:px-16 bg-[#faf8f5]">
         <div className="max-w-7xl mx-auto">
           <div className="space-y-16">
             {programs.map((program, index) => (
@@ -168,7 +198,7 @@ export default function Trainings() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-br from-[#2A35CC] to-[#1f2a99] text-white">
+      <section className="py-16 bg-gradient-to-br from-[#004B8D] to-[#003870] text-white">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-3xl lg:text-4xl font-['Playfair_Display'] font-bold mb-4">
             Ready to Transform Your Leadership?
@@ -178,7 +208,7 @@ export default function Trainings() {
           </p>
           <a
             href="#contact"
-            className="inline-block px-8 py-4 bg-white text-[#2A35CC] font-['Inter'] font-semibold rounded-lg shadow-lg hover:shadow-xl hover:bg-gray-50 transition-all duration-300"
+            className="inline-block px-8 py-4 bg-white text-[#004B8D] font-['Inter'] font-semibold rounded-lg shadow-lg hover:shadow-xl hover:bg-gray-50 transition-all duration-300"
           >
             Get in Touch
           </a>
