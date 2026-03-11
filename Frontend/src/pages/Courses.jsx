@@ -38,12 +38,23 @@ export default function Courses() {
     conditional_desc: 'A comprehensive three-video series explaining mediation, moderation, and conditional process analysis with practical dataset examples.',
     manuscript_title: 'Manuscript Writing & Publishing',
     manuscript_desc: 'A 16-session series covering elements of manuscript writing and strategies for high-quality academic publishing. Includes instruction files and supplementary readings.',
+    multilevel_drive: 'https://drive.google.com/drive/folders/1GTHqiJX1sEjSuVlhBmR_Z5DETrUwIHGd',
+    multilevel_youtube: '',
+    sem_drive: '',
+    sem_youtube: '',
+    psychometrics_drive: 'https://drive.google.com/drive/folders/',
+    psychometrics_youtube: '',
+    conditional_drive: 'https://drive.google.com/file/d/1Ih2WCnyC64mESIKByOIOYAmkCioAGiTO/view?usp=sharing',
+    conditional_youtube: '',
+    manuscript_drive: 'https://drive.google.com/drive/folders/',
+    manuscript_youtube: '',
     cta_heading: 'Ready to Start Learning?',
     cta_subtitle: 'Explore our courses and begin your journey toward personal and professional excellence.',
   });
   const [showAddCourse, setShowAddCourse] = useState(false);
   const [editingCourse, setEditingCourse] = useState(null);
   const [homeOverrides, setHomeOverrides] = useState({});
+  const [showAddResearch, setShowAddResearch] = useState(false);
 
   const fadeInUp = {
     hidden: { opacity: 0, y: 20 },
@@ -67,6 +78,9 @@ export default function Courses() {
     where('published', '==', true)
   ], true);
 
+  // Fetch dynamic research courses
+  const { data: researchCourses, loading: researchLoading } = useFirestoreCollection('researchCourses', [], true);
+
   // Helper function to extract YouTube video ID from various URL formats
   const extractVideoId = (url) => {
     if (!url) return null;
@@ -87,6 +101,30 @@ export default function Courses() {
     } catch (error) {
       console.error('Error adding course:', error);
       alert('Failed to add course');
+    }
+  };
+
+  const addResearchCourse = async (newCourse) => {
+    try {
+      await addDoc(collection(db, 'researchCourses'), {
+        ...newCourse,
+        createdAt: new Date()
+      });
+      setShowAddResearch(false);
+      alert('Research course added successfully!');
+    } catch (error) {
+      console.error('Error adding research course:', error);
+      alert('Failed to add research course');
+    }
+  };
+
+  const deleteResearchCourse = async (id) => {
+    if (!window.confirm('Delete this research course?')) return;
+    try {
+      await deleteDoc(doc(db, 'researchCourses', id));
+    } catch (error) {
+      console.error('Error deleting research course:', error);
+      alert('Failed to delete research course');
     }
   };
 
@@ -166,29 +204,49 @@ export default function Courses() {
     </motion.div>
   );
 
-  const ResearchLecture = ({ title, description, driveLink }) => (
+  const ResearchLecture = ({ title, description, driveLink, youtubeLink, driveField, youtubeField }) => (
     <motion.div
       initial="hidden"
       whileInView="visible"
       viewport={viewportOptions}
       variants={fadeInUp}
-      className="bg-gradient-to-br from-[#fff7ed] to-white p-6 rounded-xl shadow-md hover:shadow-xl transition-shadow border-l-4 border-[#f97316]"
+      className="bg-gradient-to-br from-[#fff7ed] to-white p-6 rounded-xl shadow-md hover:shadow-xl transition-shadow border-l-4 border-[#f97316] flex flex-col"
     >
       <div className="text-xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-3">
         {title}
       </div>
-      <div className="font-['Inter'] text-gray-600 mb-4">
+      <div className="font-['Inter'] text-gray-600 mb-5 flex-1">
         {description}
       </div>
-      {driveLink && (
-        <a
-          href={driveLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-[#f97316] hover:text-[#ea580c] font-['Inter'] text-sm inline-flex items-center gap-1 font-semibold"
-        >
-          <FiExternalLink size={14} /> Download Materials
-        </a>
+      <div className="flex flex-wrap gap-3 mb-3">
+        {driveLink && (
+          <a
+            href={driveLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#004B8D] hover:bg-[#003870] text-white font-['Inter'] text-sm font-semibold rounded-lg transition-all shadow-md"
+          >
+            <FiExternalLink size={14} /> Access Course Material
+          </a>
+        )}
+        {youtubeLink && (
+          <a
+            href={youtubeLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#fb923c] hover:bg-[#f97316] text-white font-['Inter'] text-sm font-semibold rounded-lg transition-all shadow-md"
+          >
+            <FiYoutube size={14} /> Access Course Videos
+          </a>
+        )}
+      </div>
+      {driveField && youtubeField && (
+        <ResearchLinksEditor
+          driveField={driveField}
+          youtubeField={youtubeField}
+          driveValue={driveLink}
+          youtubeValue={youtubeLink}
+        />
       )}
     </motion.div>
   );
@@ -272,13 +330,65 @@ export default function Courses() {
           )}
 
           {coursesLoading ? (
-             <div className="text-center py-12">
-               <div className="w-12 h-12 border-4 border-[#004B8D] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-               <p className="text-lg font-['Inter'] text-gray-600">Loading courses...</p>
-             </div>
-          ) : courses && courses.length > 0 ? (
+            <div className="text-center py-12">
+              <div className="w-12 h-12 border-4 border-[#004B8D] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-lg font-['Inter'] text-gray-600">Loading courses...</p>
+            </div>
+          ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {courses.map((course, index) => {
+              {/* Featured Coursera Courses */}
+              <CourseCard
+                icon={FiBook}
+                title={<EditableText collection="content" docId="courses" field="happiness_title" defaultValue={pageData?.happiness_title || 'HAPPINESS: Science, Practice and Ancient Indian Wisdom'} />}
+                description={<EditableText collection="content" docId="courses" field="happiness_desc" defaultValue={pageData?.happiness_desc || 'Explore how to become a happy being—successful and at peace. This unique course combines evidence from science, practical well-being techniques, and lessons from Indian wisdom storehouses: the Upanishads, the Gita, and the Yoga Sutras.'} multiline />}
+                link="https://www.coursera.org/learn/happiness"
+                linkText="Enroll on Coursera"
+                badge="COURSERA"
+                borderColor="border-[#f97316]"
+              >
+                <div className="mb-6 space-y-3">
+                  <div className="flex items-center gap-2 text-sm font-['Inter'] text-gray-700">
+                    <FiBook className="w-4 h-4 text-[#f97316]" />
+                    <EditableText collection="content" docId="courses" field="happiness_b1" defaultValue={pageData?.happiness_b1 || 'Evidence from science'} />
+                  </div>
+                  <div className="flex items-center gap-2 text-sm font-['Inter'] text-gray-700">
+                    <FiBook className="w-4 h-4 text-[#f97316]" />
+                    <EditableText collection="content" docId="courses" field="happiness_b2" defaultValue={pageData?.happiness_b2 || 'Simple well-being techniques'} />
+                  </div>
+                  <div className="flex items-center gap-2 text-sm font-['Inter'] text-gray-700">
+                    <FiBook className="w-4 h-4 text-[#f97316]" />
+                    <EditableText collection="content" docId="courses" field="happiness_b3" defaultValue={pageData?.happiness_b3 || 'Ancient Indian wisdom'} />
+                  </div>
+                </div>
+              </CourseCard>
+
+              <CourseCard
+                icon={FiUsers}
+                title={<EditableText collection="content" docId="courses" field="leadership_title" defaultValue={pageData?.leadership_title || 'Leadership Skills'} />}
+                description={<EditableText collection="content" docId="courses" field="leadership_desc" defaultValue={pageData?.leadership_desc || 'A beginner course for professionals from diverse backgrounds. Strengthen your capacity to lead across boundaries, with or without authority, and manage the inevitable stresses and challenges of leading a team. Drawing from business, philosophy, sports, and psychology.'} multiline />}
+                link="https://www.coursera.org/learn/leadershipskills"
+                linkText="Enroll on Coursera"
+                badge="COURSERA"
+                borderColor="border-[#004B8D]"
+              >
+                <div className="mb-6 space-y-3">
+                  <div className="flex items-center gap-2 text-sm font-['Inter'] text-gray-700">
+                    <FiUsers className="w-4 h-4 text-[#004B8D]" />
+                    <EditableText collection="content" docId="courses" field="leadership_b1" defaultValue={pageData?.leadership_b1 || 'Lead across boundaries'} />
+                  </div>
+                  <div className="flex items-center gap-2 text-sm font-['Inter'] text-gray-700">
+                    <FiUsers className="w-4 h-4 text-[#004B8D]" />
+                    <EditableText collection="content" docId="courses" field="leadership_b2" defaultValue={pageData?.leadership_b2 || 'Lead with or without authority'} />
+                  </div>
+                  <div className="flex items-center gap-2 text-sm font-['Inter'] text-gray-700">
+                    <FiUsers className="w-4 h-4 text-[#004B8D]" />
+                    <EditableText collection="content" docId="courses" field="leadership_b3" defaultValue={pageData?.leadership_b3 || 'Manage leadership stresses'} />
+                  </div>
+                </div>
+              </CourseCard>
+
+              {/* Dynamic Firestore courses */}
+              {courses && courses.map((course, index) => {
                 const videoId = course.youtubeUrl ? extractVideoId(course.youtubeUrl) : null;
                 const thumbnailUrl = course.thumbnail || 
                   (videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : null);
@@ -320,6 +430,11 @@ export default function Courses() {
                       </div>
                     )}
                     
+                    {course.courseraUrl && (
+                      <span className="inline-block px-3 py-1 bg-gray-100 text-xs font-['Inter'] font-semibold text-[#1a1a1a] rounded-full mb-2">
+                        COURSERA
+                      </span>
+                    )}
                     <h3 className="text-2xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-3 pr-16">
                       {course.title}
                     </h3>
@@ -358,23 +473,45 @@ export default function Courses() {
                       </div>
                     )}
                     
-                    {(course.courseLink || course.youtubeUrl) && (
-                      <a
-                        href={course.courseLink || course.youtubeUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center gap-2 w-full px-4 py-3 bg-[#004B8D] hover:bg-[#003870] text-white font-['Inter'] font-semibold rounded-lg transition-all shadow-md mt-auto"
-                      >
-                        Explore Course
-                        <FiExternalLink className="w-4 h-4" />
-                      </a>
-                    )}
+                    <div className="flex flex-col gap-2 mt-auto">
+                      {course.courseraUrl && (
+                        <a
+                          href={course.courseraUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center gap-2 w-full px-4 py-3 bg-[#fb923c] hover:bg-[#f97316] text-white font-['Inter'] font-semibold rounded-lg transition-all shadow-md"
+                        >
+                          Enroll on Coursera
+                          <FiExternalLink className="w-4 h-4" />
+                        </a>
+                      )}
+                      {course.courseLink && (
+                        <a
+                          href={course.courseLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center gap-2 w-full px-4 py-3 bg-[#004B8D] hover:bg-[#003870] text-white font-['Inter'] font-semibold rounded-lg transition-all shadow-md"
+                        >
+                          Explore Course
+                          <FiExternalLink className="w-4 h-4" />
+                        </a>
+                      )}
+                      {!course.courseraUrl && !course.courseLink && course.youtubeUrl && (
+                        <a
+                          href={course.youtubeUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center gap-2 w-full px-4 py-3 bg-[#004B8D] hover:bg-[#003870] text-white font-['Inter'] font-semibold rounded-lg transition-all shadow-md"
+                        >
+                          Watch on YouTube
+                          <FiExternalLink className="w-4 h-4" />
+                        </a>
+                      )}
+                    </div>
                   </motion.div>
                 );
               })}
             </div>
-          ) : (
-            <p className="text-gray-500 font-['Inter']">No management courses available at the moment.</p>
           )}
 
           {editingCourse && isAdmin && (
@@ -389,92 +526,6 @@ export default function Courses() {
         </div>
       </section>
 
-      {/* Featured Courses Section */}
-      <section className="py-16 px-6 lg:px-16 bg-[#faf8f5]">
-        <div className="max-w-7xl mx-auto">
-          <motion.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={viewportOptions}
-            variants={fadeInUp}
-            className="mb-12"
-          >
-            <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-4">
-              <EditableText
-                collection="content"
-                docId="courses"
-                field="featured_heading"
-                defaultValue={pageData?.featured_heading || 'Featured Courses'}
-                className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a]"
-              />
-            </h2>
-            <div className="w-24 h-1 bg-[#f97316] rounded-full mb-4"></div>
-            <p className="text-lg font-['Inter'] text-gray-600 max-w-2xl">
-              <EditableText
-                collection="content"
-                docId="courses"
-                field="featured_subtitle"
-                defaultValue={pageData?.featured_subtitle || 'Comprehensive online courses combining science, practice, and ancient wisdom'}
-                className="text-lg font-['Inter'] text-gray-600"
-                multiline
-              />
-            </p>
-          </motion.div>
-
-          <div className="grid lg:grid-cols-2 gap-8">
-            <CourseCard
-              icon={FiBook}
-              title={<EditableText collection="content" docId="courses" field="happiness_title" defaultValue={pageData?.happiness_title || 'HAPPINESS: Science, Practice and Ancient Indian Wisdom'} />}
-              description={<EditableText collection="content" docId="courses" field="happiness_desc" defaultValue={pageData?.happiness_desc || 'Explore how to become a happy being—successful and at peace. This unique course combines evidence from science, practical well-being techniques, and lessons from Indian wisdom storehouses: the Upanishads, the Gita, and the Yoga Sutras.'} multiline />}
-              link="https://www.coursera.org/learn/happiness"
-              linkText="Enroll on Coursera"
-              badge="COURSERA"
-              borderColor="border-[#f97316]"
-            >
-              <div className="mb-6 space-y-3">
-                <div className="flex items-center gap-2 text-sm font-['Inter'] text-gray-700">
-                  <FiBook className="w-4 h-4 text-[#f97316]" />
-                  <EditableText collection="content" docId="courses" field="happiness_b1" defaultValue={pageData?.happiness_b1 || 'Evidence from science'} />
-                </div>
-                <div className="flex items-center gap-2 text-sm font-['Inter'] text-gray-700">
-                  <FiBook className="w-4 h-4 text-[#f97316]" />
-                  <EditableText collection="content" docId="courses" field="happiness_b2" defaultValue={pageData?.happiness_b2 || 'Simple well-being techniques'} />
-                </div>
-                <div className="flex items-center gap-2 text-sm font-['Inter'] text-gray-700">
-                  <FiBook className="w-4 h-4 text-[#f97316]" />
-                  <EditableText collection="content" docId="courses" field="happiness_b3" defaultValue={pageData?.happiness_b3 || 'Ancient Indian wisdom'} />
-                </div>
-              </div>
-            </CourseCard>
-
-            <CourseCard
-              icon={FiUsers}
-              title={<EditableText collection="content" docId="courses" field="leadership_title" defaultValue={pageData?.leadership_title || 'Leadership Skills'} />}
-              description={<EditableText collection="content" docId="courses" field="leadership_desc" defaultValue={pageData?.leadership_desc || 'A beginner course for professionals from diverse backgrounds. Strengthen your capacity to lead across boundaries, with or without authority, and manage the inevitable stresses and challenges of leading a team. Drawing from business, philosophy, sports, and psychology.'} multiline />}
-              link="https://www.coursera.org/learn/leadershipskills"
-              linkText="Enroll on Coursera"
-              badge="COURSERA"
-              borderColor="border-[#004B8D]"
-            >
-              <div className="mb-6 space-y-3">
-                <div className="flex items-center gap-2 text-sm font-['Inter'] text-gray-700">
-                  <FiUsers className="w-4 h-4 text-[#004B8D]" />
-                  <EditableText collection="content" docId="courses" field="leadership_b1" defaultValue={pageData?.leadership_b1 || 'Lead across boundaries'} />
-                </div>
-                <div className="flex items-center gap-2 text-sm font-['Inter'] text-gray-700">
-                  <FiUsers className="w-4 h-4 text-[#004B8D]" />
-                  <EditableText collection="content" docId="courses" field="leadership_b2" defaultValue={pageData?.leadership_b2 || 'Lead with or without authority'} />
-                </div>
-                <div className="flex items-center gap-2 text-sm font-['Inter'] text-gray-700">
-                  <FiUsers className="w-4 h-4 text-[#004B8D]" />
-                  <EditableText collection="content" docId="courses" field="leadership_b3" defaultValue={pageData?.leadership_b3 || 'Manage leadership stresses'} />
-                </div>
-              </div>
-            </CourseCard>
-          </div>
-        </div>
-      </section>
-
       {/* Research Methods Section */}
       <section className="py-16 px-6 lg:px-16 bg-white">
         <div className="max-w-7xl mx-auto">
@@ -485,27 +536,48 @@ export default function Courses() {
             variants={fadeInUp}
             className="mb-12"
           >
-            <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-4">
-              <EditableText
-                collection="content"
-                docId="courses"
-                field="research_heading"
-                defaultValue={pageData?.research_heading || 'Research Methods'}
-                className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a]"
-              />
-            </h2>
-            <div className="w-24 h-1 bg-[#004B8D] rounded-full mb-4"></div>
-            <p className="text-lg font-['Inter'] text-gray-600 max-w-2xl">
-              <EditableText
-                collection="content"
-                docId="courses"
-                field="research_subtitle"
-                defaultValue={pageData?.research_subtitle || 'Comprehensive lecture series on advanced research methodologies for scholars and practitioners'}
-                className="text-lg font-['Inter'] text-gray-600"
-                multiline
-              />
-            </p>
+            <div className="flex items-start justify-between flex-wrap gap-4">
+              <div>
+                <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-4">
+                  <EditableText
+                    collection="content"
+                    docId="courses"
+                    field="research_heading"
+                    defaultValue={pageData?.research_heading || 'Research Methods'}
+                    className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a]"
+                  />
+                </h2>
+                <div className="w-24 h-1 bg-[#004B8D] rounded-full mb-4"></div>
+                <p className="text-lg font-['Inter'] text-gray-600 max-w-2xl">
+                  <EditableText
+                    collection="content"
+                    docId="courses"
+                    field="research_subtitle"
+                    defaultValue={pageData?.research_subtitle || 'Comprehensive lecture series on advanced research methodologies for scholars and practitioners'}
+                    className="text-lg font-['Inter'] text-gray-600"
+                    multiline
+                  />
+                </p>
+              </div>
+              {isAdmin && (
+                <button
+                  onClick={() => setShowAddResearch(true)}
+                  className="flex items-center gap-2 bg-[#004B8D] hover:bg-[#003870] text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-md"
+                >
+                  <FiPlus /> Add Research Course
+                </button>
+              )}
+            </div>
           </motion.div>
+
+          {showAddResearch && isAdmin && (
+            <div className="mb-10 p-6 bg-white rounded-xl border-2 border-[#004B8D] shadow-lg">
+              <ResearchCourseForm
+                onSave={addResearchCourse}
+                onCancel={() => setShowAddResearch(false)}
+              />
+            </div>
+          )}
 
           <div className="space-y-12">
             {/* Multilevel Modeling */}
@@ -538,15 +610,34 @@ export default function Courses() {
                   multiline
                 />
               </p>
-              <a
-                href="https://drive.google.com/drive/folders/1GTHqiJX1sEjSuVlhBmR_Z5DETrUwIHGd"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-[#004B8D] hover:bg-[#003870] text-white px-6 py-3 rounded-lg font-['Inter'] font-semibold transition-all shadow-md"
-              >
-                Access Course Materials
-                <FiExternalLink className="w-4 h-4" />
-              </a>
+              <div className="flex flex-wrap gap-3">
+                {(pageData?.multilevel_drive || 'https://drive.google.com/drive/folders/1GTHqiJX1sEjSuVlhBmR_Z5DETrUwIHGd') && (
+                  <a
+                    href={pageData?.multilevel_drive || 'https://drive.google.com/drive/folders/1GTHqiJX1sEjSuVlhBmR_Z5DETrUwIHGd'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 bg-[#004B8D] hover:bg-[#003870] text-white px-6 py-3 rounded-lg font-['Inter'] font-semibold transition-all shadow-md"
+                  >
+                    <FiExternalLink className="w-4 h-4" /> Access Course Material
+                  </a>
+                )}
+                {pageData?.multilevel_youtube && (
+                  <a
+                    href={pageData.multilevel_youtube}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 bg-[#fb923c] hover:bg-[#f97316] text-white px-6 py-3 rounded-lg font-['Inter'] font-semibold transition-all shadow-md"
+                  >
+                    <FiYoutube className="w-4 h-4" /> Access Course Videos
+                  </a>
+                )}
+              </div>
+              <ResearchLinksEditor
+                driveField="multilevel_drive"
+                youtubeField="multilevel_youtube"
+                driveValue={pageData?.multilevel_drive || 'https://drive.google.com/drive/folders/1GTHqiJX1sEjSuVlhBmR_Z5DETrUwIHGd'}
+                youtubeValue={pageData?.multilevel_youtube || ''}
+              />
             </motion.div>
 
             {/* Covariance-Based SEM */}
@@ -579,9 +670,37 @@ export default function Courses() {
                   multiline
                 />
               </p>
-              <p className="text-gray-500 font-['Inter'] text-sm italic">
-                Note: Material link to be updated
-              </p>
+              <div className="flex flex-wrap gap-3">
+                {pageData?.sem_drive && (
+                  <a
+                    href={pageData.sem_drive}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 bg-[#004B8D] hover:bg-[#003870] text-white px-6 py-3 rounded-lg font-['Inter'] font-semibold transition-all shadow-md"
+                  >
+                    <FiExternalLink className="w-4 h-4" /> Access Course Material
+                  </a>
+                )}
+                {pageData?.sem_youtube && (
+                  <a
+                    href={pageData.sem_youtube}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 bg-[#fb923c] hover:bg-[#f97316] text-white px-6 py-3 rounded-lg font-['Inter'] font-semibold transition-all shadow-md"
+                  >
+                    <FiYoutube className="w-4 h-4" /> Access Course Videos
+                  </a>
+                )}
+                {!pageData?.sem_drive && !pageData?.sem_youtube && (
+                  <p className="text-gray-500 font-['Inter'] text-sm italic">Note: Links to be updated</p>
+                )}
+              </div>
+              <ResearchLinksEditor
+                driveField="sem_drive"
+                youtubeField="sem_youtube"
+                driveValue={pageData?.sem_drive || ''}
+                youtubeValue={pageData?.sem_youtube || ''}
+              />
             </motion.div>
 
             {/* Grid of Research Topics */}
@@ -589,19 +708,61 @@ export default function Courses() {
               <ResearchLecture
                 title={<EditableText collection="content" docId="courses" field="psychometrics_title" defaultValue={pageData?.psychometrics_title || 'Psychometrics'} />}
                 description={<EditableText collection="content" docId="courses" field="psychometrics_desc" defaultValue={pageData?.psychometrics_desc || 'Introduction to central concepts of measurement covering test construction, item analysis, reliability, validity, and measurement error. Includes hands-on sessions with SPSS and AMOS.'} multiline />}
-                driveLink="https://drive.google.com/drive/folders/"
+                driveLink={pageData?.psychometrics_drive || 'https://drive.google.com/drive/folders/'}
+                youtubeLink={pageData?.psychometrics_youtube || ''}
+                driveField="psychometrics_drive"
+                youtubeField="psychometrics_youtube"
               />
               <ResearchLecture
                 title={<EditableText collection="content" docId="courses" field="conditional_title" defaultValue={pageData?.conditional_title || 'Conditional Process Analysis'} />}
                 description={<EditableText collection="content" docId="courses" field="conditional_desc" defaultValue={pageData?.conditional_desc || 'A comprehensive three-video series explaining mediation, moderation, and conditional process analysis with practical dataset examples.'} multiline />}
-                driveLink="https://drive.google.com/file/d/1Ih2WCnyC64mESIKByOIOYAmkCioAGiTO/view?usp=sharing"
+                driveLink={pageData?.conditional_drive || 'https://drive.google.com/file/d/1Ih2WCnyC64mESIKByOIOYAmkCioAGiTO/view?usp=sharing'}
+                youtubeLink={pageData?.conditional_youtube || ''}
+                driveField="conditional_drive"
+                youtubeField="conditional_youtube"
               />
               <ResearchLecture
                 title={<EditableText collection="content" docId="courses" field="manuscript_title" defaultValue={pageData?.manuscript_title || 'Manuscript Writing & Publishing'} />}
                 description={<EditableText collection="content" docId="courses" field="manuscript_desc" defaultValue={pageData?.manuscript_desc || 'A 16-session series covering elements of manuscript writing and strategies for high-quality academic publishing. Includes instruction files and supplementary readings.'} multiline />}
-                driveLink="https://drive.google.com/drive/folders/"
+                driveLink={pageData?.manuscript_drive || 'https://drive.google.com/drive/folders/'}
+                youtubeLink={pageData?.manuscript_youtube || ''}
+                driveField="manuscript_drive"
+                youtubeField="manuscript_youtube"
               />
             </div>
+
+            {/* Dynamic Research Courses from Firestore */}
+            {researchLoading && (
+              <div className="text-center py-6">
+                <div className="w-8 h-8 border-4 border-[#004B8D] border-t-transparent rounded-full animate-spin mx-auto"></div>
+              </div>
+            )}
+            {!researchLoading && researchCourses && researchCourses.length > 0 && (
+              <div className="mt-10">
+                <h3 className="text-2xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-6">Additional Research Topics</h3>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {researchCourses.map((rc) => (
+                    <div key={rc.id} className="relative">
+                      <ResearchLecture
+                        title={rc.title}
+                        description={rc.description}
+                        driveLink={rc.driveLink}
+                        youtubeLink={rc.youtubeLink}
+                      />
+                      {isAdmin && (
+                        <button
+                          onClick={() => deleteResearchCourse(rc.id)}
+                          className="absolute top-3 right-3 p-1.5 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg transition-colors"
+                          title="Delete"
+                        >
+                          <FiTrash2 size={14} />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -650,11 +811,153 @@ export default function Courses() {
   );
 }
 
+// Research Course Form — for adding new dynamic research courses
+function ResearchCourseForm({ onSave, onCancel }) {
+  const [form, setForm] = useState({ title: '', description: '', driveLink: '', youtubeLink: '' });
+  const [saving, setSaving] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!form.title.trim()) { alert('Title is required'); return; }
+    setSaving(true);
+    await onSave(form);
+    setSaving(false);
+  };
+
+  const field = (key, label, placeholder, type = 'text') => (
+    <div>
+      <label className="block text-sm font-semibold text-gray-700 mb-1">{label}</label>
+      {type === 'textarea' ? (
+        <textarea
+          value={form[key]}
+          onChange={e => setForm(p => ({ ...p, [key]: e.target.value }))}
+          placeholder={placeholder}
+          rows={3}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#004B8D] outline-none resize-none"
+        />
+      ) : (
+        <input
+          type={type}
+          value={form[key]}
+          onChange={e => setForm(p => ({ ...p, [key]: e.target.value }))}
+          placeholder={placeholder}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#004B8D] outline-none"
+        />
+      )}
+    </div>
+  );
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <h3 className="text-lg font-['Playfair_Display'] font-bold text-[#1a1a1a]">Add Research Course</h3>
+      {field('title', 'Title *', 'e.g. Factor Analysis')}
+      {field('description', 'Description', 'Brief description of the course...', 'textarea')}
+      {field('driveLink', 'Drive / Material URL', 'https://drive.google.com/...', 'url')}
+      {field('youtubeLink', 'YouTube URL', 'https://www.youtube.com/...', 'url')}
+      <div className="flex gap-3 pt-2">
+        <button
+          type="submit"
+          disabled={saving}
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#004B8D] hover:bg-[#003870] text-white font-semibold rounded-lg transition-all shadow-md disabled:opacity-60"
+        >
+          <FiSave size={15} /> {saving ? 'Saving...' : 'Add Course'}
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition-all"
+        >
+          <FiX size={15} /> Cancel
+        </button>
+      </div>
+    </form>
+  );
+}
+
+// Research Links Editor — admin-only inline editor for Drive & YouTube URLs
+function ResearchLinksEditor({ driveField, youtubeField, driveValue, youtubeValue }) {
+  const { isAdmin } = useAuth();
+  const [editing, setEditing] = useState(false);
+  const [drive, setDrive] = useState(driveValue || '');
+  const [youtube, setYoutube] = useState(youtubeValue || '');
+  const [saving, setSaving] = useState(false);
+
+  if (!isAdmin) return null;
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await updateDoc(doc(db, 'content', 'courses'), {
+        [driveField]: drive,
+        [youtubeField]: youtube,
+      });
+      setEditing(false);
+    } catch (e) {
+      alert('Failed to save links. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (!editing) {
+    return (
+      <button
+        onClick={() => setEditing(true)}
+        className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-500 text-xs font-semibold rounded-lg transition-colors"
+      >
+        <FiEdit2 size={11} /> Edit Links
+      </button>
+    );
+  }
+
+  return (
+    <div className="mt-3 p-4 bg-white border border-[#004B8D]/20 rounded-lg flex flex-col gap-3">
+      <p className="text-xs font-bold text-[#004B8D] uppercase tracking-wide">Edit Links</p>
+      <div>
+        <label className="block text-xs font-semibold text-gray-600 mb-1">Drive / Material URL</label>
+        <input
+          type="url"
+          value={drive}
+          onChange={e => setDrive(e.target.value)}
+          placeholder="https://drive.google.com/..."
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#004B8D] outline-none"
+        />
+      </div>
+      <div>
+        <label className="block text-xs font-semibold text-gray-600 mb-1">YouTube URL</label>
+        <input
+          type="url"
+          value={youtube}
+          onChange={e => setYoutube(e.target.value)}
+          placeholder="https://www.youtube.com/..."
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#004B8D] outline-none"
+        />
+      </div>
+      <div className="flex gap-2">
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="inline-flex items-center gap-1 px-4 py-2 bg-[#004B8D] hover:bg-[#003870] text-white text-xs font-semibold rounded-lg transition-colors disabled:opacity-60"
+        >
+          <FiSave size={12} /> {saving ? 'Saving...' : 'Save'}
+        </button>
+        <button
+          onClick={() => { setDrive(driveValue || ''); setYoutube(youtubeValue || ''); setEditing(false); }}
+          className="inline-flex items-center gap-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs font-semibold rounded-lg transition-colors"
+        >
+          <FiX size={12} /> Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // Course Form Component for Admin
 function CourseForm({ course, onSave, onCancel }) {
   const [formData, setFormData] = useState(course || {
     title: '',
     description: '',
+    courseraUrl: '',
     courseLink: '',
     youtubeUrl: '',
     thumbnail: ''
@@ -691,13 +994,25 @@ function CourseForm({ course, onSave, onCancel }) {
         />
       </div>
       <div>
-        <label className="block text-sm font-semibold mb-2 text-gray-700">Course Link <span className="text-gray-400 font-normal">(Coursera, website, etc.)</span></label>
+        <label className="block text-sm font-semibold mb-2 text-gray-700">
+          Coursera URL <span className="text-gray-400 font-normal">(shows "Enroll on Coursera" button + badge)</span>
+        </label>
         <input
           type="url"
-          value={formData.courseLink}
-          onChange={(e) => setFormData({ ...formData, courseLink: e.target.value })}
+          value={formData.courseraUrl || ''}
+          onChange={(e) => setFormData({ ...formData, courseraUrl: e.target.value })}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004B8D] outline-none transition-shadow"
           placeholder="https://www.coursera.org/learn/..."
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-semibold mb-2 text-gray-700">Other Link <span className="text-gray-400 font-normal">(website, Drive, etc.)</span></label>
+        <input
+          type="url"
+          value={formData.courseLink || ''}
+          onChange={(e) => setFormData({ ...formData, courseLink: e.target.value })}
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004B8D] outline-none transition-shadow"
+          placeholder="https://..."
         />
       </div>
       <div>

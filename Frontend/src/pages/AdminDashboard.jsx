@@ -2668,67 +2668,35 @@ function TestimonialEditor({ testimonial, onUpdate, onDelete }) {
         </div>
       ) : (
         <>
-          <div className="admin-form-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: '1rem' }}>
-            <div className="logo-info-wrapper" style={{ display: 'flex', alignItems: 'start', gap: '1rem', flex: 1 }}>
-              <div className="logo-preview-container" style={{ 
-                minWidth: '180px', 
-                width: '180px',
-                height: '100px', 
-                backgroundColor: '#ffffff', 
-                border: '2px solid #e5e5e5',
-                borderRadius: '8px', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                padding: '1rem',
-                flexShrink: 0,
-                position: 'relative'
-              }}>
-                {logo.logoUrl ? (
-                  <img 
-                    src={logo.logoUrl} 
-                    alt={logo.name}
-                    style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }}
-                    onError={(e) => e.target.style.display = 'none'}
-                  />
-                ) : (
-                  <div style={{ 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    alignItems: 'center', 
-                    justifyContent: 'center',
-                    textAlign: 'center',
-                    color: '#999',
-                    fontSize: '0.75rem'
-                  }}>
-                    <FiImage size={24} color="#ccc" />
-                    <span style={{ marginTop: '0.5rem' }}>No Logo</span>
-                  </div>
-                )}
-              </div>
-              <div className="logo-card-content" style={{ flex: 1, minWidth: 0 }}>
-                <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>{logo.name}</h3>
-                <p className="logo-url-text" style={{ 
-                  fontSize: '0.75rem', 
-                  color: '#999', 
-                  marginBottom: '0.75rem',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap'
-                }}>{logo.logoUrl}</p>
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                  <span style={{ 
-                    display: 'inline-block', 
-                    padding: '0.25rem 0.75rem', 
-                    backgroundColor: logo.published ? '#10b981' : '#6b7280',
-                    color: 'white',
-                    borderRadius: '999px',
-                    fontSize: '0.75rem'
-                  }}>
-                    {logo.published ? 'Published' : 'Draft'}
-                  </span>
-                  <span style={{ fontSize: '0.85rem', color: '#999' }}>Order: {logo.order}</span>
-                </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem' }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              {testimonial.photoUrl && (
+                <img
+                  src={testimonial.photoUrl}
+                  alt={testimonial.author}
+                  style={{ width: '56px', height: '56px', borderRadius: '50%', objectFit: 'cover', border: '2px solid #e5e5e5', marginBottom: '0.75rem' }}
+                  onError={(e) => e.target.style.display = 'none'}
+                />
+              )}
+              <p style={{ fontSize: '0.95rem', color: '#374151', lineHeight: 1.6, marginBottom: '0.75rem', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
+                "{testimonial.quote}"
+              </p>
+              <p style={{ fontSize: '0.9rem', fontWeight: 600, color: '#004B8D', marginBottom: '0.2rem' }}>{testimonial.author}</p>
+              <p style={{ fontSize: '0.8rem', color: '#6b7280' }}>
+                {testimonial.role}{testimonial.organization ? `, ${testimonial.organization}` : ''}
+              </p>
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', marginTop: '0.75rem' }}>
+                <span style={{
+                  display: 'inline-block',
+                  padding: '0.2rem 0.6rem',
+                  backgroundColor: testimonial.published ? '#10b981' : '#6b7280',
+                  color: 'white',
+                  borderRadius: '999px',
+                  fontSize: '0.75rem'
+                }}>
+                  {testimonial.published ? 'Published' : 'Draft'}
+                </span>
+                <span style={{ fontSize: '0.8rem', color: '#9ca3af' }}>Order: {testimonial.order}</span>
               </div>
             </div>
             <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>

@@ -32,10 +32,20 @@ const staggerContainer = {
 };
 const viewportOptions = { once: true, margin: '0px 0px -60px 0px', amount: 0.15 };
 
+const FALLBACK_TESTIMONIALS = [
+  { id: 'f1', quote: "I have to admit that I wasn't sure what would be involved with your course, but I consider myself very blessed to have been a part of it. The historical aspect of Mahabharata was fascinating by itself, and I enjoyed the way you incorporated the epic with current leadership practices.", author: "Colene Sassmann", role: "Class Participant 2023, MBA course", organization: "University of Northern Iowa" },
+  { id: 'f2', quote: "Observing you from the sidelines, I learnt many things. Chief amongst them, your dhairya, humility and a steadfast bold vision. Your course and its reflections on the ego & self as a leader made a deep impression.", author: "Rupal Nayar", role: "Director, Industry & University Partnerships", organization: "Coursera" },
+  { id: 'f3', quote: "We thank you for conducting the session for the Principals of Delhi Public Schools. The session was rewarding and much appreciated by all participants.", author: "Vanita Sehgal", role: "Executive Director, HRDC", organization: "DPSS" },
+  { id: 'f4', quote: "Thank you for such wonderful mentor / coach / guide / teacher. I am really feeling happy to be your student. The way you put up the topic is so interesting, I am loving it.", author: "Vijay Vyas", role: "Group Head, HR", organization: "Rushil Decor Limited" },
+  { id: 'f5', quote: "Your classes were a real value addition in FDP course. Thank you for teaching us so patiently. You made a complicated course quite easy for us.", author: "Irfana Rashid", role: "FDP 2017 Participant", organization: "IIM Ahmedabad" },
+  { id: 'f6', quote: "Just wanted to thank you for the lecture today. It was, probably, the most important lecture that I ever attended.", author: "Kaustubh Korde", role: "PGPX 2018 Participant", organization: "IIM Ahmedabad" },
+];
+
 export default function Home() {
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState({ message: '', type: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [testimonialPage, setTestimonialPage] = useState(0);
 
   // ─── Helpers ───────────────────────────────────────────────────────────────
   const extractVideoId = (url) => {
@@ -136,6 +146,17 @@ export default function Home() {
     }
     setIsSubmitting(false);
   };
+
+  // ─── Testimonials auto-rotation ────────────────────────────────────────────
+  useEffect(() => {
+    const allItems = testimonials && testimonials.length > 0 ? testimonials : FALLBACK_TESTIMONIALS;
+    const totalPages = Math.ceil(allItems.length / 3);
+    if (totalPages <= 1) return;
+    const timer = setInterval(() => {
+      setTestimonialPage(prev => (prev + 1) % totalPages);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [testimonials]);
 
   // ─── Loading ───────────────────────────────────────────────────────────────
   if (loading || blogsLoading || coursesLoading || testimonialsLoading || logosLoading || booksLoading) {
@@ -474,25 +495,9 @@ export default function Home() {
       </section>
 
       {/* ══════════════════════════════════════════════════════
-          4. TESTIMONIALS — infinite scrolling strip
+          4. TESTIMONIALS — 3 at a time, auto-rotate every 5s
       ══════════════════════════════════════════════════════ */}
-      <section className="py-12 sm:py-16 bg-white overflow-hidden relative">
-        {/* CSS for marquee animations */}
-        <style>{`
-          @keyframes marquee-left {
-            0%   { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-          }
-          .testimonial-track-left {
-            display: flex;
-            width: max-content;
-            animation: marquee-left 40s linear infinite;
-          }
-          .testimonial-track-left:hover {
-            animation-play-state: paused;
-          }
-        `}</style>
-
+      <section className="py-12 sm:py-16 bg-white relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-10">
           <motion.div className="text-center"
             initial="hidden" whileInView="visible" viewport={viewportOptions} variants={fadeInUp}>
@@ -507,38 +512,40 @@ export default function Home() {
         </div>
 
         {(() => {
-          const allItems = testimonials && testimonials.length > 0 ? testimonials : [
-            { id: 'f1', quote: "I have to admit that I wasn't sure what would be involved with your course, but I consider myself very blessed to have been a part of it. The historical aspect of Mahabharata was fascinating by itself, and I enjoyed the way you incorporated the epic with current leadership practices.", author: "Colene Sassmann", role: "Class Participant 2023, MBA course", organization: "University of Northern Iowa" },
-            { id: 'f2', quote: "observing you from the sidelines, I learnt many things. Chief amongst them, your dhairya, humility and a steadfast bold vision. Your course and its reflections on the ego & self as a leader made a deep impression.", author: "Rupal Nayar", role: "Director, Industry & University Partnerships", organization: "Coursera" },
-            { id: 'f3', quote: "We thank you for conducting the session for the Principals of Delhi Public Schools. The session was rewarding and much appreciated by all participants.", author: "Vanita Sehgal", role: "Executive Director, HRDC", organization: "DPSS" },
-            { id: 'f4', quote: "Thank you for such wonderful mentor / coach / guide / teacher. I am really feeling happy to be your student. The way you put up the topic is so interesting, I am loving it.", author: "Vijay Vyas", role: "Group Head, HR", organization: "Rushil Decor Limited" },
-            { id: 'f5', quote: "Your classes were a real value addition in FDP course. Thank you for teaching us so patiently. You made a complicated course quite easy for us.", author: "Irfana Rashid", role: "FDP 2017 Participant", organization: "IIM Ahmedabad" },
-            { id: 'f6', quote: "Just wanted to thank you for the lecture today. It was, probably, the most important lecture that I ever attended.", author: "Kaustubh Korde", role: "PGPX 2018 Participant", organization: "IIM Ahmedabad" },
-          ];
-          // Duplicate for seamless loop
-          const row1 = [...allItems, ...allItems];
-
-          const Card = ({ t }) => (
-            <div className="flex-shrink-0 w-[380px] sm:w-[460px] mx-4 bg-white rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-[#004B8D] px-8 py-7">
-              <p className="text-base sm:text-lg font-['Playfair_Display'] italic text-gray-700 leading-relaxed mb-5 line-clamp-4">
-                "{t.quote}"
-              </p>
-              <div className="h-px bg-gray-100 mb-4" />
-              <p className="text-sm font-['Inter'] font-semibold text-[#004B8D]">— {t.author}</p>
-              <p className="text-sm font-['Inter'] text-gray-400 italic">
-                {t.role}{t.organization ? `, ${t.organization}` : ''}
-              </p>
-            </div>
-          );
+          const allItems = testimonials && testimonials.length > 0 ? testimonials : FALLBACK_TESTIMONIALS;
+          const totalPages = Math.ceil(allItems.length / 3);
+          const currentPage = testimonialPage % totalPages;
+          const currentItems = allItems.slice(currentPage * 3, currentPage * 3 + 3);
 
           return (
-            <div className="flex flex-col gap-5">
-              {/* Row 1 — scrolls left */}
-              <div className="overflow-hidden">
-                <div className="testimonial-track-left">
-                  {row1.map((t, i) => <Card key={`r1-${i}`} t={t} />)}
-                </div>
+            <div className="max-w-7xl mx-auto px-4 sm:px-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {currentItems.map((t, i) => (
+                  <div key={`${currentPage}-${i}`} className="bg-white rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-[#004B8D] px-8 py-7 flex flex-col">
+                    <p className="text-base font-['Inter'] text-gray-700 leading-relaxed mb-5 flex-1">
+                      "{t.quote}"
+                    </p>
+                    <div className="h-px bg-gray-100 mb-4" />
+                    <p className="text-sm font-['Inter'] font-semibold text-[#004B8D]">— {t.author}</p>
+                    <p className="text-sm font-['Inter'] text-gray-400">
+                      {t.role}{t.organization ? `, ${t.organization}` : ''}
+                    </p>
+                  </div>
+                ))}
               </div>
+              {totalPages > 1 && (
+                <div className="flex justify-center gap-2 mt-8">
+                  {Array.from({ length: totalPages }).map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setTestimonialPage(i)}
+                      style={{ transition: 'all 0.3s' }}
+                      className={`h-2 rounded-full ${i === currentPage ? 'w-6 bg-[#004B8D]' : 'w-2 bg-gray-300'}`}
+                      aria-label={`Go to page ${i + 1}`}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           );
         })()}

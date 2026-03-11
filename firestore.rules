@@ -2,58 +2,77 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Helper function to check if user is admin
     function isAdmin() {
-      // Replace with your actual admin email
       return request.auth != null && 
              request.auth.token.email == 'vishallko31@gmail.com';
     }
     
-    // ========== CONTENT COLLECTION ==========
-    // Anyone can read website content
-    // Only admin can write/update
     match /content/{document=**} {
-      allow read: true;
+      allow read: if true;
       allow write, update, delete: if isAdmin();
     }
     
-    // ========== NEWSLETTER SUBSCRIBERS ==========
-    // Anyone can create (subscribe)
-    // Only admin can read all subscribers
     match /newsletter_subscribers/{subscriberId} {
-      allow create: true;
-      allow read, update, delete: if isAdmin();
-      
-      // Prevent duplicate subscriptions
       allow create: if request.resource.data.email is string &&
                       request.resource.data.email.size() > 0;
-    }
-    
-    // ========== BLOG POSTS (Future Feature) ==========
-    match /blog_posts/{postId} {
-      allow read: true;
-      allow write, update, delete: if isAdmin();
-    }
-    
-    // ========== COURSES (Future Feature) ==========
-    match /courses/{courseId} {
-      allow read: true;
-      allow write, update, delete: if isAdmin();
-    }
-    
-    // ========== BOOKS ==========
-    match /books/{bookId} {
-      allow read: true;
-      allow write, update, delete: if isAdmin();
-    }
-    
-    // ========== CONTACT FORM SUBMISSIONS ==========
-    match /contact_submissions/{submissionId} {
-      allow create: true;
       allow read, update, delete: if isAdmin();
     }
     
-    // Block all other collections by default
+    match /blogs/{postId} {
+      allow read: if true;
+      allow write, update, delete: if isAdmin();
+    }
+
+    match /blog_posts/{postId} {
+      allow read: if true;
+      allow write, update, delete: if isAdmin();
+    }
+
+    match /testimonials/{docId} {
+      allow read: if true;
+      allow write, update, delete: if isAdmin();
+    }
+
+    match /training_logos/{docId} {
+      allow read: if true;
+      allow write, update, delete: if isAdmin();
+    }
+
+    match /training_partners/{docId} {
+      allow read: if true;
+      allow write, update, delete: if isAdmin();
+    }
+    
+    match /courses/{courseId} {
+      allow read: if true;
+      allow write, update, delete: if isAdmin();
+    }
+
+    match /researchCourses/{courseId} {
+      allow read: if true;
+      allow write, update, delete: if isAdmin();
+    }
+    
+    match /books/{bookId} {
+      allow read: if true;
+      allow write, update, delete: if isAdmin();
+    }
+    
+    match /contact_submissions/{submissionId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /trainings/{docId} {
+      allow read: if true;
+      allow write, update, delete: if isAdmin();
+    }
+
+    match /research/{docId} {
+      allow read: if true;
+      allow write, update, delete: if isAdmin();
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
