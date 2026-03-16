@@ -75,6 +75,11 @@ service cloud.firestore {
       allow write, update, delete: if isAdmin();
     }
 
+    match /training_programs/{docId} {
+      allow read: if true;
+      allow write, update, delete: if isAdmin();
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

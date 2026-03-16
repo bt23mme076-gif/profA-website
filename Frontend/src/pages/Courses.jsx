@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
-import { useState } from 'react';
-import { FiYoutube, FiBook, FiUsers, FiTrendingUp, FiBarChart2, FiFileText, FiExternalLink, FiPlay, FiPlus, FiEdit2, FiTrash2, FiSave, FiX } from 'react-icons/fi';
+import { useState, useEffect } from 'react';
+import { FiYoutube, FiBook, FiUsers, FiTrendingUp, FiBarChart2, FiFileText, FiExternalLink, FiPlay, FiPlus, FiEdit2, FiTrash2, FiSave, FiX, FiChevronUp, FiChevronDown } from 'react-icons/fi';
 import { useFirestoreCollection } from '../hooks/useFirestoreCollection';
 import { useFirestoreDoc } from '../hooks/useFirestoreDoc';
 import EditableText from '../components/EditableText';
@@ -55,6 +55,7 @@ export default function Courses() {
   const [editingCourse, setEditingCourse] = useState(null);
   const [homeOverrides, setHomeOverrides] = useState({});
   const [showAddResearch, setShowAddResearch] = useState(false);
+  const [reorderMode, setReorderMode] = useState(false);
 
   const fadeInUp = {
     hidden: { opacity: 0, y: 20 },
@@ -78,6 +79,8 @@ export default function Courses() {
     where('published', '==', true)
   ], true);
 
+  const sortedCourses = courses ? [...courses].slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0)) : [];
+
   // Fetch dynamic research courses
   const { data: researchCourses, loading: researchLoading } = useFirestoreCollection('researchCourses', [], true);
 
@@ -91,16 +94,60 @@ export default function Courses() {
   // Admin functions for managing dynamic courses
   const addCourse = async (newCourse) => {
     try {
+      // set order to end of list
+      const maxOrder = courses && courses.length ? Math.max(...courses.map(c => (c.order ?? 0))) : 0;
       await addDoc(collection(db, 'courses'), {
         ...newCourse,
         published: true, // Auto-publish for simplicity, or add a toggle in the form
-        createdAt: new Date()
+        createdAt: new Date(),
+        order: maxOrder + 1
       });
       setShowAddCourse(false);
       alert('Course added successfully!');
     } catch (error) {
       console.error('Error adding course:', error);
       alert('Failed to add course');
+    }
+  };
+
+  // Ensure every course has an order when entering reorder mode
+  useEffect(() => {
+    if (!reorderMode || !isAdmin || !courses) return;
+    const missing = courses.filter(c => typeof c.order !== 'number');
+    if (missing.length === 0) return;
+    (async () => {
+      try {
+        // assign orders based on current sorted position
+        const sorted = [...courses].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+        for (let i = 0; i < sorted.length; i++) {
+          const c = sorted[i];
+          if (typeof c.order !== 'number') {
+            await updateDoc(doc(db, 'courses', c.id), { order: i + 1 });
+          }
+        }
+      } catch (e) {
+        console.error('Failed to ensure order fields:', e);
+      }
+    })();
+  }, [reorderMode, isAdmin, courses]);
+
+  const moveCourse = async (courseId, direction) => {
+    if (!courses) return;
+    const sorted = [...courses].slice().sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    const idx = sorted.findIndex(c => c.id === courseId);
+    if (idx === -1) return;
+    const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= sorted.length) return;
+    const a = sorted[idx];
+    const b = sorted[swapIdx];
+    const aOrder = a.order ?? idx + 1;
+    const bOrder = b.order ?? swapIdx + 1;
+    try {
+      await updateDoc(doc(db, 'courses', a.id), { order: bOrder });
+      await updateDoc(doc(db, 'courses', b.id), { order: aOrder });
+    } catch (e) {
+      console.error('Failed to swap course order:', e);
+      alert('Failed to reorder courses.');
     }
   };
 
@@ -163,46 +210,58 @@ export default function Courses() {
   };
 
   // Shared Course card mimicking the Research.jsx card styling
-  const CourseCard = ({ icon: Icon, title, description, link, linkText = "Access Course", badge, borderColor = "border-[#004B8D]", children }) => (
-    <motion.div
-      initial="hidden"
-      whileInView="visible"
-      viewport={viewportOptions}
-      variants={fadeInUp}
-      className={`bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow border-l-4 ${borderColor} relative group`}
-    >
-      <div className="flex items-start gap-4 mb-4">
-        <div className={`p-3 rounded-xl ${borderColor === 'border-[#f97316]' ? 'bg-[#fff7ed]' : 'bg-[#dce8f5]'}`}>
-          <Icon className={`w-6 h-6 ${borderColor === 'border-[#f97316]' ? 'text-[#f97316]' : 'text-[#004B8D]'}`} />
-        </div>
-        <div className="flex-1">
-          {badge && (
-            <span className="inline-block px-3 py-1 bg-gray-100 text-xs font-['Inter'] font-semibold text-[#1a1a1a] rounded-full mb-2">
-              {badge}
-            </span>
-          )}
-          <div className="text-2xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-2">
-            {title}
+  const CourseCard = ({ icon: Icon, title, description, link, linkText = "Access Course", badge, borderColor = "border-[#004B8D]", children, alt = false }) => {
+    const headerBg = alt ? 'bg-[#f97316]' : 'bg-[#004B8D]';
+    const headerIconBg = alt ? 'bg-[#fff7ed]' : 'bg-[#dce8f5]';
+    const headerIconColor = alt ? 'text-[#f97316]' : 'text-[#004B8D]';
+    const cardBg = alt ? 'bg-[#fff7ed]' : 'bg-white';
+
+    return (
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={viewportOptions}
+        variants={fadeInUp}
+        className={`${cardBg} rounded-lg shadow-md hover:shadow-xl transition-shadow border-l-4 ${borderColor} relative group overflow-hidden`}
+      >
+        <div className={`${headerBg} p-6`}> 
+          <div className="flex items-start gap-4">
+            <div className={`${headerIconBg} p-3 rounded-xl`}> 
+              {Icon && <Icon className={`w-6 h-6 ${headerIconColor}`} />}
+            </div>
+            <div className="flex-1">
+              {badge && (
+                <span className="inline-block px-3 py-1 bg-transparent text-xs font-['Inter'] font-semibold text-white rounded-full mb-2">
+                  {badge}
+                </span>
+              )}
+              <div className="text-2xl font-['Playfair_Display'] font-bold text-white mb-0">
+                {title}
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-      <div className="text-gray-700 font-['Inter'] leading-relaxed mb-6">
-        {description}
-      </div>
-      {children}
-      {link && (
-        <a
-          href={link}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`inline-flex items-center gap-2 px-6 py-3 text-white font-['Inter'] font-semibold rounded-lg transition-all shadow-md hover:shadow-lg group ${borderColor === 'border-[#f97316]' ? 'bg-[#fb923c] hover:bg-[#f97316]' : 'bg-[#004B8D] hover:bg-[#003870]'}`}
-        >
-          {linkText}
-          <FiExternalLink className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-        </a>
-      )}
-    </motion.div>
-  );
+
+        <div className="p-6">
+          <div className="text-gray-700 font-['Inter'] leading-relaxed mb-6">
+            {description}
+          </div>
+          {children}
+          {link && (
+            <a
+              href={link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`inline-flex items-center gap-2 px-6 py-3 text-white font-['Inter'] font-semibold rounded-lg transition-all shadow-md hover:shadow-lg ${alt ? 'bg-[#fb923c] hover:bg-[#f97316]' : 'bg-[#004B8D] hover:bg-[#003870]'}`}
+            >
+              {linkText}
+              <FiExternalLink className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </a>
+          )}
+        </div>
+      </motion.div>
+    );
+  };
 
   const ResearchLecture = ({ title, description, driveLink, youtubeLink, driveField, youtubeField }) => (
     <motion.div
@@ -310,12 +369,21 @@ export default function Courses() {
                 <div className="w-24 h-1 bg-[#004B8D] rounded-full"></div>
               </div>
               {isAdmin && (
-                <button
-                  onClick={() => setShowAddCourse(true)}
-                  className="flex items-center gap-2 bg-[#004B8D] hover:bg-[#003870] text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-md"
-                >
-                  <FiPlus /> Add Course
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setShowAddCourse(true)}
+                    className="flex items-center gap-2 bg-[#004B8D] hover:bg-[#003870] text-white px-4 py-2 rounded-lg font-semibold transition-all shadow-md"
+                  >
+                    <FiPlus /> Add Course
+                  </button>
+                  <button
+                    onClick={() => setReorderMode((s) => !s)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${reorderMode ? 'bg-[#f97316] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                    title="Toggle reorder mode"
+                  >
+                    {reorderMode ? 'Reorder: ON' : 'Reorder'}
+                  </button>
+                </div>
               )}
             </div>
           </motion.div>
@@ -345,6 +413,7 @@ export default function Courses() {
                 linkText="Enroll on Coursera"
                 badge="COURSERA"
                 borderColor="border-[#f97316]"
+                alt={false}
               >
                 <div className="mb-6 space-y-3">
                   <div className="flex items-center gap-2 text-sm font-['Inter'] text-gray-700">
@@ -370,6 +439,7 @@ export default function Courses() {
                 linkText="Enroll on Coursera"
                 badge="COURSERA"
                 borderColor="border-[#004B8D]"
+                alt={true}
               >
                 <div className="mb-6 space-y-3">
                   <div className="flex items-center gap-2 text-sm font-['Inter'] text-gray-700">
@@ -388,127 +458,119 @@ export default function Courses() {
               </CourseCard>
 
               {/* Dynamic Firestore courses */}
-              {courses && courses.map((course, index) => {
-                const videoId = course.youtubeUrl ? extractVideoId(course.youtubeUrl) : null;
-                const thumbnailUrl = course.thumbnail || 
-                  (videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : null);
-                
-                return (
-                  <motion.div
-                    key={course.id}
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={viewportOptions}
-                    variants={fadeInUp}
-                    className="bg-white p-6 rounded-lg shadow-md hover:shadow-xl transition-shadow border-l-4 border-[#004B8D] relative group flex flex-col"
-                  >
-                    {isAdmin && (
-                      <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                        <button
-                          title={homeOverrides[course.id] ?? course.showOnHome ? 'Remove from Home page' : 'Show on Home page'}
-                          onClick={() => toggleShowOnHome(course)}
-                          className={`flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-semibold transition-all whitespace-nowrap ${
-                            (homeOverrides[course.id] ?? course.showOnHome)
-                              ? 'bg-[#004B8D] text-white shadow'
-                              : 'bg-gray-100 text-gray-600 hover:bg-[#dce8f5] hover:text-[#004B8D]'
-                          }`}
-                        >
-                          🏠 {(homeOverrides[course.id] ?? course.showOnHome) ? 'On Home' : '+ Home'}
-                        </button>
-                        <button
-                          onClick={() => setEditingCourse(course)}
-                          className="p-2 bg-[#004B8D] hover:bg-[#003870] text-white rounded-lg shadow"
-                        >
-                          <FiEdit2 size={16} />
-                        </button>
-                        <button
-                          onClick={() => deleteCourse(course.id)}
-                          className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow"
-                        >
-                          <FiTrash2 size={16} />
-                        </button>
-                      </div>
-                    )}
-                    
-                    {course.courseraUrl && (
-                      <span className="inline-block px-3 py-1 bg-gray-100 text-xs font-['Inter'] font-semibold text-[#1a1a1a] rounded-full mb-2">
-                        COURSERA
-                      </span>
-                    )}
-                    <h3 className="text-2xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-3 pr-16">
-                      {course.title}
-                    </h3>
-                    <p className="text-gray-600 font-['Inter'] mb-6 flex-grow">
-                      {course.description}
-                    </p>
-                    
-                    {thumbnailUrl && (
-                      <div className="mb-6">
-                        <a 
-                          href={course.youtubeUrl || '#'} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="block relative group/video"
-                        >
-                          <div className="aspect-video w-full bg-gray-100 rounded-lg overflow-hidden shadow-md">
-                            <img 
-                              src={thumbnailUrl}
-                              alt={course.title}
-                              className="w-full h-full object-cover group-hover/video:opacity-90 transition-opacity"
-                              onError={(e) => {
-                                if (videoId && !course.thumbnail) {
-                                  e.target.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-                                } else {
-                                  e.target.src = 'https://placehold.co/640x360/1a1a1a/ffffff?text=Course+Image';
-                                }
-                              }}
-                            />
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="w-12 h-12 bg-[#004B8D] bg-opacity-90 rounded-full flex items-center justify-center group-hover/video:scale-110 transition-transform shadow-lg">
-                                <FiPlay className="w-6 h-6 text-white ml-1" />
+              {sortedCourses && sortedCourses.map((course, index) => {
+                  const videoId = course.youtubeUrl ? extractVideoId(course.youtubeUrl) : null;
+                  const thumbnailUrl = course.thumbnail || (videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : null);
+                  const isAlt = index % 2 === 1;
+                  const borderColor = isAlt ? 'border-[#f97316]' : 'border-[#004B8D]';
+                  const playBg = isAlt ? 'bg-[#fb923c] bg-opacity-90' : 'bg-[#004B8D] bg-opacity-90';
+                  const ytButtonClass = isAlt ? 'bg-[#fb923c] hover:bg-[#f97316]' : 'bg-[#004B8D] hover:bg-[#003870]';
+
+                  return (
+                    <div key={course.id} className="relative">
+                      <CourseCard
+                        key={course.id}
+                        icon={FiFileText}
+                        title={course.title}
+                        description={course.description}
+                        badge={course.courseraUrl ? 'COURSERA' : null}
+                        borderColor={borderColor}
+                        alt={isAlt}
+                      >
+                      {thumbnailUrl && (
+                        <div className="mb-6">
+                          <a
+                            href={course.youtubeUrl || '#'}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block relative group/video"
+                          >
+                            <div className="aspect-video w-full bg-gray-100 rounded-lg overflow-hidden shadow-md">
+                              <img
+                                src={thumbnailUrl}
+                                alt={course.title}
+                                className="w-full h-full object-cover group-hover/video:opacity-90 transition-opacity"
+                                onError={(e) => {
+                                  if (videoId && !course.thumbnail) {
+                                    e.target.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+                                  } else {
+                                    e.target.src = 'https://placehold.co/640x360/1a1a1a/ffffff?text=Course+Image';
+                                  }
+                                }}
+                              />
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className={`w-12 h-12 ${playBg} rounded-full flex items-center justify-center group-hover/video:scale-110 transition-transform shadow-lg`}>
+                                  <FiPlay className="w-6 h-6 text-white ml-1" />
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </a>
+                          </a>
+                        </div>
+                      )}
+
+                      <div className="flex flex-col gap-2 mt-auto">
+                        {course.courseraUrl && (
+                          <a
+                            href={course.courseraUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center gap-2 w-full px-4 py-3 bg-[#fb923c] hover:bg-[#f97316] text-white font-['Inter'] font-semibold rounded-lg transition-all shadow-md"
+                          >
+                            Enroll on Coursera
+                            <FiExternalLink className="w-4 h-4" />
+                          </a>
+                        )}
+                        {course.courseLink && (
+                          <a
+                            href={course.courseLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center justify-center gap-2 w-full px-4 py-3 bg-[#004B8D] hover:bg-[#003870] text-white font-['Inter'] font-semibold rounded-lg transition-all shadow-md"
+                          >
+                            Explore Course
+                            <FiExternalLink className="w-4 h-4" />
+                          </a>
+                        )}
+                        {!course.courseraUrl && !course.courseLink && course.youtubeUrl && (
+                          <a
+                            href={course.youtubeUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`inline-flex items-center justify-center gap-2 w-full px-4 py-3 ${ytButtonClass} text-white font-['Inter'] font-semibold rounded-lg transition-all shadow-md`}
+                          >
+                            Watch on YouTube
+                            <FiExternalLink className="w-4 h-4" />
+                          </a>
+                        )}
                       </div>
-                    )}
-                    
-                    <div className="flex flex-col gap-2 mt-auto">
-                      {course.courseraUrl && (
-                        <a
-                          href={course.courseraUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center gap-2 w-full px-4 py-3 bg-[#fb923c] hover:bg-[#f97316] text-white font-['Inter'] font-semibold rounded-lg transition-all shadow-md"
-                        >
-                          Enroll on Coursera
-                          <FiExternalLink className="w-4 h-4" />
-                        </a>
-                      )}
-                      {course.courseLink && (
-                        <a
-                          href={course.courseLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center gap-2 w-full px-4 py-3 bg-[#004B8D] hover:bg-[#003870] text-white font-['Inter'] font-semibold rounded-lg transition-all shadow-md"
-                        >
-                          Explore Course
-                          <FiExternalLink className="w-4 h-4" />
-                        </a>
-                      )}
-                      {!course.courseraUrl && !course.courseLink && course.youtubeUrl && (
-                        <a
-                          href={course.youtubeUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center justify-center gap-2 w-full px-4 py-3 bg-[#004B8D] hover:bg-[#003870] text-white font-['Inter'] font-semibold rounded-lg transition-all shadow-md"
-                        >
-                          Watch on YouTube
-                          <FiExternalLink className="w-4 h-4" />
-                        </a>
+                      </CourseCard>
+
+                      {isAdmin && (
+                        <div className="absolute top-3 right-3 flex flex-col gap-2">
+                          <button
+                            onClick={() => moveCourse(course.id, 'up')}
+                            className="p-2 bg-white border rounded-md shadow-sm hover:bg-gray-50"
+                            title="Move up"
+                          >
+                            <FiChevronUp />
+                          </button>
+                          <button
+                            onClick={() => moveCourse(course.id, 'down')}
+                            className="p-2 bg-white border rounded-md shadow-sm hover:bg-gray-50"
+                            title="Move down"
+                          >
+                            <FiChevronDown />
+                          </button>
+                          <button
+                            onClick={() => { if (confirm('Delete this course?')) deleteCourse(course.id); }}
+                            className="p-2 bg-red-50 text-red-600 border rounded-md shadow-sm hover:bg-red-100"
+                            title="Delete"
+                          >
+                            <FiTrash2 />
+                          </button>
+                        </div>
                       )}
                     </div>
-                  </motion.div>
                 );
               })}
             </div>

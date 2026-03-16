@@ -667,7 +667,7 @@ export default function Home() {
               <div>
                 <EditableText
                   field="blog_heading"
-                  defaultValue={data.blog_heading}
+                  defaultValue={data.blog_heading || 'My Blogs'}
                   className="text-3xl sm:text-5xl lg:text-6xl font-['Playfair_Display'] font-bold text-[#111111] block"
                 />
                 <div className="w-24 h-1 bg-[#004B8D] rounded-full mt-4" />

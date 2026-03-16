@@ -534,7 +534,11 @@ export default function AdminDashboard() {
   const saveHomeContent = async () => {
     try {
       setSaving(true);
-      await updateDoc(doc(db, 'content', 'home'), homeContent);
+      // Avoid accidentally overwriting fields with empty strings/null.
+      const payload = Object.fromEntries(
+        Object.entries(homeContent || {}).filter(([, v]) => v !== '' && v !== null && v !== undefined)
+      );
+      await updateDoc(doc(db, 'content', 'home'), payload);
       setMessage({ text: 'Home content saved successfully!', type: 'success' });
       setTimeout(() => setMessage({ text: '', type: '' }), 3000);
     } catch (error) {
@@ -556,6 +560,12 @@ export default function AdminDashboard() {
       const imageUrl = await uploadToCloudinary(file, 'home');
       
       setHomeContent({ ...homeContent, [fieldName]: imageUrl });
+      // Persist the uploaded image URL immediately to avoid loss if other saves occur.
+      try {
+        await updateDoc(doc(db, 'content', 'home'), { [fieldName]: imageUrl });
+      } catch (err) {
+        console.error('Failed to persist hero image URL immediately:', err);
+      }
       setHomeImageProgress({ ...homeImageProgress, [fieldName]: 'Upload successful!' });
       setTimeout(() => {
         setHomeImageProgress({ ...homeImageProgress, [fieldName]: '' });

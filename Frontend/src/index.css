@@ -176,11 +176,12 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Full-screen section utility */
 .full-screen-section {
-  min-height: calc(100vh - 80px); /* 80px for fixed navbar */
+  /* Reduce default section spacing so sections sit closer together */
+  min-height: auto; /* allow content to determine height */
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 6rem 0;
+  padding: 3rem 0;
   position: relative;
   overflow: hidden;
 }
@@ -188,7 +189,7 @@ h1, h2, h3, h4, h5, h6 {
 /* Responsive padding for sections */
 @media (max-width: 768px) {
   .full-screen-section {
-    padding: 4rem 0;
+    padding: 2rem 0;
     min-height: auto; /* Allow content to define height on mobile */
   }
 }
