@@ -255,6 +255,22 @@ export default function AdminDashboard() {
   const [subscribers, setSubscribers] = useState([]);
   const [subscribersLoading, setSubscribersLoading] = useState(false);
   const [campaigns, setCampaigns] = useState([]);
+  
+  // Pagination for subscribers
+  const [currentPage, setCurrentPage] = useState(1);
+  const subscribersPerPage = 10;
+  
+  // Reset pagination when subscribers change
+  useEffect(() => {
+    const totalPages = Math.ceil(subscribers.length / subscribersPerPage);
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [subscribers, subscribersPerPage]);
+
+  // Manual subscriber add
+  const [newSubscriberEmail, setNewSubscriberEmail] = useState('');
+  const [addingSubscriber, setAddingSubscriber] = useState(false);
 
   const loadSubscribers = async () => {
     setSubscribersLoading(true);
@@ -288,6 +304,60 @@ export default function AdminDashboard() {
     const a = document.createElement('a');
     a.href = url; a.download = `newsletter_subscribers_${new Date().toISOString().slice(0,10)}.csv`;
     a.click(); URL.revokeObjectURL(url);
+  };
+
+  const handleAddSubscriber = async () => {
+    if (!newSubscriberEmail.trim()) {
+      alert('Please enter an email address.');
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(newSubscriberEmail.trim())) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+
+    setAddingSubscriber(true);
+    try {
+      // Check if exists
+      const newsletterRef = collection(db, 'newsletter_subscribers');
+      const q = query(newsletterRef, where('email', '==', newSubscriberEmail.trim().toLowerCase()));
+      const snap = await getDocs(q);
+      
+      if (!snap.empty) {
+        alert('This email is already subscribed!');
+        setAddingSubscriber(false);
+        return;
+      }
+
+      await addDoc(newsletterRef, {
+        email: newSubscriberEmail.trim().toLowerCase(),
+        subscribedAt: new Date().toISOString(),
+        status: 'active',
+        source: 'admin_dashboard'
+      });
+      
+      alert('Subscriber added successfully!');
+      setNewSubscriberEmail('');
+      loadSubscribers(); // Refresh list
+    } catch (err) {
+      console.error('Error adding subscriber:', err);
+      alert('Failed to add subscriber: ' + err.message);
+    } finally {
+      setAddingSubscriber(false);
+    }
+  };
+
+  const handleDeleteSubscriber = async (id, email) => {
+    if (!window.confirm(`Are you sure you want to delete subscriber ${email}?`)) return;
+    try {
+      await deleteDoc(doc(db, 'newsletter_subscribers', id));
+      alert('Subscriber deleted successfully.');
+      setSubscribers(prev => prev.filter(s => s.id !== id));
+    } catch (err) {
+      console.error('Error deleting subscriber:', err);
+      alert('Failed to delete subscriber: ' + err.message);
+    }
   };
 
   // Blog comments state
@@ -367,7 +437,6 @@ export default function AdminDashboard() {
         console.log('Trainings content not found, initializing...');
         const defaultTrainings = {
           page_heading: "Executive Training Programs",
-          page_subtitle: "By Prof. Vishal Gupta",
           page_description: "Transform your leadership journey with world-class executive education programs from IIM Ahmedabad",
         };
         await setDoc(doc(db, 'content', 'trainings'), defaultTrainings);
@@ -1919,39 +1988,99 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
+              {/* Add Subscriber Form */}
+              <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '6px', marginBottom: '1.5rem', border: '1px solid #e2e8f0' }}>
+                <h4 style={{ margin: '0 0 0.75rem', fontSize: '0.95rem', fontWeight: 600, color: '#475569' }}>Manually Add Subscriber</h4>
+                <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                  <input
+                    type="email"
+                    placeholder="Enter email address"
+                    value={newSubscriberEmail}
+                    onChange={(e) => setNewSubscriberEmail(e.target.value)}
+                    style={{ flex: 1, minWidth: '200px', padding: '0.6rem', border: '1px solid #cbd5e1', borderRadius: '4px' }}
+                  />
+                  <button
+                    onClick={handleAddSubscriber}
+                    disabled={addingSubscriber}
+                    style={{ padding: '0.6rem 1.25rem', background: '#004B8D', color: 'white', border: 'none', borderRadius: '4px', cursor: addingSubscriber ? 'not-allowed' : 'pointer', fontWeight: 600 }}
+                  >
+                    {addingSubscriber ? 'Adding...' : 'Add'}
+                  </button>
+                </div>
+              </div>
+
               {subscribers.length === 0 ? (
                 <p style={{ color: '#999', textAlign: 'center', padding: '2rem 0' }}>Click "Load Subscribers" to view the list.</p>
               ) : (
-                <div style={{ overflowX: 'auto' }}>
-                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
-                    <thead>
-                      <tr style={{ borderBottom: '2px solid #e5e5e5', textAlign: 'left' }}>
-                        <th style={{ padding: '0.6rem 1rem', fontWeight: 600 }}>#</th>
-                        <th style={{ padding: '0.6rem 1rem', fontWeight: 600 }}>Email</th>
-                        <th style={{ padding: '0.6rem 1rem', fontWeight: 600 }}>Status</th>
-                        <th style={{ padding: '0.6rem 1rem', fontWeight: 600 }}>Subscribed On</th>
-                        <th style={{ padding: '0.6rem 1rem', fontWeight: 600 }}>Source</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {subscribers.map((s, i) => (
-                        <tr key={s.id} style={{ borderBottom: '1px solid #f0f0f0', background: i % 2 === 0 ? '#fafafa' : 'white' }}>
-                          <td style={{ padding: '0.6rem 1rem', color: '#888' }}>{i + 1}</td>
-                          <td style={{ padding: '0.6rem 1rem', fontWeight: 500 }}>{s.email}</td>
-                          <td style={{ padding: '0.6rem 1rem' }}>
-                            <span style={{ padding: '2px 10px', borderRadius: '999px', fontSize: '0.78rem', fontWeight: 600, background: s.status === 'active' ? '#d1fae5' : '#fef3c7', color: s.status === 'active' ? '#065f46' : '#92400e' }}>
-                              {s.status || 'active'}
-                            </span>
-                          </td>
-                          <td style={{ padding: '0.6rem 1rem', color: '#666' }}>
-                            {s.subscribedAt ? new Date(s.subscribedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
-                          </td>
-                          <td style={{ padding: '0.6rem 1rem', color: '#888', fontSize: '0.85rem' }}>{s.source || 'website'}</td>
+                <>
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+                      <thead>
+                        <tr style={{ borderBottom: '2px solid #e5e5e5', textAlign: 'left' }}>
+                          <th style={{ padding: '0.6rem 1rem', fontWeight: 600 }}>#</th>
+                          <th style={{ padding: '0.6rem 1rem', fontWeight: 600 }}>Email</th>
+                          <th style={{ padding: '0.6rem 1rem', fontWeight: 600 }}>Status</th>
+                          <th style={{ padding: '0.6rem 1rem', fontWeight: 600 }}>Subscribed On</th>
+                          <th style={{ padding: '0.6rem 1rem', fontWeight: 600 }}>Source</th>
+                          <th style={{ padding: '0.6rem 1rem', fontWeight: 600, textAlign: 'center' }}>Action</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {subscribers
+                          .slice((currentPage - 1) * subscribersPerPage, currentPage * subscribersPerPage)
+                          .map((s, i) => (
+                          <tr key={s.id} style={{ borderBottom: '1px solid #f0f0f0', background: i % 2 === 0 ? '#fafafa' : 'white' }}>
+                            <td style={{ padding: '0.6rem 1rem', color: '#888' }}>
+                              {(currentPage - 1) * subscribersPerPage + i + 1}
+                            </td>
+                            <td style={{ padding: '0.6rem 1rem', fontWeight: 500 }}>{s.email}</td>
+                            <td style={{ padding: '0.6rem 1rem' }}>
+                              <span style={{ padding: '2px 10px', borderRadius: '999px', fontSize: '0.78rem', fontWeight: 600, background: s.status === 'active' ? '#d1fae5' : '#fef3c7', color: s.status === 'active' ? '#065f46' : '#92400e' }}>
+                                {s.status || 'active'}
+                              </span>
+                            </td>
+                            <td style={{ padding: '0.6rem 1rem', color: '#666' }}>
+                              {s.subscribedAt ? new Date(s.subscribedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}
+                            </td>
+                            <td style={{ padding: '0.6rem 1rem', color: '#888', fontSize: '0.85rem' }}>{s.source || 'website'}</td>
+                            <td style={{ padding: '0.6rem 1rem', textAlign: 'center' }}>
+                              <button
+                                onClick={() => handleDeleteSubscriber(s.id, s.email)}
+                                style={{ border: 'none', background: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px' }}
+                                title="Delete Subscriber"
+                              >
+                                <FiTrash2 size={16} />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  
+                  {/* Pagination Controls */}
+                  {subscribers.length > subscribersPerPage && (
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '1.5rem', gap: '1rem' }}>
+                      <button 
+                        onClick={() => setCurrentPage(c => Math.max(c - 1, 1))}
+                        disabled={currentPage === 1}
+                        style={{ padding: '0.5rem 1rem', border: '1px solid #ddd', borderRadius: '4px', background: currentPage === 1 ? '#f3f4f6' : 'white', cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
+                      >
+                        Previous
+                      </button>
+                      <span style={{ fontSize: '0.9rem', color: '#666' }}>
+                        Page <strong>{currentPage}</strong> of <strong>{Math.ceil(subscribers.length / subscribersPerPage)}</strong>
+                      </span>
+                      <button 
+                        onClick={() => setCurrentPage(c => Math.min(c + 1, Math.ceil(subscribers.length / subscribersPerPage)))}
+                        disabled={currentPage >= Math.ceil(subscribers.length / subscribersPerPage)}
+                        style={{ padding: '0.5rem 1rem', border: '1px solid #ddd', borderRadius: '4px', background: currentPage >= Math.ceil(subscribers.length / subscribersPerPage) ? '#f3f4f6' : 'white', cursor: currentPage >= Math.ceil(subscribers.length / subscribersPerPage) ? 'not-allowed' : 'pointer' }}
+                      >
+                        Next
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>

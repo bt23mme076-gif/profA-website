@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { FiLinkedin, FiTwitter, FiMail, FiYoutube, FiInstagram, FiFacebook } from 'react-icons/fi';
+import { FiLinkedin, FiTwitter, FiMail, FiYoutube, FiInstagram, FiFacebook, FiMapPin } from 'react-icons/fi';
 import { SiTiktok } from 'react-icons/si';
 
 export default function Footer() {
@@ -32,6 +32,12 @@ export default function Footer() {
                 <a href="tel:+917971524935" className="hover:text-white transition-colors">
                   +91-79-7152-4935
                 </a>
+              </p>
+              <p className="flex items-start justify-center md:justify-start gap-2">
+                <FiMapPin className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                <span className="hover:text-white transition-colors text-left max-w-[250px]">
+                  Wing 11A, IIM-A, Vastrapur, Ahmedabad - 380015
+                </span>
               </p>
             </div>
             <div className="text-gray-500 text-sm md:text-base font-medium space-y-1">

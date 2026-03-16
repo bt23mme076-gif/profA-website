@@ -173,3 +173,29 @@ h1, h2, h3, h4, h5, h6 {
     width: 4px;
   }
 }
+
+/* Full-screen section utility */
+.full-screen-section {
+  min-height: calc(100vh - 80px); /* 80px for fixed navbar */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 6rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Responsive padding for sections */
+@media (max-width: 768px) {
+  .full-screen-section {
+    padding: 4rem 0;
+    min-height: auto; /* Allow content to define height on mobile */
+  }
+}
+
+/* Hide scrollbar on mobile for cleaner look */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+}

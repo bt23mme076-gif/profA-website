@@ -4,7 +4,6 @@ import { doc, setDoc } from 'firebase/firestore';
 const trainingsContent = {
   // Page header
   page_heading: "Executive Training Programs",
-  page_subtitle: "By Prof. Vishal Gupta",
   page_description: "Transform your leadership journey with world-class executive education programs from IIM Ahmedabad",
   
   // Training Programs

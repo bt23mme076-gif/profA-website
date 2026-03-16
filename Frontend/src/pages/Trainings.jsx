@@ -8,7 +8,6 @@ export default function Trainings() {
   const { isAdmin } = useAuth() || {};
   const { data: pageData } = useFirestoreDoc('content', 'trainings', {
     page_heading: 'Executive Training Programs',
-    page_subtitle: 'By Prof. Vishal Gupta',
     page_description: 'Transform your leadership journey with world-class executive education programs from IIM Ahmedabad',
   });
 
@@ -95,7 +94,6 @@ export default function Trainings() {
                 collection="content"
                 docId="trainings"
                 field="page_subtitle"
-                defaultValue={pageData?.page_subtitle || 'By Prof. Vishal Gupta'}
                 className="text-xl lg:text-2xl text-[#004B8D] font-['Inter']"
               />
             </p>

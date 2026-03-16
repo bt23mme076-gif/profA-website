@@ -32,13 +32,13 @@ const viewportOptions = { once: true, margin: '0px 0px -60px 0px', amount: 0.15 
 
 
 const UNIFORM_CARD =
-  "w-full max-w-[340px] mx-auto bg-white rounded-[24px] overflow-hidden border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col h-full";
+  "w-full max-w-[340px] mx-auto bg-white rounded-[24px] overflow-hidden border border-gray-200 shadow-sm hover:shadow-2xl hover:border-[#F5C400] transition-all duration-300 flex flex-col h-full group transform hover:-translate-y-2";
 
 const UNIFORM_IMAGE_WRAP =
-  "w-full h-[160px] sm:h-[180px] md:h-[200px] overflow-hidden bg-gray-100";
+  "w-full h-[160px] sm:h-[180px] md:h-[200px] overflow-hidden bg-gray-100 relative";
 
 const UNIFORM_IMAGE =
-  "w-full h-full object-cover";
+  "w-full h-full object-cover transition-transform duration-700 group-hover:scale-110";
 
 const UNIFORM_BODY =
   "flex flex-col flex-1 p-4 sm:p-5";
@@ -56,7 +56,7 @@ const UNIFORM_FOOTER =
   "mt-auto pt-4 border-t border-gray-200 flex items-center justify-between gap-3";
 
 const UNIFORM_BUTTON =
-  "w-full text-center bg-[#004B8D] hover:bg-[#004B8D] text-white px-4 py-2 font-['Inter'] font-bold text-xs sm:text-sm rounded-lg transition-colors shadow-md flex items-center justify-center gap-2 mt-auto";
+  "w-full text-center bg-[#004B8D] text-white px-4 py-3 font-['Inter'] font-bold text-xs sm:text-sm rounded-lg transition-all duration-300 shadow-md flex items-center justify-center gap-2 mt-auto hover:bg-[#F5C400] hover:text-[#0B1628] hover:shadow-lg transform hover:-translate-y-1";
 
 const FALLBACK_TESTIMONIALS = [
   {
@@ -149,8 +149,6 @@ export default function Home() {
     hero_subtitle: 'IIM Ahmedabad Professor. Researcher. Thought Leader.',
     hero_description:
       'Professor in Organizational Behavior at the Indian Institute of Management Ahmedabad (IIMA)',
-    hero_credential1: 'Fellow, IIM Lucknow',
-    hero_credential2: 'B.E. (Hons.) EEE, BITS-Pilani',
     hero_linkedin: 'https://in.linkedin.com/in/vishal-gupta-iima',
     hero_address: '502, Forum Tower, IIMA New Campus',
     hero_phone: '+91-79-7152-4935',
@@ -165,7 +163,6 @@ export default function Home() {
       'Develop strategic thinking capabilities to drive innovation and competitive advantage in dynamic markets.',
     course2_youtube: '',
 
-    blog_heading: 'Recent Blogs',
     blog1_title: 'The Future of Strategic Leadership in Digital Age',
     blog1_excerpt:
       'Exploring how leaders can navigate uncertainty and drive transformation in rapidly evolving business landscapes.',
@@ -351,87 +348,184 @@ export default function Home() {
   return (
     <div className="bg-white overflow-x-hidden">
       {/* 1. HERO */}
-      <section
-        className="min-h-[calc(100vh-80px)] grid lg:grid-cols-2 items-stretch px-4 sm:px-6 lg:px-16 py-8 lg:py-0 gap-8 lg:gap-0 relative overflow-hidden"
-        style={{ background: 'linear-gradient(135deg, #1a2d52 0%, #1e3461 40%, #162647 100%)' }}
-      >
-        <div className="flex flex-col justify-center space-y-4 sm:space-y-5 max-w-2xl w-full h-full relative z-10 order-2 lg:order-1">
-          <motion.div
-            initial={{ opacity: 0, y: 45 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <EditableText
-              field="hero_greeting"
-              defaultValue={data.hero_greeting}
-              className="text-sm sm:text-base md:text-lg font-['Inter'] font-semibold tracking-[0.25em] uppercase text-[#F5C400] mb-4 block"
-            />
+     {/* 1. HERO */}
+<section
+  className="min-h-[calc(100vh-80px)] grid lg:grid-cols-2 items-stretch px-4 sm:px-6 lg:px-16 py-8 lg:py-0 gap-8 lg:gap-0 relative overflow-hidden"
+  style={{ background: 'linear-gradient(135deg, #1a2d52 0%, #1e3461 40%, #162647 100%)' }}
+>
+  <style>{`
+    /* Animated gradient underline */
+    @keyframes shimmer-line {
+      0%   { background-position: -200% center; }
+      100% { background-position: 200% center; }
+    }
+    .hero-shimmer-line {
+      height: 3px;
+      width: 180px;
+      background: linear-gradient(90deg, #004B8D, #F5C400, #004B8D, #F5C400);
+      background-size: 300% auto;
+      animation: shimmer-line 3s linear infinite;
+      border-radius: 9999px;
+      margin-top: 8px;
+    }
 
-            <EditableText
-              field="hero_title"
-              defaultValue={data.hero_title || 'Creating Happy Leaders'}
-              className="text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-['Playfair_Display'] font-bold text-white leading-[1.05] mb-2 block"
-            />
+    /* Photo ring glow — same schema as .photo-ring */
+    .hero-photo-ring {
+      position: relative;
+      border-radius: 1rem;
+      transition: transform 0.4s ease;
+    }
+    .hero-photo-ring::before {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 1.25rem;
+      background: linear-gradient(135deg, #F5C400, #004B8D, #F5C400);
+      opacity: 0;
+      transform: scale(0.96);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      box-shadow: 0 0 0px rgba(245,196,0,0);
+      z-index: -1;
+    }
+    .hero-photo-ring:hover::before,
+    .hero-photo-ring:focus-within::before {
+      opacity: 1;
+      transform: scale(1.06);
+      box-shadow: 0 0 32px rgba(245, 196, 0, 0.35), 0 0 60px rgba(0, 75, 141, 0.2);
+    }
+    .hero-photo-ring:hover .hero-profile-photo,
+    .hero-photo-ring:focus-within .hero-profile-photo {
+      transform: scale(1.035);
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
+    }
+    .hero-profile-photo {
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+      border-radius: 1rem;
+      overflow: hidden;
+    }
 
-            <EditableText
-              field="hero_name"
-              defaultValue={data.hero_name}
-              className="text-2xl sm:text-3xl md:text-4xl xl:text-5xl font-['Playfair_Display'] text-[#F5C400] font-semibold mb-4 block"
-            />
+    /* Button glow effects */
+    .hero-btn-primary {
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    .hero-btn-primary::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #FFD700, #F5C400, #FFA500);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      border-radius: inherit;
+    }
+    .hero-btn-primary:hover::after {
+      opacity: 1;
+    }
+    .hero-btn-primary:hover {
+      box-shadow: 0 0 20px rgba(245, 196, 0, 0.5), 0 6px 20px rgba(0,0,0,0.3);
+      transform: translateY(-2px) scale(1.04);
+    }
+    .hero-btn-primary span {
+      position: relative;
+      z-index: 1;
+    }
 
-            <EditableText
-              field="hero_description"
-              defaultValue={data.hero_description}
-              className="text-base sm:text-lg md:text-xl xl:text-2xl font-['Inter'] text-gray-300 leading-relaxed block mb-4"
-              multiline={true}
-            />
-          </motion.div>
+    /* Credential pills */
+    .hero-credential {
+      transition: all 0.3s ease;
+      cursor: default;
+    }
+    .hero-credential:hover {
+      background: rgba(245, 196, 0, 0.15);
+      border-color: rgba(245, 196, 0, 0.6);
+      color: #F5C400;
+      transform: translateX(4px);
+    }
+  `}</style>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.7 }}
-            className="space-y-4"
-          >
-            <div className="flex flex-wrap gap-3">
-              <Link to="/about">
-                <motion.button
-                  whileHover={{ scale: 1.05, backgroundColor: '#004B8D' }}
-                  whileTap={{ scale: 0.97 }}
-                  transition={{ duration: 0.2 }}
-                  className="bg-[#F5C400] px-7 py-3.5 font-['Inter'] font-bold text-[#0B1628] text-sm rounded-md shadow-lg"
-                >
-                  Get in Touch
-                </motion.button>
-              </Link>
-            </div>
-          </motion.div>
-        </div>
+  {/* Subtle background orbs */}
+  <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#004B8D]/10 rounded-full blur-3xl pointer-events-none" />
+  <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-[#F5C400]/5 rounded-full blur-3xl pointer-events-none" />
 
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, x: 30 }}
-          animate={{ opacity: 1, scale: 1, x: 0 }}
-          transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
-          className="relative z-10 flex items-center justify-center h-full order-1 lg:order-2"
-        >
-          <div className="relative overflow-hidden rounded-2xl flex items-center justify-center w-full max-w-[300px] sm:max-w-[360px] md:max-w-[400px] lg:max-w-[430px] aspect-[3/4] shadow-[0_20px_40px_rgba(0,0,0,0.4)] bg-[#1a2d52]">
-            <img
-              src={data.hero_image || '/prof-gupta.jpg'}
-              alt="Prof. Vishal Gupta"
-              className="w-full h-full object-cover object-top"
-              onError={(e) => {
-                e.target.src = 'https://via.placeholder.com/600x800/1a2d4f/ffffff?text=Prof.+Vishal+Gupta';
-              }}
-            />
-          </div>
-        </motion.div>
-      </section>
+  <div className="flex flex-col justify-center space-y-4 sm:space-y-5 max-w-2xl w-full h-full relative z-10 order-2 lg:order-1">
+    <motion.div
+      initial={{ opacity: 0, y: 45 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <EditableText
+        field="hero_greeting"
+        defaultValue={data.hero_greeting}
+        className="text-sm sm:text-base md:text-lg font-['Inter'] font-semibold tracking-[0.25em] uppercase text-[#F5C400] mb-4 block"
+      />
 
+      <EditableText
+        field="hero_title"
+        defaultValue={data.hero_title || 'Creating Happy Leaders'}
+        className="text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-['Playfair_Display'] font-bold text-white leading-[1.05] mb-2 block"
+      />
+      {/* Animated shimmer underline */}
+      <div className="hero-shimmer-line mb-3" />
+
+      <EditableText
+        field="hero_name"
+        defaultValue={data.hero_name}
+        className="text-2xl sm:text-3xl md:text-4xl xl:text-5xl font-['Playfair_Display'] text-[#F5C400] font-semibold mb-4 block"
+      />
+
+      <EditableText
+        field="hero_description"
+        defaultValue={data.hero_description}
+        className="text-base sm:text-lg md:text-xl xl:text-2xl font-['Inter'] text-gray-300 leading-relaxed block mb-4"
+        multiline={true}
+      />
+
+      <div className="flex items-center gap-4">
+      </div>
+    </motion.div>
+
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.5, duration: 0.7 }}
+      className="space-y-4"
+    >
+      <div className="flex flex-wrap gap-3">
+        <Link to="/about">
+          <button className="hero-btn-primary bg-[#F5C400] px-7 py-3.5 font-['Inter'] font-bold text-[#0B1628] text-sm rounded-md shadow-lg">
+            <span>Get in Touch</span>
+          </button>
+        </Link>
+      </div>
+    </motion.div>
+  </div>
+
+  <motion.div
+    initial={{ opacity: 0, scale: 0.95, x: 30 }}
+    animate={{ opacity: 1, scale: 1, x: 0 }}
+    transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+    className="relative z-10 flex items-center justify-center h-full order-1 lg:order-2"
+  >
+    <div className="hero-photo-ring">
+      <div className="hero-profile-photo w-full max-w-[300px] sm:max-w-[360px] md:max-w-[400px] lg:max-w-[430px] aspect-[3/4] shadow-[0_20px_40px_rgba(0,0,0,0.4)] bg-[#1a2d52] overflow-hidden">
+        <img
+          src={data.hero_image || '/prof-gupta.jpg'}
+          alt="Prof. Vishal Gupta"
+          className="w-full h-full object-cover object-top"
+          onError={(e) => {
+            e.target.src = 'https://via.placeholder.com/600x800/1a2d4f/ffffff?text=Prof.+Vishal+Gupta';
+          }}
+        />
+      </div>
+    </div>
+  </motion.div>
+</section>
       {/* 2. COURSES */}
-      <section id="courses" className="py-10 sm:py-12 px-4 sm:px-6 lg:px-16 bg-white">
-        <div className="max-w-7xl mx-auto">
+      <section id="courses" className="full-screen-section bg-white pt-6 pb-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <motion.div
-            className="text-center mb-8"
+            className="text-center mb-8 group"
             initial="hidden"
             whileInView="visible"
             viewport={viewportOptions}
@@ -440,13 +534,13 @@ export default function Home() {
             <EditableText
               field="courses_heading"
               defaultValue={data.courses_heading}
-              className="text-2xl sm:text-3xl lg:text-4xl font-['Playfair_Display'] font-bold text-[#111111] mb-3 block"
+              className="text-2xl sm:text-3xl lg:text-4xl font-['Playfair_Display'] font-bold text-[#111111] mb-3 block group-hover:text-[#004B8D] transition-colors duration-300"
             />
-            <div className="w-24 h-1 bg-[#004B8D] rounded-full mx-auto" />
+            <div className="w-24 h-1 bg-[#004B8D] rounded-full mx-auto group-hover:bg-[#F5C400] transition-colors duration-300 group-hover:w-32 transition-all" />
           </motion.div>
 
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto"
+            className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto"
             initial="hidden"
             whileInView="visible"
             viewport={viewportOptions}
@@ -560,10 +654,10 @@ export default function Home() {
       </section>
 
       {/* 3. BLOGS */}
-      <section id="blog" className="py-12 sm:py-16 px-4 sm:px-6 lg:px-16 bg-[#ebf2f8]">
+            <section id="blog" className="py-2 px-4 sm:px-6 lg:px-16 bg-[#ebf2f8]">
         <div className="max-w-7xl mx-auto">
           <motion.div
-            className="mb-12"
+            className="mb-4"
             initial="hidden"
             whileInView="visible"
             viewport={viewportOptions}
@@ -582,18 +676,14 @@ export default function Home() {
           </motion.div>
 
           <motion.div
-            className="flex items-center gap-3 mb-8"
+            className="flex items-center gap-3 mb-2"
             initial="hidden"
             whileInView="visible"
             viewport={viewportOptions}
             variants={fadeInLeft}
           >
-            <div className="w-8 h-8 rounded-full bg-[#004B8D] flex items-center justify-center flex-shrink-0">
-              <FiBookOpen size={14} className="text-white" />
-            </div>
-            <h3 className="text-lg sm:text-xl font-['Playfair_Display'] font-bold text-[#111111]">
-              Recent Blogs
-            </h3>
+          
+            
             <div className="h-px flex-1 bg-gray-200" />
           </motion.div>
 
@@ -656,7 +746,7 @@ export default function Home() {
           </motion.div>
 
           <motion.div
-            className="text-center mt-14"
+            className="text-center mt-6"
             initial="hidden"
             whileInView="visible"
             viewport={viewportOptions}
@@ -676,10 +766,10 @@ export default function Home() {
       </section>
 
       {/* 4. TESTIMONIALS */}
-      <section className="py-12 sm:py-16 bg-white relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-10">
+      <section className="full-screen-section bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <motion.div
-            className="text-center"
+            className="text-center mb-12"
             initial="hidden"
             whileInView="visible"
             viewport={viewportOptions}
@@ -695,7 +785,6 @@ export default function Home() {
             </h2>
             <div className="w-24 h-1 bg-[#004B8D] rounded-full mx-auto" />
           </motion.div>
-        </div>
 
         {(() => {
           const allItems = testimonials && testimonials.length > 0 ? testimonials : FALLBACK_TESTIMONIALS;
@@ -704,12 +793,12 @@ export default function Home() {
           const currentItems = allItems.slice(currentPage * 3, currentPage * 3 + 3);
 
           return (
-            <div className="max-w-7xl mx-auto px-4 sm:px-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
                 {currentItems.map((t, i) => (
                   <div
                     key={`${currentPage}-${i}`}
-                    className="w-full max-w-[470px] mx-auto bg-white rounded-[32px] overflow-hidden border border-gray-200 shadow-sm flex flex-col min-h-[420px] p-5 sm:p-6"
+                    className="w-full max-w-[470px] mx-auto bg-white rounded-[32px] overflow-hidden border border-gray-200 shadow-sm flex flex-col h-full min-h-[380px] p-6"
                   >
                     <div className="flex-1">
                       <p className="text-base font-['Inter'] text-gray-700 leading-relaxed">
@@ -746,101 +835,97 @@ export default function Home() {
             </div>
           );
         })()}
+        </div>
       </section>
 
-      {/* 5. TRAININGS DELIVERED */}
-      <section className="py-12 sm:py-16 bg-[#ebf2f8] overflow-hidden">
-        <style>{`
-          @keyframes logos-scroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-          }
-          .logos-track {
-            display: flex;
-            align-items: center;
-            width: max-content;
-            animation: logos-scroll 30s linear infinite;
-          }
-          .logos-track:hover {
-            animation-play-state: paused;
-          }
-        `}</style>
-
-        <motion.div
-          className="max-w-7xl mx-auto px-4 sm:px-6 text-center mb-10"
-          initial="hidden"
-          whileInView="visible"
-          viewport={viewportOptions}
-          variants={fadeInUp}
-        >
-          <h2 className="text-3xl sm:text-5xl lg:text-6xl font-['Playfair_Display'] font-bold text-[#111111] mb-4">
-            Trainings Delivered For
-          </h2>
-          <div className="w-24 h-1 bg-[#004B8D] rounded-full mx-auto mb-6" />
-          <p className="text-sm sm:text-base text-gray-600 font-['Inter'] max-w-3xl mx-auto">
-            From leading academic institutions to global corporations, Prof. Gupta has delivered transformative training programs.
-          </p>
-        </motion.div>
-
-        {(() => {
-          const logoItems =
-            trainingLogos && trainingLogos.length > 0
-              ? trainingLogos
-              : [
-                  { id: 'f1', name: 'IIM Ahmedabad', logoUrl: '' },
-                  { id: 'f2', name: 'Coursera', logoUrl: '' },
-                  { id: 'f3', name: 'Delhi Public Schools', logoUrl: '' },
-                  { id: 'f4', name: 'Rushil Decor', logoUrl: '' },
-                  { id: 'f5', name: 'University of Northern Iowa', logoUrl: '' },
-                  { id: 'f6', name: 'University of Mumbai', logoUrl: '' },
-                  { id: 'f7', name: 'ISRO', logoUrl: '' },
-                  { id: 'f8', name: 'Larsen & Toubro', logoUrl: '' }
-                ];
-
-          const doubled = [...logoItems, ...logoItems];
-
-          return (
-            <div className="overflow-hidden">
-              <div className="logos-track">
-                {doubled.map((logo, i) => (
-                  <div
-                    key={`logo-${i}`}
-                    className="flex-shrink-0 flex items-center justify-center h-20 lg:h-28 px-8 py-4 mx-3 bg-white rounded-lg shadow-sm border border-gray-200 hover:bg-white transition-colors"
-                    style={{ maxWidth: '180px' }}
-                  >
-                    {logo.logoUrl ? (
-                      <>
-                        <img
-                          src={logo.logoUrl}
-                          alt={logo.name}
-                          className="max-h-full w-auto object-contain"
-                          onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.nextSibling.style.display = 'block';
-                          }}
-                        />
-                        <span className="font-['Inter'] font-bold text-gray-700 text-center hidden text-sm">
-                          {logo.name}
-                        </span>
-                      </>
-                    ) : (
-                      <span className="font-['Inter'] font-bold text-gray-700 text-center text-sm lg:text-lg whitespace-nowrap">
-                        {logo.name}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
+   {/* 5. TRAININGS DELIVERED */}
+<section id="trainings" className="full-screen-section bg-[#ebf2f8]">
+  <style>{`
+    @keyframes logos-scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .logos-track {
+      display: flex;
+      align-items: center;
+      width: max-content;
+      animation: logos-scroll 30s linear infinite;
+    }
+    .logos-track:hover {
+      animation-play-state: paused;
+    }
+  `}</style>
+  <motion.div
+    className="max-w-7xl mx-auto px-4 sm:px-6 text-center mb-12"
+    initial="hidden"
+    whileInView="visible"
+    viewport={viewportOptions}
+    variants={fadeInUp}
+  >
+    <h2 className="text-3xl sm:text-5xl lg:text-6xl font-['Playfair_Display'] font-bold text-[#111111] mb-4">
+      Trainings Delivered For
+    </h2>
+    <div className="w-24 h-1 bg-[#004B8D] rounded-full mx-auto mb-6" />
+    <p className="text-base sm:text-lg text-gray-600 font-['Inter'] max-w-3xl mx-auto">
+      From leading academic institutions to global corporations, Prof. Gupta has delivered transformative training programs.
+    </p>
+  </motion.div>
+  {(() => {
+    const logoItems =
+      trainingLogos && trainingLogos.length > 0
+        ? trainingLogos
+        : [
+            { id: 'f1', name: 'IIM Ahmedabad', logoUrl: '' },
+            { id: 'f2', name: 'Coursera', logoUrl: '' },
+            { id: 'f3', name: 'Delhi Public Schools', logoUrl: '' },
+            { id: 'f4', name: 'Rushil Decor', logoUrl: '' },
+            { id: 'f5', name: 'University of Northern Iowa', logoUrl: '' },
+            { id: 'f6', name: 'University of Mumbai', logoUrl: '' },
+            { id: 'f7', name: 'ISRO', logoUrl: '' },
+            { id: 'f8', name: 'Larsen & Toubro', logoUrl: '' }
+          ];
+    const doubled = [...logoItems, ...logoItems];
+    return (
+      <div className="overflow-hidden w-full">
+        <div className="logos-track">
+          {doubled.map((logo, i) => (
+            <div
+              key={`logo-${i}`}
+              className="flex-shrink-0 flex items-center justify-center h-24 lg:h-32 px-10 py-5 mx-4 bg-white rounded-lg shadow-md border border-gray-200"
+              style={{ minWidth: '200px' }}
+            >
+              {logo.logoUrl ? (
+                <>
+                  <img
+                    src={logo.logoUrl}
+                    alt={logo.name}
+                    className="max-h-full w-auto object-contain"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'block';
+                    }}
+                  />
+                  <span className="font-['Inter'] font-bold text-gray-700 text-center hidden text-sm">
+                    {logo.name}
+                  </span>
+                </>
+              ) : (
+                <span className="font-['Inter'] font-bold text-gray-700 text-center text-sm lg:text-lg whitespace-nowrap">
+                  {logo.name}
+                </span>
+              )}
             </div>
-          );
-        })()}
-      </section>
-
+          ))}
+        </div>
+      </div>
+    );
+  })()}
+</section>
       {/* 6. BOOKS */}
-      <section id="books" className="py-10 sm:py-12 px-4 sm:px-6 lg:px-16 bg-white">
-        <div className="max-w-7xl mx-auto">
+      <section id="books" className="full-screen-section bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <motion.div
-            className="text-center mb-8"
+            className="text-center mb-12"
             initial="hidden"
             whileInView="visible"
             viewport={viewportOptions}
@@ -855,7 +940,7 @@ export default function Home() {
           </motion.div>
 
           <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto"
             initial="hidden"
             whileInView="visible"
             viewport={viewportOptions}

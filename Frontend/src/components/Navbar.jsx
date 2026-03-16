@@ -11,7 +11,7 @@ const DEFAULT_NAV_LINKS = [
   { id: 'books', name: 'Books', path: '/book' },
   { id: 'consulting', name: 'Consulting', path: '/about' },
   { id: 'recognitions', name: 'Recognitions', path: '/about' },
-  { id: 'opinions', name: 'Opinions', hash: '#blog' },
+  { id: 'opinions', name: 'Blogs', path: '/blog' },
   { id: 'courses', name: 'Courses', path: '/courses' },
   { id: 'contact', name: 'Contact', hash: '#contact' },
 ];
@@ -51,7 +51,26 @@ export default function Navbar() {
           const data = snap.data();
           if (data.professorName) setProfessorName(data.professorName);
           if (data.subtitle) setSubtitle(data.subtitle);
-          if (data.navLinks && Array.isArray(data.navLinks)) setNavLinks(data.navLinks);
+          if (data.navLinks && Array.isArray(data.navLinks)) {
+            let needsUpdate = false;
+            const patchedLinks = data.navLinks.map(l => {
+              // Ensure Opinions/Blogs link goes to /blog
+              // Also ensure we handle cases where name might have been edited but ID remains
+              if (l.id === 'opinions' && (l.path !== '/blog')) {
+                needsUpdate = true;
+                return { ...l, path: '/blog', hash: undefined };
+              }
+              return l;
+            });
+            setNavLinks(patchedLinks);
+            
+            // If migration applied, update Firestore immediately to persist the fix
+            if (needsUpdate) {
+              setDoc(docRef, { navLinks: patchedLinks }, { merge: true }).catch(err => 
+                console.error('Failed to auto-migrate navbar links:', err)
+              );
+            }
+          }
         }
       } catch (err) {
         console.error('Could not load navbar content:', err);
@@ -207,6 +226,14 @@ export default function Navbar() {
 
   const handleNavClick = (link) => {
     setMobileMenuOpen(false); // Close mobile menu on nav click
+    
+    // Explicit override for Blogs/Opinions to ensure correct routing
+    if (link.id === 'opinions' || link.name === 'Blogs' || link.name === 'Opinions') {
+      navigate('/blog');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     if (link.path) {
       // Navigate to a different page
       navigate(link.path);
