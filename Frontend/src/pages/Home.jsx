@@ -350,8 +350,8 @@ export default function Home() {
       {/* 1. HERO */}
      {/* 1. HERO */}
 <section
-  className="min-h-[calc(100vh-80px)] grid lg:grid-cols-2 items-stretch px-4 sm:px-6 lg:px-16 py-8 lg:py-0 gap-8 lg:gap-0 relative overflow-hidden"
-  style={{ background: 'linear-gradient(135deg, #1a2d52 0%, #1e3461 40%, #162647 100%)' }}
+  className="grid lg:grid-cols-2 items-stretch px-4 sm:px-6 lg:px-16 py-8 lg:py-0 gap-8 lg:gap-0 relative overflow-hidden"
+  style={{ background: 'linear-gradient(135deg, #1a2d52 0%, #1e3461 40%, #162647 100%)', minHeight: 'clamp(640px, 82vh, 920px)' }}
 >
   <style>{`
     /* Animated gradient underline */
@@ -359,15 +359,15 @@ export default function Home() {
       0%   { background-position: -200% center; }
       100% { background-position: 200% center; }
     }
-    .hero-shimmer-line {
-      height: 3px;
-      width: 180px;
-      background: linear-gradient(90deg, #004B8D, #F5C400, #004B8D, #F5C400);
-      background-size: 300% auto;
-      animation: shimmer-line 3s linear infinite;
-      border-radius: 9999px;
-      margin-top: 8px;
-    }
+      .hero-shimmer-line {
+        height: 3px;
+        width: clamp(120px, 12vw, 260px);
+        background: linear-gradient(90deg, #004B8D, #F5C400, #004B8D, #F5C400);
+        background-size: 300% auto;
+        animation: shimmer-line 3s linear infinite;
+        border-radius: 9999px;
+        margin-top: 8px;
+      }
 
     /* Photo ring: replace gradient glow with single solid yellow border */
     .hero-photo-ring {
@@ -449,7 +449,8 @@ export default function Home() {
   <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#004B8D]/10 rounded-full blur-3xl pointer-events-none" />
   <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-[#F5C400]/5 rounded-full blur-3xl pointer-events-none" />
 
-  <div className="flex flex-col justify-center space-y-4 sm:space-y-5 max-w-2xl w-full h-full relative z-10 order-2 lg:order-1">
+  <div className="flex flex-col justify-center space-y-4 sm:space-y-5 w-full h-full relative z-10 order-2 lg:order-1"
+    style={{ maxWidth: 'min(640px, 54vw)' }}>
     <motion.div
       initial={{ opacity: 0, y: 45 }}
       animate={{ opacity: 1, y: 0 }}
@@ -509,7 +510,7 @@ export default function Home() {
     className="relative z-10 flex items-center justify-center h-full order-1 lg:order-2"
   >
     <div className="hero-photo-ring">
-      <div className="hero-profile-photo w-full max-w-[300px] sm:max-w-[360px] md:max-w-[400px] lg:max-w-[430px] aspect-[3/4] shadow-[0_20px_40px_rgba(0,0,0,0.4)] bg-[#1a2d52] overflow-hidden">
+    <div className="hero-profile-photo w-full aspect-[3/4] shadow-[0_20px_40px_rgba(0,0,0,0.4)] bg-[#1a2d52] overflow-hidden" style={{ maxWidth: 'min(430px, 38vw)' }}>
         <img
           src={data.hero_image || '/prof-gupta.jpg'}
           alt="Prof. Vishal Gupta"
@@ -535,7 +536,7 @@ export default function Home() {
             <EditableText
               field="courses_heading"
               defaultValue={data.courses_heading}
-              className="text-2xl sm:text-3xl lg:text-4xl font-['Playfair_Display'] font-bold text-[#111111] mb-3 block group-hover:text-[#004B8D] transition-colors duration-300"
+              className="text-2xl sm:text-3xl lg:text-4xl font-['Playfair_Display'] font-bold text-[#111111] mb-3 block transition-colors duration-300"
             />
             <div className="w-24 h-1 bg-[#004B8D] rounded-full mx-auto group-hover:bg-[#F5C400] transition-colors duration-300 group-hover:w-32 transition-all" />
           </motion.div>
@@ -658,20 +659,20 @@ export default function Home() {
             <section id="blog" className="py-2 px-4 sm:px-6 lg:px-16 bg-[#ebf2f8]">
         <div className="max-w-7xl mx-auto">
           <motion.div
-            className="mb-4"
+            className="mb-4 group"
             initial="hidden"
             whileInView="visible"
             viewport={viewportOptions}
             variants={fadeInUp}
           >
             <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
-              <div>
+                <div className="group">
                 <EditableText
                   field="blog_heading"
                   defaultValue={data.blog_heading || 'My Blogs'}
-                  className="text-3xl sm:text-5xl lg:text-6xl font-['Playfair_Display'] font-bold text-[#111111] block"
+                  className="text-3xl sm:text-5xl lg:text-6xl font-['Playfair_Display'] font-bold text-[#111111] block transition-colors duration-300"
                 />
-                <div className="w-24 h-1 bg-[#004B8D] rounded-full mt-4" />
+                <div className="w-24 h-1 bg-[#004B8D] rounded-full mt-4 mx-auto group-hover:bg-[#F5C400] group-hover:w-32 transition-all duration-300" />
               </div>
             </div>
           </motion.div>
@@ -770,7 +771,7 @@ export default function Home() {
       <section className="full-screen-section bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <motion.div
-            className="text-center mb-12"
+            className="text-center mb-12 group"
             initial="hidden"
             whileInView="visible"
             viewport={viewportOptions}
@@ -784,7 +785,7 @@ export default function Home() {
             <h2 className="text-2xl sm:text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#111111] mb-2">
               What People Say
             </h2>
-            <div className="w-24 h-1 bg-[#004B8D] rounded-full mx-auto" />
+            <div className="w-24 h-1 bg-[#004B8D] rounded-full mx-auto group-hover:bg-[#F5C400] group-hover:w-32 transition-all duration-300" />
           </motion.div>
 
         {(() => {
@@ -840,7 +841,7 @@ export default function Home() {
       </section>
 
    {/* 5. TRAININGS DELIVERED */}
-<section id="trainings" className="full-screen-section bg-[#ebf2f8]">
+<section id="trainings" className="full-screen-section bg-[#ebf2f8] min-h-screen">
   <style>{`
     @keyframes logos-scroll {
       0% { transform: translateX(0); }
@@ -857,16 +858,16 @@ export default function Home() {
     }
   `}</style>
   <motion.div
-    className="max-w-7xl mx-auto px-4 sm:px-6 text-center mb-12"
+    className="max-w-4xl mx-auto px-4 sm:px-6 text-center mb-12 group"
     initial="hidden"
     whileInView="visible"
     viewport={viewportOptions}
     variants={fadeInUp}
   >
-    <h2 className="text-3xl sm:text-5xl lg:text-6xl font-['Playfair_Display'] font-bold text-[#111111] mb-4">
+    <h2 className="text-3xl sm:text-5xl lg:text-6xl font-['Playfair_Display'] font-bold text-[#111111] mb-4 transition-colors duration-300">
       Trainings Delivered For
     </h2>
-    <div className="w-24 h-1 bg-[#004B8D] rounded-full mx-auto mb-6" />
+    <div className="w-24 h-1 bg-[#004B8D] rounded-full mx-auto mb-6 group-hover:bg-[#F5C400] group-hover:w-32 transition-all duration-300" />
     <p className="text-base sm:text-lg text-gray-600 font-['Inter'] max-w-3xl mx-auto">
       From leading academic institutions to global corporations, Prof. Gupta has delivered transformative training programs.
     </p>
@@ -887,8 +888,8 @@ export default function Home() {
           ];
     const doubled = [...logoItems, ...logoItems];
     return (
-      <div className="overflow-hidden w-full">
-        <div className="logos-track">
+      <div className="overflow-hidden w-screen -mx-4 sm:-mx-6 lg:-mx-8">
+        <div className="logos-track px-4 sm:px-6 lg:px-8">
           {doubled.map((logo, i) => (
             <div
               key={`logo-${i}`}
@@ -926,7 +927,7 @@ export default function Home() {
       <section id="books" className="full-screen-section bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
           <motion.div
-            className="text-center mb-12"
+            className="text-center mb-12 group"
             initial="hidden"
             whileInView="visible"
             viewport={viewportOptions}
@@ -937,7 +938,7 @@ export default function Home() {
               defaultValue={data.books_heading}
               className="text-2xl sm:text-3xl lg:text-4xl font-['Playfair_Display'] font-bold text-[#111111] block mb-3"
             />
-            <div className="w-24 h-1 bg-[#004B8D] rounded-full mx-auto" />
+            <div className="w-24 h-1 bg-[#004B8D] rounded-full mx-auto group-hover:bg-[#F5C400] group-hover:w-32 transition-all duration-300" />
           </motion.div>
 
           <motion.div

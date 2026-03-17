@@ -176,7 +176,14 @@ export default function Trainings() {
           )}
           <div className="space-y-16">
             {loading && <p>Loading programs...</p>}
-            {programs.map((program, index) => (
+            {programs.map((program, index) => {
+              const isEven = index % 2 === 0;
+              const headerBg = isEven ? 'bg-[#004B8D]' : 'bg-[#f97316]';
+              const buttonGradient = isEven
+                ? 'bg-linear-to-r from-[#004B8D] to-[#003870] hover:from-[#003870] hover:to-[#002a5a]'
+                : 'bg-linear-to-r from-[#f97316] to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c]';
+
+              return (
               <div key={program.id}>
                 {editingProgram?.id === program.id ? (
                   <AddEditForm
@@ -208,7 +215,7 @@ export default function Trainings() {
                       </div>
                     )}
                     {/* Program Header */}
-                    <div className={`p-8 text-white ${index % 2 === 0 ? 'bg-[#004B8D]' : 'bg-[#f97316]'}`}> 
+                    <div className={`p-8 text-white ${headerBg}`}> 
                       <h2 className="text-4xl font-['Playfair_Display'] font-bold mb-2 text-white !text-white">
                         {program.title}
                       </h2>
@@ -266,7 +273,7 @@ export default function Trainings() {
                           href={program.applyLink}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-3 px-8 py-4 bg-linear-to-r from-[#f97316] to-[#ea580c] text-white font-['Inter'] font-semibold rounded-lg shadow-lg hover:shadow-xl hover:from-[#ea580c] hover:to-[#c2410c] transition-all duration-300 transform hover:scale-105"
+                          className={`inline-flex items-center gap-3 px-8 py-4 ${buttonGradient} text-white font-['Inter'] font-semibold rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105`}
                         >
                           Apply Now
                           <FiExternalLink className="text-xl" />
@@ -276,7 +283,8 @@ export default function Trainings() {
                   </motion.div>
                 )}
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>

@@ -117,6 +117,73 @@ app.post('/api/contact', async (req, res) => {
   }
 });
 
+// Notify admin about new comment (used by frontend after comment submission)
+app.post('/api/notify/comment', async (req, res) => {
+  try {
+    const { name, email, comment, blogTitle, blogId, blogSlug } = req.body;
+
+    if (!name || !comment || !(blogTitle || blogId)) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL || process.env.GMAIL_USER;
+    if (!adminEmail) {
+      return res.status(500).json({ error: 'Admin email not configured' });
+    }
+
+    const subject = `New comment on: ${blogTitle || blogSlug}`;
+    const body = `<p>A new comment was posted on <strong>${blogTitle || blogSlug}</strong>.</p>
+      <p><strong>Name:</strong> ${name}</p>
+      <p><strong>Email:</strong> ${email || 'N/A'}</p>
+      <p><strong>Comment:</strong></p>
+      <blockquote style="background:#f8f9fb;padding:12px;border-left:3px solid #004B8D;">${comment}</blockquote>
+      <p>Approve or moderate comments in Firestore collection <code>blog_comments</code> (document for blogId: ${blogId}).</p>`;
+
+    await transporter.sendMail({
+      from: `"Prof. Vishal Gupta | IIM Ahmedabad" <${process.env.GMAIL_USER}>`,
+      to: adminEmail,
+      subject,
+      html: body,
+      text: `${name} (${email || 'no-email'}) commented on ${blogTitle || blogSlug}:\n\n${comment}`
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Comment notification error:', err);
+    res.status(500).json({ error: 'Failed to send notification' });
+  }
+});
+
+// Public endpoint to fetch approved comments for a blog (uses Admin SDK so bypasses client rules)
+app.get('/api/comments', async (req, res) => {
+  try {
+    const blogId = req.query.blogId;
+    if (!blogId) return res.status(400).json({ error: 'Missing blogId query parameter' });
+
+    // Query only by blogId to avoid requiring a composite index; filter and sort in code
+    const snap = await db.collection('blog_comments')
+      .where('blogId', '==', blogId)
+      .get();
+
+    console.log('Fetched comments snapshot size:', snap.size);
+
+    // Filter approved comments and sort by createdAt ascending
+    const comments = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .filter(c => c.approved === true)
+      .sort((a, b) => {
+        const at = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate().getTime() : (new Date(a.createdAt || 0)).getTime();
+        const bt = b.createdAt && b.createdAt.toDate ? b.createdAt.toDate().getTime() : (new Date(b.createdAt || 0)).getTime();
+        return at - bt;
+      });
+    res.json({ success: true, comments });
+  } catch (err) {
+    console.error('Error fetching comments via admin SDK:', err);
+    console.error(err.stack || err);
+    res.status(500).json({ error: 'Failed to fetch comments', details: err.message });
+  }
+});
+
 // Newsletter subscription endpoint - Save to Firestore
 app.post('/api/newsletter/subscribe', async (req, res) => {
   try {

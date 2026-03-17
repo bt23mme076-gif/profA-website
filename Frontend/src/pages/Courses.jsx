@@ -357,7 +357,8 @@ export default function Courses() {
           >
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
-                <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-4">
+                <div className="group">
+                <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-4 transition-colors duration-300">
                   <EditableText
                     collection="content"
                     docId="courses"
@@ -366,7 +367,8 @@ export default function Courses() {
                     className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a]"
                   />
                 </h2>
-                <div className="w-24 h-1 bg-[#004B8D] rounded-full"></div>
+                <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#F5C400] group-hover:w-32 transition-all duration-300"></div>
+                </div>
               </div>
               {isAdmin && (
                 <div className="flex gap-2">
@@ -599,8 +601,8 @@ export default function Courses() {
             className="mb-12"
           >
             <div className="flex items-start justify-between flex-wrap gap-4">
-              <div>
-                <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-4">
+              <div className="group">
+                <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-4 transition-colors duration-300">
                   <EditableText
                     collection="content"
                     docId="courses"
@@ -609,7 +611,8 @@ export default function Courses() {
                     className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a]"
                   />
                 </h2>
-                <div className="w-24 h-1 bg-[#004B8D] rounded-full mb-4"></div>
+                <div className="w-24 h-1 bg-[#004B8D] rounded-full mb-4 group-hover:bg-[#F5C400] group-hover:w-32 transition-all duration-300"></div>
+              </div>
                 <p className="text-lg font-['Inter'] text-gray-600 max-w-2xl">
                   <EditableText
                     collection="content"
@@ -620,7 +623,6 @@ export default function Courses() {
                     multiline
                   />
                 </p>
-              </div>
               {isAdmin && (
                 <button
                   onClick={() => setShowAddResearch(true)}
@@ -800,11 +802,10 @@ export default function Courses() {
               </div>
             )}
             {!researchLoading && researchCourses && researchCourses.length > 0 && (
-              <div className="mt-10">
-                <h3 className="text-2xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-6">Additional Research Topics</h3>
-                <div className="grid md:grid-cols-2 gap-6">
+              <div className="mt-6">
+                <div className="flex flex-col gap-6">
                   {researchCourses.map((rc) => (
-                    <div key={rc.id} className="relative">
+                    <div key={rc.id} className="relative w-full">
                       <ResearchLecture
                         title={rc.title}
                         description={rc.description}

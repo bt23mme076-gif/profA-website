@@ -236,8 +236,6 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('home');
   const [homeContent, setHomeContent] = useState({});
-  const [aboutContent, setAboutContent] = useState({});
-  const [trainingsContent, setTrainingsContent] = useState({});
   const [blogs, setBlogs] = useState([]);
   const [courses, setCourses] = useState([]);
   const [testimonials, setTestimonials] = useState([]);
@@ -367,6 +365,10 @@ export default function AdminDashboard() {
   // Home content image upload states
   const [homeImageUploading, setHomeImageUploading] = useState({});
   const [homeImageProgress, setHomeImageProgress] = useState({});
+  // Navbar/logo state
+  const [navbarContent, setNavbarContent] = useState({});
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [logoProgress, setLogoProgress] = useState('');
 
   // Redirect if not admin
   useEffect(() => {
@@ -411,37 +413,7 @@ export default function AdminDashboard() {
         setHomeContent({});
       }
 
-      // Fetch about content
-      const aboutDoc = await getDoc(doc(db, 'content', 'about'));
-      if (aboutDoc.exists()) {
-        setAboutContent(aboutDoc.data());
-        console.log('About content loaded');
-      } else {
-        console.log('About content not found, initializing...');
-        const defaultAbout = {
-          hero_heading: "Creating Happy Leaders",
-          hero_subtitle: "Professor of Organizational Behavior at IIM Ahmedabad.",
-          bio_heading: "Bridging Engineering and Behavior",
-        };
-        await setDoc(doc(db, 'content', 'about'), defaultAbout);
-        setAboutContent(defaultAbout);
-      }
 
-
-      // Fetch trainings content
-      const trainingsDoc = await getDoc(doc(db, 'content', 'trainings'));
-      if (trainingsDoc.exists()) {
-        setTrainingsContent(trainingsDoc.data());
-        console.log('Trainings content loaded');
-      } else {
-        console.log('Trainings content not found, initializing...');
-        const defaultTrainings = {
-          page_heading: "Executive Training Programs",
-          page_description: "Transform your leadership journey with world-class executive education programs from IIM Ahmedabad",
-        };
-        await setDoc(doc(db, 'content', 'trainings'), defaultTrainings);
-        setTrainingsContent(defaultTrainings);
-      }
 
       // Fetch blogs
       const blogsSnapshot = await getDocs(collection(db, 'blogs'));
@@ -478,6 +450,15 @@ export default function AdminDashboard() {
       }));
       setTrainingLogos(logosData);
       console.log('Training logos loaded:', logosData.length);
+
+      // Fetch navbar content (logo_url etc.)
+      const navbarDoc = await getDoc(doc(db, 'content', 'navbar'));
+      if (navbarDoc.exists()) {
+        setNavbarContent(navbarDoc.data());
+        console.log('Navbar content loaded');
+      } else {
+        setNavbarContent({});
+      }
 
       setLoading(false);
       console.log('All data loaded successfully');
@@ -575,6 +556,34 @@ export default function AdminDashboard() {
       setHomeImageProgress({ ...homeImageProgress, [fieldName]: 'Upload failed. Please try again.' });
     } finally {
       setHomeImageUploading({ ...homeImageUploading, [fieldName]: false });
+    }
+  };
+
+  // Upload logo for navbar - saves logo_url to content/navbar
+  const handleNavbarLogoUpload = async (file) => {
+    if (!file) return;
+    try {
+      setLogoUploading(true);
+      setLogoProgress('Uploading...');
+      const imageUrl = await uploadToCloudinary(file, 'navbar');
+      setNavbarContent({ ...navbarContent, logo_url: imageUrl });
+      try {
+        await updateDoc(doc(db, 'content', 'navbar'), { logo_url: imageUrl });
+      } catch (err) {
+        // if navbar doc doesn't exist, create it
+        try {
+          await setDoc(doc(db, 'content', 'navbar'), { logo_url: imageUrl }, { merge: true });
+        } catch (err2) {
+          console.error('Failed to persist navbar logo URL:', err2);
+        }
+      }
+      setLogoProgress('Upload successful!');
+      setTimeout(() => setLogoProgress(''), 2000);
+    } catch (err) {
+      console.error('Error uploading logo:', err);
+      setLogoProgress('Upload failed. Please try again.');
+    } finally {
+      setLogoUploading(false);
     }
   };
 
@@ -962,41 +971,6 @@ export default function AdminDashboard() {
               gap: '0.5rem'
             }}
           >
-            <FiUsers /> <span>About</span>
-          </button>
-          <button
-            className="admin-tab"
-            onClick={() => setActiveTab('research')}
-            style={{
-              padding: '1rem 2rem',
-              border: 'none',
-              background: 'none',
-              borderBottom: activeTab === 'research' ? '3px solid #1a1a1a' : 'none',
-              fontWeight: activeTab === 'research' ? 600 : 400,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}
-          
-          >
-            <FiBriefcase /> <span>Trainings</span>
-          </button>
-          <button
-            className="admin-tab"
-            onClick={() => setActiveTab('newsletter')}
-            style={{
-              padding: '1rem 2rem',
-              border: 'none',
-              background: 'none',
-              borderBottom: activeTab === 'newsletter' ? '3px solid #1a1a1a' : 'none',
-              fontWeight: activeTab === 'newsletter' ? 600 : 400,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
-            }}
-          >
             <FiDownload /> <span>Newsletter</span>
           </button>
           <button
@@ -1116,6 +1090,57 @@ export default function AdminDashboard() {
                         style={{ marginTop: '0.5rem', maxWidth: '200px', height: 'auto', borderRadius: '4px' }}
                         onError={(e) => e.target.style.display = 'none'}
                       />
+                    )}
+                  </div>
+                  {/* Navbar / Logo section */}
+                  <div style={{ borderTop: '1px solid #eee', paddingTop: '1rem', marginTop: '1rem' }}>
+                    <h3 style={{ fontSize: '1.05rem', fontWeight: 600, marginBottom: '0.75rem' }}>Navbar Logo</h3>
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                      <label
+                        style={{
+                          padding: '0.5rem 1rem',
+                          backgroundColor: logoUploading ? '#9ca3af' : '#004B8D',
+                          color: 'white',
+                          borderRadius: '4px',
+                          cursor: logoUploading ? 'not-allowed' : 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '0.5rem'
+                        }}
+                      >
+                        <FiUpload />
+                        {logoUploading ? 'Uploading...' : 'Upload Logo'}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => e.target.files[0] && handleNavbarLogoUpload(e.target.files[0])}
+                          disabled={logoUploading}
+                          style={{ display: 'none' }}
+                        />
+                      </label>
+                      {logoProgress && (
+                        <span style={{ padding: '0.5rem', color: logoProgress.includes('failed') ? '#ef4444' : '#10b981', fontSize: '0.9rem' }}>{logoProgress}</span>
+                      )}
+                    </div>
+                    <input
+                      type="text"
+                      value={navbarContent.logo_url || ''}
+                      onChange={(e) => setNavbarContent({ ...navbarContent, logo_url: e.target.value })}
+                      onBlur={async () => {
+                        try {
+                          await updateDoc(doc(db, 'content', 'navbar'), { logo_url: navbarContent.logo_url || '' });
+                          setMessage({ text: 'Logo URL saved', type: 'success' });
+                          setTimeout(() => setMessage({ text: '', type: '' }), 2000);
+                        } catch (err) {
+                          console.error('Error saving logo URL:', err);
+                          setMessage({ text: 'Error saving logo URL', type: 'error' });
+                        }
+                      }}
+                      placeholder="Or paste logo URL"
+                      style={{ width: '100%', padding: '0.75rem', border: '1px solid #ddd', borderRadius: '4px' }}
+                    />
+                    {navbarContent.logo_url && (
+                      <img src={navbarContent.logo_url} alt="Logo preview" style={{ marginTop: '0.5rem', maxWidth: '180px', height: 'auto', borderRadius: '6px' }} onError={(e) => e.target.style.display = 'none'} />
                     )}
                   </div>
                 </div>
@@ -1676,131 +1701,7 @@ export default function AdminDashboard() {
           </div>
         )}
 
-        {/* About Page Tab */}
-        {activeTab === 'about' && (
-          <div className="admin-card admin-content-section" style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '1.5rem' }}>Edit About Page Content</h2>
-            <div style={{ display: 'grid', gap: '1.5rem' }}>
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Hero Heading</label>
-                <input
-                  type="text"
-                  value={aboutContent.hero_heading || ''}
-                  onChange={(e) => setAboutContent({ ...aboutContent, hero_heading: e.target.value })}
-                  style={{ width: '100%', padding: '0.75rem', border: '1px solid #ddd', borderRadius: '4px' }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Bio Heading</label>
-                <input
-                  type="text"
-                  value={aboutContent.bio_heading || ''}
-                  onChange={(e) => setAboutContent({ ...aboutContent, bio_heading: e.target.value })}
-                  style={{ width: '100%', padding: '0.75rem', border: '1px solid #ddd', borderRadius: '4px' }}
-                />
-              </div>
-              <button
-                onClick={async () => {
-                  setSaving(true);
-                  try {
-                    await updateDoc(doc(db, 'content', 'about'), aboutContent);
-                    setMessage({ text: 'About page updated successfully!', type: 'success' });
-                    setTimeout(() => setMessage({ text: '', type: '' }), 3000);
-                  } catch (error) {
-                    setMessage({ text: 'Error updating about page', type: 'error' });
-                    console.error(error);
-                  } finally {
-                    setSaving(false);
-                  }
-                }}
-                disabled={saving}
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  backgroundColor: '#004B8D',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: saving ? 'not-allowed' : 'pointer',
-                  fontWeight: 600,
-                  opacity: saving ? 0.6 : 1
-                }}
-              >
-                {saving ? 'Saving...' : 'Save About Content'}
-              </button>
-            </div>
-            <p style={{ marginTop: '1rem', color: '#666', fontSize: '0.9rem' }}>
-              More detailed editing options coming soon. For now, you can edit the data directly in Firestore.
-            </p>
-          </div>
-        )}
-
-        {/* Trainings Page Tab */}
-        {activeTab === 'trainings' && (
-          <div className="admin-card admin-content-section" style={{ backgroundColor: 'white', padding: '2rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '1.5rem' }}>Edit Trainings Page Content</h2>
-            <div style={{ display: 'grid', gap: '1.5rem' }}>
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Page Heading</label>
-                <input
-                  type="text"
-                  value={trainingsContent.page_heading || ''}
-                  onChange={(e) => setTrainingsContent({ ...trainingsContent, page_heading: e.target.value })}
-                  style={{ width: '100%', padding: '0.75rem', border: '1px solid #ddd', borderRadius: '4px' }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Page Subtitle</label>
-                <input
-                  type="text"
-                  value={trainingsContent.page_subtitle || ''}
-                  onChange={(e) => setTrainingsContent({ ...trainingsContent, page_subtitle: e.target.value })}
-                  style={{ width: '100%', padding: '0.75rem', border: '1px solid #ddd', borderRadius: '4px' }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Page Description</label>
-                <textarea
-                  value={trainingsContent.page_description || ''}
-                  onChange={(e) => setTrainingsContent({ ...trainingsContent, page_description: e.target.value })}
-                  rows={3}
-                  style={{ width: '100%', padding: '0.75rem', border: '1px solid #ddd', borderRadius: '4px' }}
-                />
-              </div>
-              <button
-                onClick={async () => {
-                  setSaving(true);
-                  try {
-                    await updateDoc(doc(db, 'content', 'trainings'), trainingsContent);
-                    setMessage({ text: 'Trainings page updated successfully!', type: 'success' });
-                    setTimeout(() => setMessage({ text: '', type: '' }), 3000);
-                  } catch (error) {
-                    setMessage({ text: 'Error updating trainings page', type: 'error' });
-                    console.error(error);
-                  } finally {
-                    setSaving(false);
-                  }
-                }}
-                disabled={saving}
-                style={{
-                  padding: '0.75rem 1.5rem',
-                  backgroundColor: '#004B8D',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: saving ? 'not-allowed' : 'pointer',
-                  fontWeight: 600,
-                  opacity: saving ? 0.6 : 1
-                }}
-              >
-                {saving ? 'Saving...' : 'Save Trainings Content'}
-              </button>
-            </div>
-            <p style={{ marginTop: '1rem', color: '#666', fontSize: '0.9rem' }}>
-              Training programs can be managed in Firestore. Full editing interface coming soon.
-            </p>
-          </div>
-        )}
-
+       
         {/* ═══════════════════════════════════════════════════════
             NEWSLETTER TAB
         ════════════════════════════════════════════════════════ */}

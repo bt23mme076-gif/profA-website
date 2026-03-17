@@ -582,22 +582,38 @@ export default function Research() {
     }
   ];
 
-  // Use Firestore data if available, otherwise use hardcoded data
+  // Helper to parse a year/date from various fields and compare descending
+  const parseYear = (item) => {
+    if (!item) return 0;
+    const y = item.year || item.date || '';
+    const s = String(y).trim();
+    // try to extract a 4-digit year at start
+    const m = s.match(/(\d{4})/);
+    if (m) return parseInt(m[1], 10);
+    const n = parseInt(s, 10);
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  const compareByYearDesc = (a, b) => parseYear(b) - parseYear(a);
+
+  // Use Firestore data if available, otherwise use hardcoded data — always sort by year desc
   const displayPublications = (researchData?.featured_publications && researchData.featured_publications.length > 0)
-    ? researchData.featured_publications
-    : featuredPublications;
+    ? researchData.featured_publications.slice().sort(compareByYearDesc)
+    : featuredPublications.slice().sort(compareByYearDesc);
 
   const filteredPublications = useMemo(() => {
     const q = pubSearch.trim().toLowerCase();
-    if (!q) return displayPublications;
-    return displayPublications.filter(p =>
+    const base = displayPublications.slice();
+    if (!q) return base;
+    return base.filter(p =>
       p.title?.toLowerCase().includes(q) ||
       p.authors?.toLowerCase().includes(q) ||
-      p.year?.toString().includes(q) ||
+      String(p.year || '').toLowerCase().includes(q) ||
       p.journal?.toLowerCase().includes(q)
     );
   }, [pubSearch, displayPublications]);
-  const displayBookChapters = researchData?.book_chapters || bookChapters;
+
+  const displayBookChapters = (researchData?.book_chapters || bookChapters).slice().sort(compareByYearDesc);
   const displayCases = researchData?.cases || cases;
 
   return (
@@ -670,11 +686,11 @@ export default function Research() {
             className="mb-12"
           >
             <div className="flex items-center justify-between flex-wrap gap-4">
-              <div>
-                <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-4">
+              <div className="group">
+                <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-4 transition-colors duration-300">
                   Featured Peer-reviewed Publications
                 </h2>
-                <div className="w-24 h-1 bg-[#004B8D] rounded-full"></div>
+                <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#F5C400] group-hover:w-32 transition-all duration-300"></div>
               </div>
               {isAdmin && (
                 <button
@@ -895,11 +911,11 @@ export default function Research() {
             className="mb-12"
           >
             <div className="flex items-center justify-between flex-wrap gap-4">
-              <div>
-                <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-4">
+              <div className="group">
+                <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-4 transition-colors duration-300">
                   Book Chapters & Conference Proceedings
                 </h2>
-                <div className="w-24 h-1 bg-[#004B8D] rounded-full"></div>
+                <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#F5C400] group-hover:w-32 transition-all duration-300"></div>
               </div>
               {isAdmin && (
                 <button
@@ -1015,17 +1031,17 @@ export default function Research() {
             whileInView="visible"
             viewport={viewportOptions}
             variants={fadeInUp}
-            className="mb-12 text-center"
+            className="mb-12 text-center group"
           >
             <div className="flex items-center justify-center gap-3 mb-4">
               <div className="w-14 h-14 bg-[#004B8D] rounded-full flex items-center justify-center">
                 <FiUsers className="text-white text-2xl" />
               </div>
             </div>
-            <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-4">
+            <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-4 transition-colors duration-300">
               PhD Students Guided
             </h2>
-            <div className="w-24 h-1 bg-[#004B8D] rounded-full mx-auto"></div>
+            <div className="w-24 h-1 bg-[#004B8D] rounded-full mx-auto group-hover:bg-[#F5C400] group-hover:w-32 transition-all duration-300"></div>
           </motion.div>
 
           <div className="grid md:grid-cols-2 gap-12">

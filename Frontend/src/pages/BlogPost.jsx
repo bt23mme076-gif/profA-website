@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { db } from '../firebase/config';
 import {
-  doc, getDoc, collection, query, where, orderBy, getDocs, addDoc, serverTimestamp
+  doc, getDoc, collection, query, where, orderBy, getDocs, addDoc, serverTimestamp, onSnapshot
 } from 'firebase/firestore';
 import { FiCalendar, FiTag, FiArrowLeft, FiMessageSquare, FiUser, FiMail, FiSend, FiCheck } from 'react-icons/fi';
 
@@ -94,8 +94,15 @@ export default function BlogPost() {
   const { slug } = useParams();
   const [blog, setBlog] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [comments, setComments] = useState([]);
+  const [snapshotComments, setSnapshotComments] = useState([]);
+  const [localPendingComments, setLocalPendingComments] = useState([]);
   const [commentsLoading, setCommentsLoading] = useState(true);
+
+  // Combined comments (approved from snapshot + local pending ones)
+  const comments = [
+    ...snapshotComments,
+    ...localPendingComments
+  ];
 
   // Form state
   const [name, setName] = useState('');
@@ -138,29 +145,64 @@ export default function BlogPost() {
     if (slug) fetchBlog();
   }, [slug]);
 
-  // Fetch approved comments
-  const fetchComments = async (blogId) => {
-    setCommentsLoading(true);
-    try {
-      const q = query(
-        collection(db, 'blog_comments'),
-        where('blogId', '==', blogId),
-        where('approved', '==', true),
-        orderBy('createdAt', 'asc')
-      );
-      const snap = await getDocs(q);
-      setComments(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-    } catch (err) {
-      console.error('Error fetching comments:', err);
-      setComments([]);
-    } finally {
-      setCommentsLoading(false);
-    }
-  };
-
+  // Real-time listener for approved comments
   useEffect(() => {
-    if (blog?.id) fetchComments(blog.id);
-  }, [blog]);
+    if (!blog?.id) return;
+    setCommentsLoading(true);
+    const q = query(
+      collection(db, 'blog_comments'),
+      where('blogId', '==', blog.id),
+      where('approved', '==', true),
+      orderBy('createdAt', 'asc')
+    );
+    let unsubCalled = false;
+    try {
+      const unsub = onSnapshot(q, (snap) => {
+        const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        setSnapshotComments(data);
+        setCommentsLoading(false);
+      }, async (err) => {
+        console.error('Comments realtime error:', err);
+        // If permission denied, fallback to backend admin endpoint
+        try {
+          const resp = await fetch((window && window.__BACKEND_NOTIFY_URL_BASE) ? `${window.__BACKEND_NOTIFY_URL_BASE.replace(/\/$/, '')}/api/comments?blogId=${blog.id}` : `http://localhost:5000/api/comments?blogId=${blog.id}`);
+          if (resp.ok) {
+            const json = await resp.json();
+            if (json && json.comments) setSnapshotComments(json.comments);
+          } else {
+            console.warn('Backend comments fetch returned non-OK', resp.status);
+          }
+        } catch (fetchErr) {
+          console.warn('Backend comments fetch failed', fetchErr);
+        }
+        setCommentsLoading(false);
+      });
+      // ensure we unsubscribe on cleanup
+      return () => {
+        if (!unsubCalled) {
+          unsubCalled = true;
+          unsub();
+        }
+      };
+    } catch (e) {
+      console.error('Realtime listener setup failed, falling back to backend:', e);
+      // fallback: fetch via backend admin endpoint
+      (async () => {
+        try {
+          const resp = await fetch((window && window.__BACKEND_NOTIFY_URL_BASE) ? `${window.__BACKEND_NOTIFY_URL_BASE.replace(/\/$/, '')}/api/comments?blogId=${blog.id}` : `http://localhost:5000/api/comments?blogId=${blog.id}`);
+          if (resp.ok) {
+            const json = await resp.json();
+            if (json && json.comments) setSnapshotComments(json.comments);
+          }
+        } catch (err) {
+          console.error('Backend comments fetch error:', err);
+        } finally {
+          setCommentsLoading(false);
+        }
+      })();
+      return () => {};
+    }
+  }, [blog?.id]);
 
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
@@ -183,6 +225,41 @@ export default function BlogPost() {
         approved: false, // admin must approve
         createdAt: serverTimestamp(),
       });
+      // Show the comment locally as pending so the user sees it isn't lost
+      try {
+        const pendingComment = {
+          id: `pending-${Date.now()}`,
+          name: safeName,
+          email: safeEmail,
+          comment: safeComment,
+          createdAt: new Date().toISOString(),
+          pending: true
+        };
+        setLocalPendingComments((s) => [...s, pendingComment]);
+      } catch (e) {
+        console.warn('Failed to append pending comment locally', e);
+      }
+
+      // Attempt to notify admin via backend (non-blocking)
+      (async () => {
+        try {
+          const notifyUrl = (window && window.__BACKEND_NOTIFY_URL) || 'http://localhost:5000/api/notify/comment';
+          await fetch(notifyUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: safeName,
+              email: safeEmail,
+              comment: safeComment,
+              blogTitle: blog.title,
+              blogId: blog.id,
+              blogSlug: blog.slug || blog.id
+            })
+          });
+        } catch (notifyErr) {
+          console.warn('Notification failed:', notifyErr);
+        }
+      })();
       setSubmitStatus('success');
       setSubmitMessage('Your comment has been submitted and is awaiting moderation. Thank you!');
       setName('');
@@ -273,20 +350,28 @@ export default function BlogPost() {
           {/* Comment list */}
           {commentsLoading ? (
             <p style={{ fontFamily: 'Inter, sans-serif', color: '#9ca3af', fontSize: '.875rem' }}>Loading comments…</p>
-          ) : comments.length === 0 ? (
+          ) : (snapshotComments.length === 0 && localPendingComments.length === 0) ? (
             <p className="bp-no-comments">No comments yet. Be the first to share your thoughts!</p>
           ) : (
             <ul className="bp-comment-list">
-              {comments.map((c) => (
+              {([
+                ...snapshotComments,
+                ...localPendingComments
+              ]).map((c) => (
                 <li key={c.id} className="bp-comment">
                   <div className="bp-comment-header">
                     <div className="bp-avatar">{c.name?.charAt(0)?.toUpperCase() || '?'}</div>
                     <div className="bp-comment-meta">
-                      <p className="bp-comment-author">{c.name}</p>
-                      <p className="bp-comment-date">{formatCommentDate(c.createdAt)}</p>
+                      <p className="bp-comment-author">
+                        {c.name}
+                        {c.pending && (
+                          <span style={{ color: '#f97316', fontSize: '0.8rem', marginLeft: 8 }}> (Awaiting moderation)</span>
+                        )}
+                      </p>
+                      <p className="bp-comment-date">{formatCommentDate(c.createdAt)}{c.pending ? ' • Pending' : ''}</p>
                     </div>
                   </div>
-                  <p className="bp-comment-text">{c.comment}</p>
+                  <p className="bp-comment-text" style={c.pending ? { opacity: 0.9, fontStyle: 'italic' } : {}}>{c.comment}</p>
                 </li>
               ))}
             </ul>

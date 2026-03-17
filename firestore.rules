@@ -25,6 +25,26 @@ service cloud.firestore {
       allow write, update, delete: if isAdmin();
     }
 
+    // Allow public comments but require moderation
+    match /blog_comments/{commentId} {
+      // Allow creating a comment if basic fields are present and approved is explicitly false
+      allow create: if request.resource.data.blogId is string
+                      && request.resource.data.name is string
+                      && request.resource.data.name.size() > 0
+                      && request.resource.data.comment is string
+                      && request.resource.data.comment.size() > 0
+                      && (request.resource.data.approved == false || !('approved' in request.resource.data));
+
+      // Allow getting a single comment if it's approved or the requester is an admin
+      allow get: if resource.data.approved == true || isAdmin();
+
+      // Allow list queries if the client filters for approved==true, or if the requester is an admin
+      allow list: if request.query.where('approved','==',true) || isAdmin();
+
+      // Admins can update/delete (for approving or moderating)
+      allow update, delete: if isAdmin();
+    }
+
     match /blog_posts/{postId} {
       allow read: if true;
       allow write, update, delete: if isAdmin();

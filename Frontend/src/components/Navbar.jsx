@@ -289,27 +289,51 @@ export default function Navbar() {
           width: '100%',
           maxWidth: '100vw',
           padding: windowWidth < 768 ? '0 1rem' : '0 4rem', 
-          height: windowWidth < 768 ? '65px' : '80px', 
+          height: windowWidth < 768 ? '60px' : '72px', 
           display: 'flex', 
           alignItems: 'center', 
           justifyContent: 'space-between',
           boxSizing: 'border-box'
         }}>
           {/* Brand Name */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.12rem', flex: 1, minWidth: 0 }}>
 
-            {/* Gold accent bar */}
+            {/* Logo container */}
             <div
               onClick={() => { navigate('/'); scrollToSection(null); setMobileMenuOpen(false); }}
+              onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 0 12px rgba(245,196,0,0.55)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.boxShadow = '0 0 6px rgba(245,196,0,0.22)'; }}
               style={{
-                width: '4px',
-                height: windowWidth < 768 ? '36px' : '46px',
-                background: 'linear-gradient(to bottom, #F5C400, #e09800)',
-                borderRadius: '2px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: windowWidth < 480 ? '2px' : '5px',
+                marginLeft: 0,
+                marginRight: windowWidth < 768 ? 4 : 6,
+                borderRadius: 8,
+                background: showDark ? 'rgba(11,22,40,0.06)' : 'transparent',
+                cursor: 'pointer',
                 flexShrink: 0,
-                cursor: 'pointer'
+                boxShadow: '0 0 6px rgba(245,196,0,0.18)',
+                transition: 'box-shadow 180ms ease, transform 120ms ease'
               }}
-            />
+            >
+              <img
+                src="/logo-naval.png"
+                alt="Site logo"
+                onError={(e) => { e.target.src = '/logo.png'; }}
+                style={{
+                  // Keep the logo reasonably large on mobile; only shrink the text.
+                  maxHeight: windowWidth < 480 ? 30 : windowWidth < 768 ? 32 : 44,
+                  maxWidth: 160,
+                  width: 'auto',
+                  height: 'auto',
+                  objectFit: 'contain',
+                  display: 'block',
+                  borderRadius: 8,
+                }}
+              />
+            </div>
 
             {/* Text section - plain div, no Link, so edit inputs work perfectly */}
             <div style={{ overflow: 'hidden', minWidth: 0 }}>
@@ -327,9 +351,11 @@ export default function Navbar() {
                       fontWeight: 700,
                       border: '2px solid #ffcc00',
                       borderRadius: '4px',
-                      padding: '2px 6px',
-                      width: '180px',
-                      outline: 'none'
+                      padding: '6px 8px',
+                      width: 'clamp(160px, 28vw, 420px)',
+                      maxWidth: '100%',
+                      outline: 'none',
+                      zIndex: 60
                     }}
                   />
                   <button
@@ -350,13 +376,16 @@ export default function Navbar() {
                       setMobileMenuOpen(false);
                     }}
                     style={{
-                      fontSize: windowWidth < 480 ? '0.95rem' : windowWidth < 768 ? '1.1rem' : '1.65rem',
+                      // Make the name slightly smaller on mobile while keeping logo size.
+                      fontSize: windowWidth < 480 ? '0.68rem' : windowWidth < 768 ? '1.05rem' : '1.65rem',
                       fontFamily: '"Playfair Display", "Georgia", serif',
                       fontWeight: 700,
                       color: showDark ? '#ffffff' : '#1a1a1a',
                       letterSpacing: windowWidth < 480 ? '0' : '0.02em',
-                      margin: 0, lineHeight: 1.2,
-                      whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                      margin: 0, lineHeight: 1.05,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
                       cursor: 'pointer',
                       transition: 'color 0.3s ease'
                     }}
@@ -369,8 +398,8 @@ export default function Navbar() {
                     <button
                       onClick={() => startEdit('name', professorName)}
                       title="Edit name"
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '2px', color: '#aaa', display: 'flex', flexShrink: 0 }}
-                    ><FiEdit2 size={11} /></button>
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', flexShrink: 0, color: showDark ? '#fff' : '#6b6b6b' }}
+                    ><FiEdit2 size={12} /></button>
                   )}
                 </div>
               )}
@@ -456,7 +485,7 @@ export default function Navbar() {
                 e.currentTarget.style.transform = 'scale(1)';
               }}
             >
-              {mobileMenuOpen ? <FiX size={windowWidth < 480 ? 26 : 28} /> : <FiMenu size={windowWidth < 480 ? 26 : 28} />}
+              {mobileMenuOpen ? <FiX size={windowWidth < 480 ? 20 : 24} /> : <FiMenu size={windowWidth < 480 ? 20 : 24} />}
             </button>
           )}
 
@@ -930,7 +959,7 @@ export default function Navbar() {
       </nav>
 
       {/* Spacer for fixed navbar */}
-      <div style={{ height: windowWidth < 768 ? (isAdmin ? '93px' : '65px') : (isAdmin ? '108px' : '80px') }} />
+      <div style={{ height: windowWidth < 768 ? (isAdmin ? '88px' : '60px') : (isAdmin ? '100px' : '72px') }} />
       
       {/* Add animations */}
       <style>{`
