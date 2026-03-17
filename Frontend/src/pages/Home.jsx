@@ -369,37 +369,38 @@ export default function Home() {
       margin-top: 8px;
     }
 
-    /* Photo ring glow — same schema as .photo-ring */
+    /* Photo ring: replace gradient glow with single solid yellow border */
     .hero-photo-ring {
       position: relative;
       border-radius: 1rem;
-      transition: transform 0.4s ease;
+      transition: transform 0.2s ease;
     }
     .hero-photo-ring::before {
       content: '';
       position: absolute;
       inset: -6px;
       border-radius: 1.25rem;
-      background: linear-gradient(135deg, #F5C400, #004B8D, #F5C400);
-      opacity: 0;
+      background: #ffd700; /* solid yellow */
+      opacity: 0; /* hidden by default, revealed on hover */
       transform: scale(0.96);
-      transition: opacity 0.4s ease, transform 0.4s ease;
-      box-shadow: 0 0 0px rgba(245,196,0,0);
+      transition: opacity 0.36s ease, transform 0.36s ease, box-shadow 0.36s ease;
+      box-shadow: 0 10px 30px rgba(255, 215, 0, 0.06);
       z-index: -1;
     }
     .hero-photo-ring:hover::before,
     .hero-photo-ring:focus-within::before {
       opacity: 1;
       transform: scale(1.06);
-      box-shadow: 0 0 32px rgba(245, 196, 0, 0.35), 0 0 60px rgba(0, 75, 141, 0.2);
+      /* only yellow glow on hover, no gradient or blue */
+      box-shadow: 0 14px 40px rgba(255, 215, 0, 0.18);
     }
     .hero-photo-ring:hover .hero-profile-photo,
     .hero-photo-ring:focus-within .hero-profile-photo {
-      transform: scale(1.035);
+      transform: scale(1.02);
       box-shadow: 0 14px 34px rgba(0, 0, 0, 0.28);
     }
     .hero-profile-photo {
-      transition: transform 0.4s ease, box-shadow 0.4s ease;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
       border-radius: 1rem;
       overflow: hidden;
     }

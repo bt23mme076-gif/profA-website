@@ -204,3 +204,18 @@ html {
 .read-the-docs {
   color: #888;
 }
+
+/* Hero portrait ring: single solid yellow border */
+.hero-photo-ring {
+  display: inline-block;
+  border-radius: 18px;
+  padding: 6px; /* space for the yellow border */
+  background: none;
+  border: 6px solid #ffd700; /* solid yellow */
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.32);
+}
+
+.hero-profile-photo {
+  border-radius: 12px; /* match rounded corners */
+  overflow: hidden;
+}
