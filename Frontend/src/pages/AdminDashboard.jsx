@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase/config';
-import { doc, getDoc, updateDoc, setDoc, collection, addDoc, deleteDoc, getDocs, query, where } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, setDoc, collection, addDoc, deleteDoc, getDocs, query, where, serverTimestamp } from 'firebase/firestore';
 import { FiSave, FiPlus, FiTrash2, FiEdit, FiX, FiBookOpen, FiYoutube, FiFileText, FiDownload, FiStar, FiImage, FiUpload, FiUsers, FiBriefcase, FiExternalLink, FiMail, FiSend, FiInbox, FiRefreshCw } from 'react-icons/fi';
 import { uploadToCloudinary } from '../utils/cloudinaryUpload';
 
@@ -361,6 +361,10 @@ export default function AdminDashboard() {
   // Blog comments state
   const [blogComments, setBlogComments] = useState([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
+  // Admin reply UI state
+  const [replyOpenId, setReplyOpenId] = useState(null);
+  const [replyText, setReplyText] = useState('');
+  const [replySubmitting, setReplySubmitting] = useState(false);
   
   // Home content image upload states
   const [homeImageUploading, setHomeImageUploading] = useState({});
@@ -485,6 +489,41 @@ export default function AdminDashboard() {
       console.error('Error fetching comments:', err);
     } finally {
       setCommentsLoading(false);
+    }
+  };
+
+  const formatAdminDate = (val) => {
+    if (!val) return 'Unknown date';
+    try {
+      if (val?.toDate) return val.toDate().toLocaleString('en-IN');
+      if (typeof val === 'string') {
+        const d = new Date(val);
+        if (!Number.isNaN(d.getTime())) return d.toLocaleString('en-IN');
+      }
+      if (typeof val === 'number') return new Date(val).toLocaleString('en-IN');
+    } catch (e) {
+      // fallthrough
+    }
+    return 'Unknown date';
+  };
+
+  const sendReply = async (commentId) => {
+    if (!replyText.trim()) return;
+    setReplySubmitting(true);
+    try {
+      const payload = { reply: replyText.trim(), replyAt: serverTimestamp() };
+      await updateDoc(doc(db, 'blog_comments', commentId), payload);
+      setBlogComments(prev => prev.map(c => c.id === commentId ? { ...c, reply: payload.reply, replyAt: new Date().toISOString() } : c));
+      setMessage({ text: 'Reply saved.', type: 'success' });
+      setTimeout(() => setMessage({ text: '', type: '' }), 2500);
+      setReplyOpenId(null);
+      setReplyText('');
+    } catch (err) {
+      console.error('Failed to save reply', err);
+      setMessage({ text: 'Failed to save reply', type: 'error' });
+      setTimeout(() => setMessage({ text: '', type: '' }), 3000);
+    } finally {
+      setReplySubmitting(false);
     }
   };
 
@@ -2045,19 +2084,55 @@ export default function AdminDashboard() {
                               </div>
                               <p style={{ margin: 0, fontSize: '0.9rem', color: '#374151', lineHeight: 1.6 }}>{c.comment}</p>
                               <p style={{ margin: '6px 0 0', fontSize: '0.72rem', color: '#9ca3af' }}>
-                                {c.createdAt?.toDate ? c.createdAt.toDate().toLocaleString('en-IN') : 'Unknown date'}
+                                {formatAdminDate(c.createdAt)}
                               </p>
+
+                              {/* Admin reply display */}
+                              {c.reply && (
+                                <div style={{ marginTop: 10, background: '#f8fafc', padding: 12, borderRadius: 8, border: '1px solid #e6edf6' }}>
+                                  <p style={{ margin: 0, fontWeight: 700, color: '#004B8D' }}>Reply</p>
+                                  <p style={{ margin: '6px 0 0', color: '#374151' }}>{c.reply}</p>
+                                  <p style={{ margin: '6px 0 0', fontSize: '0.78rem', color: '#9ca3af' }}>{formatAdminDate(c.replyAt)}</p>
+                                </div>
+                              )}
                             </div>
-                            <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+                            <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0, alignItems: 'center' }}>
                               {!c.approved && (
                                 <button onClick={() => approveComment(c.id)} style={{ padding: '6px 14px', background: '#10b981', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}>
                                   Approve
+                                </button>
+                              )}
+                              {c.approved && (
+                                <button onClick={() => { setReplyOpenId(c.id); setReplyText(c.reply || ''); }} style={{ padding: '6px 12px', background: '#004B8D', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '0.8rem' }}>
+                                  Reply
                                 </button>
                               )}
                               <button onClick={() => deleteComment(c.id)} style={{ padding: '6px 12px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '0.8rem' }}>
                                 <FiTrash2 size={13} />
                               </button>
                             </div>
+
+                            {/* Reply editor (when opened) */}
+                            {replyOpenId === c.id && (
+                              <div style={{ marginTop: 10, width: '100%', display: 'flex', gap: 8, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                                <textarea
+                                  value={replyText}
+                                  onChange={(e) => setReplyText(e.target.value)}
+                                  placeholder="Write a reply..."
+                                  style={{ flex: '1 1 380px', minHeight: 80, padding: 8, borderRadius: 6, border: '1px solid #e5e7eb' }}
+                                />
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0 }}>
+                                  <button
+                                    onClick={() => sendReply(c.id)}
+                                    disabled={replySubmitting}
+                                    style={{ background: '#004B8D', color: 'white', border: 'none', padding: '8px 12px', borderRadius: 6, cursor: 'pointer' }}
+                                  >
+                                    {replySubmitting ? 'Saving…' : 'Send reply'}
+                                  </button>
+                                  <button onClick={() => { setReplyOpenId(null); setReplyText(''); }} style={{ background: 'transparent', border: 'none', color: '#6b7280', cursor: 'pointer' }}>Cancel</button>
+                                </div>
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>

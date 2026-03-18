@@ -3,8 +3,9 @@ import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { db } from '../firebase/config';
 import {
-  doc, getDoc, collection, query, where, orderBy, getDocs, addDoc, serverTimestamp, onSnapshot
+  doc, getDoc, collection, query, where, orderBy, getDocs, addDoc, serverTimestamp, onSnapshot, updateDoc
 } from 'firebase/firestore';
+import { useAuth } from '../context/AuthContext';
 import { FiCalendar, FiTag, FiArrowLeft, FiMessageSquare, FiUser, FiMail, FiSend, FiCheck } from 'react-icons/fi';
 
 /* ─── Font + CSS injection ───────────────────────────── */
@@ -74,20 +75,46 @@ if (typeof document !== 'undefined' && !document.getElementById('bp-styles')) {
   document.head.appendChild(style);
 }
 
-const formatDate = (dateVal) => {
-  if (!dateVal) return '';
+// Robust date normalization to handle Firestore Timestamp objects ({ seconds, nanoseconds }),
+// legacy {_seconds,_nanoseconds}, numeric epochs, ISO strings, Date instances, and objects
+// returned from backend endpoints.
+const toDateObject = (val) => {
+  if (!val) return null;
+  // Firestore Timestamp instance
+  if (typeof val === 'object' && typeof val.toDate === 'function') return val.toDate();
+  // Serialized Firestore timestamp { seconds, nanoseconds }
+  if (val && (val.seconds != null || val._seconds != null)) {
+    const seconds = Number(val.seconds ?? val._seconds);
+    const nanoseconds = Number(val.nanoseconds ?? val._nanoseconds ?? 0);
+    if (!Number.isFinite(seconds)) return null;
+    return new Date(seconds * 1000 + Math.floor(nanoseconds / 1e6));
+  }
+  // Numeric epoch (seconds or milliseconds) — try to infer
+  if (typeof val === 'number') {
+    // if it's in seconds (reasonable range), convert to ms
+    if (val < 1e12) return new Date(val * 1000);
+    return new Date(val);
+  }
+  // String (ISO) or Date-like
   try {
-    const d = dateVal?.toDate ? dateVal.toDate() : new Date(dateVal);
-    return d.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
-  } catch { return ''; }
+    const d = new Date(val);
+    if (!Number.isNaN(d.getTime())) return d;
+  } catch (e) {
+    // fallthrough
+  }
+  return null;
+};
+
+const formatDate = (dateVal) => {
+  const d = toDateObject(dateVal);
+  if (!d) return '';
+  return d.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
 };
 
 const formatCommentDate = (ts) => {
-  if (!ts) return '';
-  try {
-    const d = ts?.toDate ? ts.toDate() : new Date(ts);
-    return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
-  } catch { return ''; }
+  const d = toDateObject(ts);
+  if (!d) return '';
+  return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
 export default function BlogPost() {
@@ -96,7 +123,12 @@ export default function BlogPost() {
   const [loading, setLoading] = useState(true);
   const [snapshotComments, setSnapshotComments] = useState([]);
   const [localPendingComments, setLocalPendingComments] = useState([]);
+  const [approvalToast, setApprovalToast] = useState(null);
   const [commentsLoading, setCommentsLoading] = useState(true);
+  const { isAdmin } = useAuth() || {};
+  const [replyOpenId, setReplyOpenId] = useState(null);
+  const [replyText, setReplyText] = useState('');
+  const [replySubmitting, setReplySubmitting] = useState(false);
 
   // Combined comments (approved from snapshot + local pending ones)
   const comments = [
@@ -160,6 +192,17 @@ export default function BlogPost() {
       const unsub = onSnapshot(q, (snap) => {
         const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         setSnapshotComments(data);
+        // Remove any local pending comments that match newly approved ones and notify user
+        try {
+          setLocalPendingComments((prev) => {
+            const removed = prev.filter((p) => data.some((s) => (s.comment || '').trim() === (p.comment || '').trim() && (s.name || '').trim() === (p.name || '').trim()));
+            const remaining = prev.filter((p) => !data.some((s) => (s.comment || '').trim() === (p.comment || '').trim() && (s.name || '').trim() === (p.name || '').trim()));
+            if (removed.length > 0) setApprovalToast('Your comment was approved and is now visible.');
+            return remaining;
+          });
+        } catch (e) {
+          // swallow
+        }
         setCommentsLoading(false);
       }, async (err) => {
         console.error('Comments realtime error:', err);
@@ -168,7 +211,15 @@ export default function BlogPost() {
           const resp = await fetch((window && window.__BACKEND_NOTIFY_URL_BASE) ? `${window.__BACKEND_NOTIFY_URL_BASE.replace(/\/$/, '')}/api/comments?blogId=${blog.id}` : `http://localhost:5000/api/comments?blogId=${blog.id}`);
           if (resp.ok) {
             const json = await resp.json();
-            if (json && json.comments) setSnapshotComments(json.comments);
+            if (json && json.comments) {
+              setSnapshotComments(json.comments);
+              setLocalPendingComments((prev) => {
+                const removed = prev.filter((p) => json.comments.some((s) => (s.comment || '').trim() === (p.comment || '').trim() && (s.name || '').trim() === (p.name || '').trim()));
+                const remaining = prev.filter((p) => !json.comments.some((s) => (s.comment || '').trim() === (p.comment || '').trim() && (s.name || '').trim() === (p.name || '').trim()));
+                if (removed.length > 0) setApprovalToast('Your comment was approved and is now visible.');
+                return remaining;
+              });
+            }
           } else {
             console.warn('Backend comments fetch returned non-OK', resp.status);
           }
@@ -190,9 +241,17 @@ export default function BlogPost() {
       (async () => {
         try {
           const resp = await fetch((window && window.__BACKEND_NOTIFY_URL_BASE) ? `${window.__BACKEND_NOTIFY_URL_BASE.replace(/\/$/, '')}/api/comments?blogId=${blog.id}` : `http://localhost:5000/api/comments?blogId=${blog.id}`);
-          if (resp.ok) {
+            if (resp.ok) {
             const json = await resp.json();
-            if (json && json.comments) setSnapshotComments(json.comments);
+            if (json && json.comments) {
+              setSnapshotComments(json.comments);
+              setLocalPendingComments((prev) => {
+                const removed = prev.filter((p) => json.comments.some((s) => (s.comment || '').trim() === (p.comment || '').trim() && (s.name || '').trim() === (p.name || '').trim()));
+                const remaining = prev.filter((p) => !json.comments.some((s) => (s.comment || '').trim() === (p.comment || '').trim() && (s.name || '').trim() === (p.name || '').trim()));
+                if (removed.length > 0) setApprovalToast('Your comment was approved and is now visible.');
+                return remaining;
+              });
+            }
           }
         } catch (err) {
           console.error('Backend comments fetch error:', err);
@@ -236,6 +295,32 @@ export default function BlogPost() {
           pending: true
         };
         setLocalPendingComments((s) => [...s, pendingComment]);
+        // Start a short-lived poll to check if admin approves quickly
+        (function pollApproval(attemptsLeft = 6) {
+          if (attemptsLeft <= 0) return;
+          setTimeout(async () => {
+            try {
+              const resp = await fetch((window && window.__BACKEND_NOTIFY_URL_BASE) ? `${window.__BACKEND_NOTIFY_URL_BASE.replace(/\/$/, '')}/api/comments?blogId=${blog.id}` : `http://localhost:5000/api/comments?blogId=${blog.id}`);
+              if (resp.ok) {
+                const json = await resp.json();
+                const approved = (json && json.comments) ? json.comments.find(c => (c.comment||'').trim() === safeComment && (c.name||'').trim() === safeName) : null;
+                if (approved) {
+                  // approved by admin — remove local pending and notify
+                  setLocalPendingComments((prev) => {
+                    const remaining = prev.filter((p) => !(p.comment === safeComment && p.name === safeName));
+                    const removed = prev.length - remaining.length;
+                    if (removed > 0) setApprovalToast('Your comment was approved and is now visible.');
+                    return remaining;
+                  });
+                  return;
+                }
+              }
+            } catch (err) {
+              // ignore
+            }
+            pollApproval(attemptsLeft - 1);
+          }, 3000);
+        })();
       } catch (e) {
         console.warn('Failed to append pending comment locally', e);
       }
@@ -273,6 +358,13 @@ export default function BlogPost() {
       setSubmitting(false);
     }
   };
+
+  // Auto-hide approval toast
+  useEffect(() => {
+    if (!approvalToast) return;
+    const t = setTimeout(() => setApprovalToast(null), 4000);
+    return () => clearTimeout(t);
+  }, [approvalToast]);
 
   if (loading) {
     return (
@@ -345,6 +437,12 @@ export default function BlogPost() {
             <FiMessageSquare style={{ display: 'inline', marginRight: 10, verticalAlign: 'middle' }} size={22} />
             {commentsLoading ? 'Comments' : `${comments.length} Comment${comments.length !== 1 ? 's' : ''}`}
           </h2>
+            {approvalToast && (
+              <div style={{ marginTop: 12 }} className="bp-success-msg">
+                <FiCheck size={16} />
+                {approvalToast}
+              </div>
+            )}
           <p className="bp-comments-sub">Join the conversation below.</p>
 
           {/* Comment list */}
@@ -368,10 +466,59 @@ export default function BlogPost() {
                           <span style={{ color: '#f97316', fontSize: '0.8rem', marginLeft: 8 }}> (Awaiting moderation)</span>
                         )}
                       </p>
-                      <p className="bp-comment-date">{formatCommentDate(c.createdAt)}{c.pending ? ' • Pending' : ''}</p>
+                          <p className="bp-comment-date">{formatCommentDate(c.createdAt) || (c.pending ? 'Just now' : '')}{c.pending ? ' • Pending' : ''}</p>
                     </div>
                   </div>
-                  <p className="bp-comment-text" style={c.pending ? { opacity: 0.9, fontStyle: 'italic' } : {}}>{c.comment}</p>
+                      <p className="bp-comment-text" style={c.pending ? { opacity: 0.9, fontStyle: 'italic' } : {}}>{c.comment}</p>
+
+                      {/* Admin reply display */}
+                      {c.reply && (
+                        <div style={{ marginTop: 10, marginLeft: 54, background: '#f8fafc', padding: 12, borderRadius: 8, border: '1px solid #e6edf6' }}>
+                          <p style={{ margin: 0, fontWeight: 600, color: '#004B8D' }}>VISHAL GUPTA</p>
+                          <p style={{ margin: '6px 0 0', color: '#374151' }}>{c.reply}</p>
+                          {c.replyAt && <p style={{ margin: '6px 0 0', fontSize: '0.8rem', color: '#9ca3af' }}>{formatCommentDate(c.replyAt)}</p>}
+                        </div>
+                      )}
+
+                      {/* Reply UI for admin */}
+                      {isAdmin && c.id && !c.pending && (
+                        <div style={{ marginTop: 8, marginLeft: 54 }}>
+                          {replyOpenId === c.id ? (
+                            <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                              <textarea
+                                value={replyText}
+                                onChange={(e) => setReplyText(e.target.value)}
+                                placeholder="Write a reply..."
+                                style={{ width: 380, maxWidth: '100%', minHeight: 72, padding: 8, borderRadius: 6, border: '1px solid #e5e7eb' }}
+                              />
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                <button
+                                  onClick={async () => {
+                                    if (!replyText.trim()) return;
+                                    setReplySubmitting(true);
+                                    try {
+                                      await updateDoc(doc(db, 'blog_comments', c.id), { reply: replyText.trim(), replyAt: serverTimestamp() });
+                                      setReplyOpenId(null);
+                                      setReplyText('');
+                                    } catch (err) {
+                                      console.error('Failed to save reply', err);
+                                    } finally {
+                                      setReplySubmitting(false);
+                                    }
+                                  }}
+                                  disabled={replySubmitting}
+                                  style={{ background: '#004B8D', color: 'white', border: 'none', padding: '8px 12px', borderRadius: 6, cursor: 'pointer' }}
+                                >
+                                  {replySubmitting ? 'Saving…' : 'Send reply'}
+                                </button>
+                                <button onClick={() => { setReplyOpenId(null); setReplyText(''); }} style={{ background: 'transparent', border: 'none', color: '#6b7280', cursor: 'pointer' }}>Cancel</button>
+                              </div>
+                            </div>
+                          ) : (
+                            <button onClick={() => { setReplyOpenId(c.id); setReplyText(c.reply || ''); }} style={{ background: 'transparent', border: 'none', color: '#004B8D', cursor: 'pointer', fontWeight: 600 }}>Reply</button>
+                          )}
+                        </div>
+                      )}
                 </li>
               ))}
             </ul>
