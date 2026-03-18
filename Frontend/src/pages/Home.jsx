@@ -350,24 +350,23 @@ export default function Home() {
       {/* 1. HERO */}
      {/* 1. HERO */}
 <section
-  className="grid lg:grid-cols-2 items-stretch px-4 sm:px-6 lg:px-16 py-8 lg:py-0 gap-8 lg:gap-0 relative overflow-hidden"
+  className="grid lg:grid-cols-2 items-stretch px-4 sm:px-6 lg:px-16 py-8 lg:py-0 gap-8 lg:gap-0 relative overflow-hidden hero-section"
   style={{ background: 'linear-gradient(135deg, #1a2d52 0%, #1e3461 40%, #162647 100%)', minHeight: 'clamp(640px, 82vh, 920px)' }}
 >
   <style>{`
-    /* Animated gradient underline */
-    @keyframes shimmer-line {
-      0%   { background-position: -200% center; }
-      100% { background-position: 200% center; }
+    /* Static yellow underline with hover color */
+    .hero-shimmer-line {
+      height: 3px;
+      width: clamp(120px, 12vw, 260px);
+      background: #F5C400; /* solid yellow */
+      border-radius: 9999px;
+      margin-top: 8px;
+      transition: background-color 0.2s ease, transform 0.15s ease;
+      cursor: pointer;
     }
-      .hero-shimmer-line {
-        height: 3px;
-        width: clamp(120px, 12vw, 260px);
-        background: linear-gradient(90deg, #004B8D, #F5C400, #004B8D, #F5C400);
-        background-size: 300% auto;
-        animation: shimmer-line 3s linear infinite;
-        border-radius: 9999px;
-        margin-top: 8px;
-      }
+    .hero-shimmer-line:hover {
+      background: #004B8D; /* blue on hover */
+    }
 
     /* Photo ring: replace gradient glow with single solid yellow border */
     .hero-photo-ring {
@@ -443,13 +442,72 @@ export default function Home() {
       color: #F5C400;
       transform: translateX(4px);
     }
+
+    /* Mobile adjustments to improve hero layout on small screens */
+    @media (max-width: 640px) {
+      .hero-section {
+        /* Horizontally split the screen: top = image, bottom = text */
+        min-height: calc(100vh - 64px);
+        padding-top: 0;
+        padding-bottom: 0;
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr;
+        align-items: stretch;
+        gap: 0;
+      }
+      .hero-shimmer-line {
+        width: 96px;
+      }
+      .hero-image-col { grid-row: 1; display:flex; align-items:center; justify-content:center; padding-top: 12px; }
+      .hero-text-col { grid-row: 2; display:flex; align-items:center; }
+      .hero-profile-photo {
+        width: 100%;
+        height: 100%;
+        max-height: 100%;
+        object-fit: cover;
+        border-radius: 12px;
+      }
+      /* Make the hero image much larger on mobile: fill the top half */
+      .hero-image-col .hero-profile-photo {
+        max-width: 100% !important;
+        width: 100% !important;
+        height: 52vh !important;
+        object-fit: cover !important;
+        border-radius: 10px;
+      }
+      .hero-photo-ring {
+        display: flex;
+        justify-content: center;
+        padding-bottom: 8px;
+      }
+      .hero-title {
+        font-size: 1.5rem !important;
+        line-height: 1.02 !important;
+        margin-bottom: 6px;
+      }
+      .hero-description { display:block; font-size:0.9rem !important; }
+      .hero-text-col .flex { width: 100%; }
+      /* ensure text column uses full available width */
+      .hero-section > .flex {
+        max-width: 100% !important;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+      }
+      .hero-greeting { font-size: 0.675rem !important; }
+      .hero-name { font-size: 1.05rem !important; }
+      .hero-description { display: none; }
+      .hero-btn-primary {
+        padding: 0.5rem 0.75rem !important;
+      }
+    }
   `}</style>
 
   {/* Subtle background orbs */}
   <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#004B8D]/10 rounded-full blur-3xl pointer-events-none" />
   <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-[#F5C400]/5 rounded-full blur-3xl pointer-events-none" />
 
-  <div className="flex flex-col justify-center space-y-4 sm:space-y-5 w-full h-full relative z-10 order-2 lg:order-1"
+  <div className="flex flex-col justify-center space-y-4 sm:space-y-5 w-full h-full relative z-10 order-1 lg:order-1 hero-text-col"
     style={{ maxWidth: 'min(640px, 54vw)' }}>
     <motion.div
       initial={{ opacity: 0, y: 45 }}
@@ -465,7 +523,7 @@ export default function Home() {
       <EditableText
         field="hero_title"
         defaultValue={data.hero_title || 'Creating Happy Leaders'}
-        className="text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-['Playfair_Display'] font-bold text-white leading-[1.05] mb-2 block"
+        className="text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-['Playfair_Display'] font-bold text-white leading-[1.05] mb-2 block hero-title"
       />
       {/* Animated shimmer underline */}
       <div className="hero-shimmer-line mb-3" />
@@ -507,7 +565,7 @@ export default function Home() {
     initial={{ opacity: 0, scale: 0.95, x: 30 }}
     animate={{ opacity: 1, scale: 1, x: 0 }}
     transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
-    className="relative z-10 flex items-center justify-center h-full order-1 lg:order-2"
+    className="relative z-10 flex items-center justify-center h-full order-2 lg:order-2 hero-image-col"
   >
     <div className="hero-photo-ring">
     <div className="hero-profile-photo w-full aspect-[3/4] shadow-[0_20px_40px_rgba(0,0,0,0.4)] bg-[#1a2d52] overflow-hidden" style={{ maxWidth: 'min(430px, 38vw)' }}>

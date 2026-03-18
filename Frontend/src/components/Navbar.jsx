@@ -680,12 +680,10 @@ export default function Navbar() {
                       display: 'inline-block'
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#004B8D';
                       e.currentTarget.style.transform = 'translateY(-1px)';
                       e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.25)';
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = '#F5C400';
                       e.currentTarget.style.transform = 'translateY(0)';
                       e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
                     }}
@@ -918,8 +916,8 @@ export default function Navbar() {
                   }}
                   style={{
                     padding: windowWidth < 480 ? '1rem' : '1.1rem',
-                    backgroundColor: '#1a1a1a',
-                    color: '#ffffff',
+                    backgroundColor: '#F5C400',
+                    color: '#0B1628',
                     fontWeight: 600,
                     fontSize: windowWidth < 480 ? '0.9rem' : '0.95rem',
                     borderRadius: '10px',
