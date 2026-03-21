@@ -36,7 +36,7 @@ export default function Footer() {
               <p className="flex items-start justify-center md:justify-start gap-2">
                 <FiMapPin className="w-5 h-5 flex-shrink-0 mt-0.5" />
                 <span className="hover:text-white transition-colors text-left max-w-[250px]">
-                  Wing 11A, IIM-A, Vastrapur, Ahmedabad - 380015
+                  502, Forum Tower IIMA New Campus, Vastrapur
                 </span>
               </p>
             </div>
