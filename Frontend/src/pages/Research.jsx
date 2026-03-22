@@ -16,6 +16,8 @@ export default function Research() {
   const [showAddChapter, setShowAddChapter] = useState(false);
   const [showAddCase, setShowAddCase] = useState(false);
   const [pubSearch, setPubSearch] = useState('');
+  const [showAddSpecialIssue, setShowAddSpecialIssue] = useState(false);
+  const [editingSpecialIssue, setEditingSpecialIssue] = useState(null);
   const fadeInUp = {
     hidden: { opacity: 0, y: 20 },
     visible: { 
@@ -300,6 +302,74 @@ export default function Research() {
     } catch (error) {
       console.error('Error adding chapter:', error);
       alert('Failed to add chapter');
+    }
+  };
+
+  const updateBookChapter = async (updatedChapter) => {
+    try {
+      const currentChapters = researchData?.book_chapters || bookChapters;
+      const updatedChapters = currentChapters.map(c => c.id === updatedChapter.id ? updatedChapter : c);
+      await updateDoc(doc(db, 'content', 'research'), {
+        book_chapters: updatedChapters
+      });
+      setEditingChapter(null);
+      alert('Chapter updated successfully!');
+    } catch (error) {
+      console.error('Error updating chapter:', error);
+      alert('Failed to update chapter');
+    }
+  };
+
+  // Admin functions for managing special issues (auto-updates via Firestore)
+  const addSpecialIssue = async (newIssue) => {
+    try {
+      const issueWithId = { ...newIssue, id: Date.now() };
+      const current = researchData?.special_issues;
+      const base = (current && current.length > 0) ? current : specialIssues;
+      await updateDoc(doc(db, 'content', 'research'), {
+        special_issues: [...base, issueWithId]
+      });
+      setShowAddSpecialIssue(false);
+      alert('Special issue added successfully!');
+    } catch (err) {
+      console.error('Error adding special issue', err);
+      alert('Failed to add special issue');
+    }
+  };
+
+  const updateSpecialIssue = async (updatedIssue, idx = null) => {
+    try {
+      const current = researchData?.special_issues || specialIssues;
+      // try matching by id first
+      const updated = current.map(i => (i.id && updatedIssue.id && i.id === updatedIssue.id) ? updatedIssue : i);
+      await updateDoc(doc(db, 'content', 'research'), {
+        special_issues: updated
+      });
+      setEditingSpecialIssue(null);
+      alert('Special issue updated successfully!');
+    } catch (err) {
+      console.error('Error updating special issue', err);
+      alert('Failed to update special issue');
+    }
+  };
+
+  const deleteSpecialIssue = async (idxOrIssue) => {
+    if (!confirm('Delete this special issue?')) return;
+    try {
+      const current = researchData?.special_issues || specialIssues;
+      let updated;
+      if (typeof idxOrIssue === 'number') {
+        updated = current.filter((_, i) => i !== idxOrIssue);
+      } else {
+        updated = current.filter(i => i.id !== idxOrIssue.id);
+      }
+      await updateDoc(doc(db, 'content', 'research'), {
+        special_issues: updated
+      });
+      alert('Special issue deleted successfully!');
+    } catch (err) {
+      console.error('Error deleting special issue', err);
+      alert('Failed to delete special issue');
     }
   };
 
@@ -615,11 +685,14 @@ export default function Research() {
 
   const displayBookChapters = (researchData?.book_chapters || bookChapters).slice().sort(compareByYearDesc);
   const displayCases = researchData?.cases || cases;
+  const displaySpecialIssues = (researchData?.special_issues && researchData.special_issues.length > 0)
+    ? researchData.special_issues
+    : specialIssues;
 
   return (
     <div className="bg-white">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-[#dce8f5] to-[#fff7ed] py-20 px-6 lg:px-16">
+      <section className="bg-linear-to-br from-[#dce8f5] to-[#fff7ed] py-20 px-6 lg:px-16">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial="hidden"
@@ -648,6 +721,26 @@ export default function Research() {
               />
             </p>
           </motion.div>
+
+          {/* Publications Dashboard */}
+          <div className="flex flex-wrap justify-center gap-6 mt-10 mb-2">
+            <div className="bg-white rounded-xl shadow-md px-10 py-6 text-center min-w-[160px]">
+              <div className="text-3xl font-bold text-[#004B8D]">{displayPublications.length}</div>
+              <div className="uppercase text-xs tracking-wider text-gray-400 mt-1">Publications</div>
+            </div>
+            <div className="bg-white rounded-xl shadow-md px-10 py-6 text-center min-w-[160px]">
+              <div className="text-3xl font-bold text-[#004B8D]">
+                {displayPublications.length > 0 ? `${Math.min(...displayPublications.map(p => parseYear(p)))}–${Math.max(...displayPublications.map(p => parseYear(p)))}` : '—'}
+              </div>
+              <div className="uppercase text-xs tracking-wider text-gray-400 mt-1">Year Range</div>
+            </div>
+            <div className="bg-white rounded-xl shadow-md px-10 py-6 text-center min-w-[160px]">
+              <div className="text-3xl font-bold text-[#004B8D]">
+                {Array.from(new Set(displayPublications.map(p => p.journal))).length}
+              </div>
+              <div className="uppercase text-xs tracking-wider text-gray-400 mt-1">Journals</div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -950,6 +1043,12 @@ export default function Research() {
                 {isAdmin && (
                   <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
+                      onClick={() => setEditingChapter(chapter)}
+                      className="p-2 bg-[#004B8D] hover:bg-[#003870] text-white rounded-lg"
+                    >
+                      <FiEdit2 size={16} />
+                    </button>
+                    <button
                       onClick={() => deleteBookChapter(chapter)}
                       className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg"
                     >
@@ -973,6 +1072,16 @@ export default function Research() {
                 )}
               </motion.div>
             ))}
+
+            {editingChapter && isAdmin && (
+              <div className="mt-6 p-6 bg-white rounded-xl border-2 border-[#004B8D] shadow-lg">
+                <BookChapterForm
+                  chapter={editingChapter}
+                  onSave={updateBookChapter}
+                  onCancel={() => setEditingChapter(null)}
+                />
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -994,15 +1103,42 @@ export default function Research() {
           </motion.div>
 
           <div className="grid md:grid-cols-2 gap-6">
-            {specialIssues.map((issue, index) => (
+            {isAdmin && (
+              <div className="md:col-span-2 flex justify-end">
+                <button
+                  onClick={() => { setShowAddSpecialIssue(true); setEditingSpecialIssue(null); }}
+                  className="flex items-center gap-2 bg-[#f97316] hover:bg-[#ea580c] text-white px-4 py-2 rounded-lg font-semibold transition-all mb-4"
+                >
+                  <FiPlus /> Add Special Issue
+                </button>
+              </div>
+            )}
+
+            {displaySpecialIssues.map((issue, index) => (
               <motion.div
-                key={index}
+                key={issue.id || index}
                 initial="hidden"
                 whileInView="visible"
                 viewport={viewportOptions}
                 variants={fadeInUp}
-                className="bg-gradient-to-br from-[#fff7ed] to-white p-6 rounded-xl shadow-md hover:shadow-xl transition-shadow border-l-4 border-[#f97316]"
+                className="bg-linear-to-br from-[#fff7ed] to-white p-6 rounded-xl shadow-md hover:shadow-xl transition-shadow border-l-4 border-[#f97316] relative group"
               >
+                {isAdmin && (
+                  <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => setEditingSpecialIssue({ ...issue, idx: index })}
+                      className="p-2 bg-[#f97316] hover:bg-[#ea580c] text-white rounded-lg"
+                    >
+                      <FiEdit2 size={16} />
+                    </button>
+                    <button
+                      onClick={() => deleteSpecialIssue(index)}
+                      className="p-2 bg-red-500 hover:bg-red-600 text-white rounded-lg"
+                    >
+                      <FiTrash2 size={16} />
+                    </button>
+                  </div>
+                )}
                 <h3 className="text-xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-2">
                   {issue.title}
                 </h3>
@@ -1020,6 +1156,24 @@ export default function Research() {
               </motion.div>
             ))}
           </div>
+
+          {(showAddSpecialIssue || editingSpecialIssue) && isAdmin && (
+            <div className="mt-6 p-6 bg-white rounded-xl border-2 border-[#f97316] shadow-lg">
+              <SpecialIssueForm
+                issue={editingSpecialIssue}
+                onSave={(data) => {
+                  if (editingSpecialIssue) {
+                    updateSpecialIssue(data, editingSpecialIssue.idx);
+                  } else {
+                    addSpecialIssue(data);
+                  }
+                  setShowAddSpecialIssue(false);
+                  setEditingSpecialIssue(null);
+                }}
+                onCancel={() => { setShowAddSpecialIssue(false); setEditingSpecialIssue(null); }}
+              />
+            </div>
+          )}
         </div>
       </section>
 
@@ -1181,24 +1335,25 @@ function PublicationForm({ publication, onSave, onCancel }) {
 }
 
 // Book Chapter Form Component
-function BookChapterForm({ onSave, onCancel }) {
-  const [formData, setFormData] = useState({
-    authors: '',
-    year: new Date().getFullYear().toString(),
-    title: '',
-    book: '',
-    doi: ''
-  });
+function BookChapterForm({ chapter, onSave, onCancel }) {
+  const [formData, setFormData] = useState(
+    chapter || {
+      authors: '',
+      year: new Date().getFullYear().toString(),
+      title: '',
+      book: '',
+      doi: ''
+    }
+  );
 
   const handleSubmit = (e) => {
     e.preventDefault();
     onSave(formData);
-    setFormData({ authors: '', year: new Date().getFullYear().toString(), title: '', book: '', doi: '' });
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
-      <h3 className="text-xl font-bold mb-3">Add New Book Chapter</h3>
+      <h3 className="text-xl font-bold mb-3">{chapter ? 'Edit Book Chapter' : 'Add New Book Chapter'}</h3>
       <div className="grid md:grid-cols-2 gap-3">
         <div>
           <label className="block text-sm font-semibold mb-1">Authors</label>
@@ -1264,6 +1419,55 @@ function BookChapterForm({ onSave, onCancel }) {
         >
           Save Chapter
         </button>
+      </div>
+    </form>
+  );
+}
+
+// Special Issue Form Component
+function SpecialIssueForm({ issue, onSave, onCancel }) {
+  const [form, setForm] = useState(issue || { title: '', description: '', link: '#' });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(form);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <h3 className="text-2xl font-bold mb-4">{issue ? 'Edit Special Issue' : 'Add Special Issue'}</h3>
+      <div>
+        <label className="block text-sm font-semibold mb-1">Title</label>
+        <input
+          type="text"
+          value={form.title}
+          onChange={(e) => setForm({ ...form, title: e.target.value })}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+          required
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-semibold mb-1">Description</label>
+        <textarea
+          value={form.description}
+          onChange={(e) => setForm({ ...form, description: e.target.value })}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+          rows={3}
+          required
+        />
+      </div>
+      <div>
+        <label className="block text-sm font-semibold mb-1">Journal Link (optional)</label>
+        <input
+          type="url"
+          value={form.link}
+          onChange={(e) => setForm({ ...form, link: e.target.value })}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+        />
+      </div>
+      <div className="flex gap-3 justify-end">
+        <button type="button" onClick={onCancel} className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg">Cancel</button>
+        <button type="submit" className="px-4 py-2 bg-[#f97316] hover:bg-[#ea580c] text-white rounded-lg font-semibold">Save</button>
       </div>
     </form>
   );

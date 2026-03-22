@@ -1,10 +1,11 @@
 import { motion } from 'framer-motion';
-import { FiExternalLink, FiCalendar, FiClock, FiMapPin, FiTarget, FiPlus, FiEdit2, FiTrash2, FiSave, FiX } from 'react-icons/fi';
+import { FiExternalLink, FiCalendar, FiClock, FiMapPin, FiTarget, FiPlus, FiEdit2, FiTrash2, FiSave, FiX, FiArrowUp, FiArrowDown } from 'react-icons/fi';
+import { FaBold, FaItalic } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import { useFirestoreDoc } from '../hooks/useFirestoreDoc';
 import { useFirestoreCollection } from '../hooks/useFirestoreCollection';
 import EditableText from '../components/EditableText';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { db } from '../firebase/config';
 import { collection, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 
@@ -33,8 +34,47 @@ export default function Trainings() {
   };
 
   const handleAddProgram = async (newData) => {
-    await addDoc(collection(db, 'training_programs'), newData);
+    // set an `order` timestamp so we can control ordering (newer => higher order)
+    const dataWithOrder = { ...newData, order: Date.now() };
+    await addDoc(collection(db, 'training_programs'), dataWithOrder);
     setShowAddForm(false);
+  };
+
+  // Reorder handlers: swap `order` values between adjacent program docs
+  const reorderPrograms = async (newOrderArray) => {
+    // newOrderArray: array of program objects in desired order (first = highest)
+    try {
+      // assign descending integer order values starting from length
+      const n = newOrderArray.length;
+      const updates = newOrderArray.map((p, i) => ({ id: p.id, order: n - i }));
+      // perform updates sequentially
+      for (const u of updates) {
+        const docRef = doc(db, 'training_programs', u.id);
+        await updateDoc(docRef, { order: u.order });
+      }
+    } catch (err) {
+      console.error('Error reordering programs', err);
+      alert('Failed to reorder programs');
+    }
+  };
+
+  const moveUpProgram = async (index) => {
+    const sorted = (programs || []).slice().sort((a, b) => (b.order || 0) - (a.order || 0));
+    if (index <= 0 || index >= sorted.length) return;
+    const newSorted = sorted.slice();
+    // swap with previous
+    [newSorted[index - 1], newSorted[index]] = [newSorted[index], newSorted[index - 1]];
+    // write new order values for all
+    await reorderPrograms(newSorted);
+  };
+
+  const moveDownProgram = async (index) => {
+    const sorted = (programs || []).slice().sort((a, b) => (b.order || 0) - (a.order || 0));
+    if (index < 0 || index >= sorted.length - 1) return;
+    const newSorted = sorted.slice();
+    // swap with next
+    [newSorted[index], newSorted[index + 1]] = [newSorted[index + 1], newSorted[index]];
+    await reorderPrograms(newSorted);
   };
 
   const AddEditForm = ({ program, onSave, onCancel }) => {
@@ -51,6 +91,49 @@ export default function Trainings() {
         color: 'from-[#004B8D] to-[#003870]',
       }
     );
+    const titleRef = useRef(null);
+    const fullTitleRef = useRef(null);
+    const descRef = useRef(null);
+    const highlightsRef = useRef(null);
+
+    // Helper to toggle wrapping selection with markers (e.g., **bold**, *italic*)
+    const toggleWrapSelection = (ref, markerStart, markerEnd) => {
+      const el = ref?.current;
+      if (!el) return;
+      const start = el.selectionStart ?? 0;
+      const end = el.selectionEnd ?? 0;
+      // use the live element value to avoid mismatch with arrays (highlights)
+      const raw = el.value ?? '';
+      const before = raw.slice(0, start);
+      const selected = raw.slice(start, end) || '';
+      const after = raw.slice(end);
+      const open = markerStart;
+      const close = markerEnd ?? markerStart;
+      const wrappedRegex = new RegExp(`^${escapeRegExp(open)}([\s\S]*?)${escapeRegExp(close)}$`);
+      const isWrapped = wrappedRegex.test(selected);
+      const newSelected = isWrapped ? selected.replace(wrappedRegex, '$1') : `${open}${selected || (open === '**' ? 'bold text' : 'italic text')}${close}`;
+      const newValue = before + newSelected + after;
+
+      // If this is the highlights field, keep it as array in state
+      if (el.name === 'highlights') {
+        setFormData((prev) => ({ ...prev, highlights: newValue.split('\n') }));
+      } else {
+        setFormData((prev) => ({ ...prev, [el.name]: newValue }));
+      }
+
+      // restore focus and selection
+      setTimeout(() => {
+        el.focus();
+        if (selected === '') {
+          const pos = start + (isWrapped ? 0 : open.length);
+          el.setSelectionRange(pos, pos + newSelected.length);
+        } else {
+          el.setSelectionRange(start, start + newSelected.length);
+        }
+      }, 0);
+    };
+
+    const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
     const handleChange = (e) => {
       const { name, value } = e.target;
@@ -74,30 +157,58 @@ export default function Trainings() {
       >
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input name="title" value={formData.title} onChange={handleChange} placeholder="Title (e.g., LEAP-EMB)" className="p-2 border rounded" />
-            <input name="fullTitle" value={formData.fullTitle} onChange={handleChange} placeholder="Full Title" className="p-2 border rounded" />
+            <div className="relative">
+              <div className="absolute right-2 top-2 flex gap-2">
+                <button type="button" title="Bold" onClick={() => toggleWrapSelection(titleRef, '**')} className="p-1 rounded border bg-white text-gray-700 hover:bg-gray-50"><FaBold /></button>
+                <button type="button" title="Italic" onClick={() => toggleWrapSelection(titleRef, '*')} className="p-1 rounded border bg-white text-gray-700 hover:bg-gray-50"><FaItalic /></button>
+              </div>
+              <input ref={titleRef} name="title" value={formData.title} onChange={handleChange} placeholder="Title (e.g., LEAP-EMB)" className="p-2 border rounded" />
+            </div>
+
+            <div className="relative">
+              <div className="absolute right-2 top-2 flex gap-2">
+                <button type="button" title="Bold" onClick={() => toggleWrapSelection(fullTitleRef, '**')} className="p-1 rounded border bg-white text-gray-700 hover:bg-gray-50"><FaBold /></button>
+                <button type="button" title="Italic" onClick={() => toggleWrapSelection(fullTitleRef, '*')} className="p-1 rounded border bg-white text-gray-700 hover:bg-gray-50"><FaItalic /></button>
+              </div>
+              <input ref={fullTitleRef} name="fullTitle" value={formData.fullTitle} onChange={handleChange} placeholder="Full Title" className="p-2 border rounded" />
+            </div>
+
             <input name="duration" value={formData.duration} onChange={handleChange} placeholder="Duration" className="p-2 border rounded" />
             <input name="format" value={formData.format} onChange={handleChange} placeholder="Format" className="p-2 border rounded" />
             <input name="location" value={formData.location} onChange={handleChange} placeholder="Location" className="p-2 border rounded" />
             <input name="applyLink" value={formData.applyLink} onChange={handleChange} placeholder="Apply Link" className="p-2 border rounded" />
             <input name="color" value={formData.color} onChange={handleChange} placeholder="Gradient Color (e.g., from-blue-500 to-blue-700)" className="p-2 border rounded" />
           </div>
-          <textarea
-            name="description"
-            value={formData.description}
-            onChange={handleChange}
-            placeholder="Description"
-            className="w-full p-2 border rounded mt-4"
-            rows="3"
-          />
-          <textarea
-            name="highlights"
-            value={formData.highlights.join('\n')}
-            onChange={handleHighlightsChange}
-            placeholder="Key Highlights (one per line)"
-            className="w-full p-2 border rounded mt-4"
-            rows="5"
-          />
+          <div className="relative mt-4">
+            <div className="absolute right-2 top-2 flex gap-2 z-10">
+              <button type="button" title="Bold" onClick={() => toggleWrapSelection(descRef, '**')} className="p-1 rounded border bg-white text-gray-700 hover:bg-gray-50"><FaBold /></button>
+              <button type="button" title="Italic" onClick={() => toggleWrapSelection(descRef, '*')} className="p-1 rounded border bg-white text-gray-700 hover:bg-gray-50"><FaItalic /></button>
+            </div>
+            <textarea
+              ref={descRef}
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              placeholder="Description"
+              className="w-full p-2 border rounded mt-4"
+              rows="3"
+            />
+          </div>
+          <div className="relative mt-4">
+            <div className="absolute right-2 top-2 flex gap-2 z-10">
+              <button type="button" title="Bold" onClick={() => toggleWrapSelection(highlightsRef, '**')} className="p-1 rounded border bg-white text-gray-700 hover:bg-gray-50"><FaBold /></button>
+              <button type="button" title="Italic" onClick={() => toggleWrapSelection(highlightsRef, '*')} className="p-1 rounded border bg-white text-gray-700 hover:bg-gray-50"><FaItalic /></button>
+            </div>
+            <textarea
+              ref={highlightsRef}
+              name="highlights"
+              value={formData.highlights.join('\n')}
+              onChange={handleHighlightsChange}
+              placeholder="Key Highlights (one per line)"
+              className="w-full p-2 border rounded mt-4"
+              rows="5"
+            />
+          </div>
           <div className="flex justify-end gap-4 mt-4">
             <button type="button" onClick={onCancel} className="flex items-center gap-2 px-4 py-2 bg-gray-300 rounded-lg">
               <FiX /> Cancel
@@ -109,6 +220,28 @@ export default function Trainings() {
         </form>
       </motion.div>
     );
+  };
+
+  const sortedPrograms = (programs || []).slice().sort((a, b) => (b.order || 0) - (a.order || 0));
+
+  // Small markdown renderer used for program titles/descriptions to support **bold** and *italic*
+  const escapeHtml = (str) => {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  };
+
+  const renderMarkdown = (text, isMultiline = false) => {
+    if (!text) return '';
+    let html = escapeHtml(text);
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    if (isMultiline) html = html.replace(/\r?\n/g, '<br/>');
+    return html;
   };
 
   return (
@@ -123,7 +256,7 @@ export default function Trainings() {
             className="text-center"
           >
             <div className="w-20 h-1 bg-[#f97316] mb-8 rounded-full mx-auto"></div>
-            <h1 className="text-5xl lg:text-6xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-6">
+            <div className="text-5xl lg:text-6xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-6" role="heading" aria-level={1}>
               <EditableText
                 collection="content"
                 docId="trainings"
@@ -131,16 +264,16 @@ export default function Trainings() {
                 defaultValue={pageData?.page_heading || 'Executive Training Programs'}
                 className="text-5xl lg:text-6xl font-['Playfair_Display'] font-bold text-[#1a1a1a]"
               />
-            </h1>
-            <p className="text-xl lg:text-2xl text-[#004B8D] font-['Inter'] max-w-3xl mx-auto">
+            </div>
+            <div className="text-xl lg:text-2xl text-[#004B8D] font-['Inter'] max-w-3xl mx-auto">
               <EditableText
                 collection="content"
                 docId="trainings"
                 field="page_subtitle"
                 className="text-xl lg:text-2xl text-[#004B8D] font-['Inter']"
               />
-            </p>
-            <p className="text-lg text-gray-600 font-['Inter'] max-w-4xl mx-auto mt-6">
+            </div>
+            <div className="text-lg text-gray-600 font-['Inter'] max-w-4xl mx-auto mt-6">
               <EditableText
                 collection="content"
                 docId="trainings"
@@ -149,7 +282,7 @@ export default function Trainings() {
                 className="text-lg text-gray-600 font-['Inter']"
                 multiline
               />
-            </p>
+            </div>
           </motion.div>
         </div>
       </section>
@@ -176,14 +309,14 @@ export default function Trainings() {
           )}
           <div className="space-y-16">
             {loading && <p>Loading programs...</p>}
-            {programs.map((program, index) => {
+            {sortedPrograms.map((program, index) => {
               const isEven = index % 2 === 0;
               const headerBg = isEven ? 'bg-[#004B8D]' : 'bg-[#f97316]';
               const buttonGradient = isEven
                 ? 'bg-linear-to-r from-[#004B8D] to-[#003870] hover:from-[#003870] hover:to-[#002a5a]'
                 : 'bg-linear-to-r from-[#f97316] to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c]';
 
-              return (
+                return (
               <div key={program.id}>
                 {editingProgram?.id === program.id ? (
                   <AddEditForm
@@ -199,28 +332,44 @@ export default function Trainings() {
                     className={`${index % 2 === 0 ? 'bg-white' : 'bg-[#fff3e6]'} rounded-2xl shadow-xl overflow-hidden border-2 border-gray-100 hover:shadow-2xl transition-shadow duration-300 relative`}
                   >
                     {isAdmin && (
-                      <div className="absolute top-4 right-4 z-10 flex gap-2">
+                      <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+                        <button
+                          onClick={() => moveUpProgram(index)}
+                          className="p-2 bg-white text-gray-700 rounded-lg shadow hover:bg-gray-50"
+                          title="Move up"
+                        >
+                          <FiArrowUp />
+                        </button>
+                        <button
+                          onClick={() => moveDownProgram(index)}
+                          className="p-2 bg-white text-gray-700 rounded-lg shadow hover:bg-gray-50"
+                          title="Move down"
+                        >
+                          <FiArrowDown />
+                        </button>
                         <button
                           onClick={() => setEditingProgram(program)}
                           className="p-2 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600"
+                          title="Edit"
                         >
                           <FiEdit2 />
                         </button>
                         <button
                           onClick={() => handleDeleteProgram(program.id)}
-                          className="p-2 bg-red-500 text-white rounded-full shadow-lg hover:bg-red-600"
+                          className="p-2 bg-white text-red-500 border border-red-200 rounded-lg shadow hover:bg-red-50"
+                          title="Delete"
                         >
                           <FiTrash2 />
                         </button>
                       </div>
                     )}
                     {/* Program Header */}
-                    <div className={`p-8 text-white ${headerBg}`}> 
-                      <h2 className="text-4xl font-['Playfair_Display'] font-bold mb-2 text-white !text-white">
-                        {program.title}
+                    <div className={`p-8 ${headerBg}`}> 
+                      <h2 className="text-4xl font-['Playfair_Display'] font-bold mb-2 text-white" style={{ color: '#ffffff' }}>
+                        <span dangerouslySetInnerHTML={{ __html: renderMarkdown(program.title) }} />
                       </h2>
-                      <p className="text-lg opacity-90 font-['Inter'] text-white">
-                        {program.fullTitle}
+                      <p className="text-lg opacity-90 font-['Inter'] text-white" style={{ color: '#ffffff' }}>
+                        <span dangerouslySetInnerHTML={{ __html: renderMarkdown(program.fullTitle) }} />
                       </p>
                     </div>
 
@@ -230,7 +379,7 @@ export default function Trainings() {
                         {/* Left Column - Description */}
                         <div>
                           <p className="text-gray-700 text-lg leading-relaxed mb-6 font-['Inter']">
-                            {program.description}
+                            <span dangerouslySetInnerHTML={{ __html: renderMarkdown(program.description, true) }} />
                           </p>
 
                           {/* Program Details */}
@@ -293,17 +442,48 @@ export default function Trainings() {
       <section className="py-16 bg-linear-to-br from-[#004B8D] to-[#003870] text-white">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-3xl lg:text-4xl font-['Playfair_Display'] font-bold mb-4">
-            Ready to Transform Your Leadership?
+            <EditableText
+              collection="content"
+              docId="trainings"
+              field="cta_heading"
+              defaultValue={pageData?.cta_heading || 'Ready to Transform Your Leadership?'}
+              className="text-3xl lg:text-4xl font-['Playfair_Display'] font-bold mb-4"
+            />
           </h2>
           <p className="text-lg font-['Inter'] mb-8 opacity-90">
-            Join thousands of executives who have enhanced their leadership capabilities through our programs
+            <EditableText
+              collection="content"
+              docId="trainings"
+              field="cta_description"
+              defaultValue={pageData?.cta_description || 'Join thousands of executives who have enhanced their leadership capabilities through our programs'}
+              className="text-lg font-['Inter'] mb-8 opacity-90"
+              multiline
+            />
           </p>
-          <a
-            href="#contact"
-            className="inline-block px-8 py-4 bg-white text-[#004B8D] font-['Inter'] font-semibold rounded-lg shadow-lg hover:shadow-xl hover:bg-gray-50 transition-all duration-300"
-          >
-            Get in Touch
-          </a>
+
+          <div className="relative inline-block">
+            <a
+              href={pageData?.cta_button_link || '#contact'}
+              className="inline-block px-8 py-4 bg-white text-[#004B8D] font-['Inter'] font-semibold rounded-lg shadow-lg hover:shadow-xl hover:bg-gray-50 transition-all duration-300"
+            >
+              <span className="text-sm font-['Inter'] font-semibold text-[#004B8D]">
+                {!isAdmin ? (pageData?.cta_button_text || 'Get in Touch') : <span className="opacity-0">{pageData?.cta_button_text || 'Get in Touch'}</span>}
+              </span>
+            </a>
+
+            {/* Editable overlay placed outside the interactive anchor to avoid nested interactive elements */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="flex items-center justify-center w-full pointer-events-auto">
+                <EditableText
+                  collection="content"
+                  docId="trainings"
+                  field="cta_button_text"
+                  defaultValue={pageData?.cta_button_text || 'Get in Touch'}
+                  className="w-full inline-block text-sm font-['Inter'] font-semibold text-[#004B8D] text-center px-2"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </div>

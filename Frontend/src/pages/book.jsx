@@ -58,6 +58,8 @@ if (typeof document !== 'undefined') {
     .bk-items a:hover{color:#004B8D;border-bottom-color:#004B8D;}
     .bk-items .ml:hover{color:#f97316;border-bottom-color:#f97316;}
     .bk-btn-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:24px;}
+    .bk-btn-flipkart{display:inline-flex;align-items:center;gap:7px;background:#fbbf24;color:#1a1a1a;font-family:'Inter',sans-serif;font-size:.8rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:11px 22px;border:2px solid #fbbf24;border-radius:6px;text-decoration:none;transition:background .2s,color .2s,transform .15s;box-shadow:0 2px 8px rgba(251,191,36,.18);}
+    .bk-btn-flipkart:hover{background:#f59e0b;color:white;transform:translateY(-1px);border-color:#f59e0b;}
     .bk-btn-p{display:inline-flex;align-items:center;gap:7px;background:#004B8D;color:white;font-family:'Inter',sans-serif;font-size:.8rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:11px 22px;border:2px solid #004B8D;border-radius:6px;text-decoration:none;transition:background .2s,color .2s,transform .15s;box-shadow:0 2px 8px rgba(0,75,141,.25);}
     .bk-btn-p:hover{background:transparent;color:#004B8D;transform:translateY(-1px);}
     .bk-btn-s{display:inline-flex;align-items:center;gap:7px;background:transparent;color:#1a1a1a;font-family:'Inter',sans-serif;font-size:.8rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:11px 22px;border:2px solid #1a1a1a;border-radius:6px;text-decoration:none;transition:background .2s,color .2s,transform .15s;}
@@ -584,7 +586,7 @@ export default function Books() {
                     </a>
                   )}
                   {book.flipkartLink && (
-                    <a href={book.flipkartLink} target="_blank" rel="noopener noreferrer" className="bk-btn-s">
+                    <a href={book.flipkartLink} target="_blank" rel="noopener noreferrer" className="bk-btn-flipkart">
                       <FiShoppingCart size={14} /> Buy on Flipkart
                     </a>
                   )}

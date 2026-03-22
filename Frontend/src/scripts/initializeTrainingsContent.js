@@ -74,9 +74,9 @@ const trainingsContent = {
   ],
   
   // CTA Section
-  cta_heading: "Ready to Transform Your Leadership?",
-  cta_description: "Join thousands of executives who have enhanced their leadership capabilities through our programs",
-  cta_button_text: "Get in Touch",
+  cta_heading: "Ready to **Transform** Your Leadership?",
+  cta_description: "Join *thousands* of executives who have enhanced their leadership capabilities through our programs",
+  cta_button_text: "**Get in Touch**",
   cta_button_link: "#contact"
 };
 

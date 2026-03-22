@@ -4,6 +4,7 @@ import { db } from '../firebase/config';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiEdit2, FiCheck, FiX } from 'react-icons/fi';
+import { FaBold, FaItalic } from 'react-icons/fa';
 
 /**
  * EditableText Component - Allows Admin to edit text inline
@@ -37,6 +38,32 @@ export default function EditableText({
       inputRef.current.focus();
     }
   }, [isEditing]);
+
+  // Helper: simple renderer for **bold** and newlines -> <br>
+  const escapeHtml = (str) => {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  };
+
+  const renderRichText = (text, isMultiline) => {
+    if (!text) return '';
+    // escape then replace **bold**
+    let html = escapeHtml(text);
+    // convert **bold** to <strong>
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    // convert *italic* to <em>
+    html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    if (isMultiline) {
+      // preserve line breaks
+      html = html.replace(/\r?\n/g, '<br/>');
+    }
+    return html;
+  };
 
   // Click outside to cancel logic
   useEffect(() => {
@@ -82,26 +109,26 @@ export default function EditableText({
   // Normal User View (No Admin)
   if (!isAdmin) {
     return multiline ? (
-      <p className={className}>{defaultValue}</p>
+      <p className={className} dangerouslySetInnerHTML={{ __html: renderRichText(defaultValue, true) }} />
     ) : (
-      <span className={className}>{defaultValue}</span>
+      <span className={className} dangerouslySetInnerHTML={{ __html: renderRichText(defaultValue, false) }} />
     );
   }
 
   // Admin View (With Floating Edit Box)
   return (
-    <div 
+    <span
       ref={containerRef}
       className="relative inline-block w-full group"
       onMouseEnter={() => !isEditing && setShowEditIcon(true)}
       onMouseLeave={() => !isEditing && setShowEditIcon(false)}
     >
       {!isEditing ? (
-        <div className="relative cursor-pointer border border-transparent hover:border-[#004B8D]/30 transition-all rounded px-1">
+        <div className="relative cursor-pointer border border-transparent hover:border-[#004B8D]/30 transition-all rounded px-1 overflow-visible">
           {multiline ? (
-            <p className={className}>{defaultValue}</p>
+            <p className={className} dangerouslySetInnerHTML={{ __html: renderRichText(defaultValue, true) }} />
           ) : (
-            <span className={className}>{defaultValue}</span>
+            <span className={className} dangerouslySetInnerHTML={{ __html: renderRichText(defaultValue, false) }} />
           )}
           
           <AnimatePresence>
@@ -110,17 +137,97 @@ export default function EditableText({
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
-                onClick={() => setIsEditing(true)}
-                className="absolute -top-3 -right-3 bg-black text-white p-1.5 rounded-full shadow-lg z-10"
+                // prevent click from bubbling to parent buttons/links
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  setIsEditing(true);
+                }}
+                type="button"
+                className="absolute top-2 right-2 bg-black text-white p-2 rounded-md shadow-lg z-30"
               >
-                <FiEdit2 size={12} />
+                <FiEdit2 size={14} />
               </motion.button>
             )}
           </AnimatePresence>
         </div>
       ) : (
         /* Floating Edit Modal Style */
-        <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="absolute left-0 top-0 z-50 w-full min-w-[300px] bg-white p-4 shadow-2xl rounded-xl border border-gray-100">
+        <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="absolute left-0 top-0 z-50 w-full min-w-[300px] bg-white p-4 shadow-2xl rounded-xl border border-gray-100 max-h-[60vh] overflow-auto">
+          {/* Toolbar: formatting + actions */}
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex gap-2 items-center">
+              <button
+                type="button"
+                title="Bold"
+                onClick={() => {
+                  const el = inputRef.current;
+                  if (!el) return;
+                  const start = el.selectionStart ?? 0;
+                  const end = el.selectionEnd ?? 0;
+                  const before = value.slice(0, start);
+                  const selected = value.slice(start, end) || '';
+                  const after = value.slice(end);
+                  const isBold = /^(\*\*)([\s\S]*?)(\*\*)$/.test(selected);
+                  const newSelected = isBold ? selected.replace(/^(\*\*)([\s\S]*?)(\*\*)$/, '$2') : `**${selected || 'bold text'}**`;
+                  const newValue = before + newSelected + after;
+                  setValue(newValue);
+                  setTimeout(() => {
+                    el.focus();
+                    if (selected === '') {
+                      const pos = start + (isBold ? 0 : 2);
+                      const len = isBold ? 9 : 9;
+                      el.setSelectionRange(pos, pos + len);
+                    } else {
+                      el.setSelectionRange(start, start + newSelected.length);
+                    }
+                  }, 0);
+                }}
+                className="p-2 rounded border bg-white text-gray-700 hover:bg-gray-50"
+              >
+                <FaBold />
+              </button>
+
+              <button
+                type="button"
+                title="Italic"
+                onClick={() => {
+                  const el = inputRef.current;
+                  if (!el) return;
+                  const start = el.selectionStart ?? 0;
+                  const end = el.selectionEnd ?? 0;
+                  const before = value.slice(0, start);
+                  const selected = value.slice(start, end) || '';
+                  const after = value.slice(end);
+                  const isItalic = /^(\*)([\s\S]*?)(\*)$/.test(selected);
+                  const newSelected = isItalic ? selected.replace(/^(\*)([\s\S]*?)(\*)$/, '$2') : `*${selected || 'italic text'}*`;
+                  const newValue = before + newSelected + after;
+                  setValue(newValue);
+                  setTimeout(() => {
+                    el.focus();
+                    if (selected === '') {
+                      const pos = start + (isItalic ? 0 : 1);
+                      const len = isItalic ? 11 : 11;
+                      el.setSelectionRange(pos, pos + len);
+                    } else {
+                      el.setSelectionRange(start, start + newSelected.length);
+                    }
+                  }, 0);
+                }}
+                className="p-2 rounded border bg-white text-gray-700 hover:bg-gray-50"
+              >
+                <FaItalic />
+              </button>
+            </div>
+
+            <div className="flex gap-2 items-center">
+              <button onClick={handleCancel} className="text-sm text-gray-600 hover:text-gray-800 px-3 py-1 rounded border">Cancel</button>
+              <button onClick={handleSave} disabled={isSaving} className="bg-black text-white text-sm px-3 py-1 rounded flex items-center gap-2">
+                {isSaving ? 'Saving...' : (<><FiCheck /> Save</>)}
+              </button>
+            </div>
+          </div>
+
           {multiline ? (
             <textarea
               ref={inputRef}
@@ -150,6 +257,6 @@ export default function EditableText({
           </div>
         </motion.div>
       )}
-    </div>
+    </span>
   );
 }

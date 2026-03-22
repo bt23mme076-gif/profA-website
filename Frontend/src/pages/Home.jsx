@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import EditableText from '../components/EditableText';
+import { useAuth } from '../context/AuthContext';
 import { FiArrowRight, FiBookOpen, FiStar, FiCheck, FiCalendar } from 'react-icons/fi';
 import { useFirestoreDoc } from '../hooks/useFirestoreDoc';
 import { useFirestoreCollection } from '../hooks/useFirestoreCollection';
@@ -110,6 +111,7 @@ const FALLBACK_TESTIMONIALS = [
 ];
 
 export default function Home() {
+  const { isAdmin } = useAuth();
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState({ message: '', type: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -140,6 +142,25 @@ export default function Home() {
     } catch {
       return '';
     }
+  };
+
+  // Small renderer for CTA (convert **bold** and *italic* to HTML)
+  const escapeHtml = (str) => {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  };
+
+  const renderRichText = (text) => {
+    if (!text) return '';
+    let html = escapeHtml(text);
+    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+    return html;
   };
 
   const { data, loading } = useFirestoreDoc('content', 'home', {
@@ -551,12 +572,36 @@ export default function Home() {
       transition={{ delay: 0.5, duration: 0.7 }}
       className="space-y-4"
     >
-      <div className="flex flex-wrap gap-3">
-        <Link to="/about">
-          <button className="hero-btn-primary bg-[#F5C400] px-7 py-3.5 font-['Inter'] font-bold text-[#0B1628] text-sm rounded-md shadow-lg">
-            <span>Get in Touch</span>
-          </button>
-        </Link>
+      <div className="flex flex-wrap gap-3 justify-start">
+        <div className="relative inline-block">
+          <Link to="/about">
+            <button className="hero-btn-primary bg-[#F5C400] inline-flex items-center justify-center px-6 py-3.5 font-['Inter'] font-bold text-[#0B1628] text-sm rounded-md shadow-lg">
+              {!isAdmin ? (
+                <span
+                  className="text-sm sm:text-base font-['Inter'] font-bold text-[#0B1628]"
+                  dangerouslySetInnerHTML={{ __html: renderRichText(data?.hero_cta_text || 'Get in Touch') }}
+                />
+              ) : (
+                <span className="opacity-0">{data?.hero_cta_text || 'Get in Touch'}</span>
+              )}
+            </button>
+          </Link>
+
+          {/* Editable overlay placed outside the interactive Link/button to avoid nested interactive elements */}
+          {isAdmin && (
+            <div className="absolute inset-0 flex items-center justify-start pointer-events-none">
+              <div className="flex items-center justify-center w-full pointer-events-auto">
+                <EditableText
+                  collection="content"
+                  docId="home"
+                  field="hero_cta_text"
+                  defaultValue={data?.hero_cta_text || 'Get in Touch'}
+                  className="w-full inline-block text-sm sm:text-base font-['Inter'] font-bold text-[#0B1628] text-center px-2"
+                />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </motion.div>
   </div>
