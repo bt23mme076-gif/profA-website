@@ -38,8 +38,14 @@ const UNIFORM_CARD =
 const UNIFORM_IMAGE_WRAP =
   "w-full h-[160px] sm:h-[180px] md:h-[200px] overflow-hidden bg-gray-100 relative";
 
+const BOOK_IMAGE_WRAP =
+  "w-full aspect-[2/3] overflow-hidden bg-gray-100 relative";
+
 const UNIFORM_IMAGE =
   "w-full h-full object-cover transition-transform duration-700 group-hover:scale-110";
+
+const BOOK_IMAGE =
+  "w-full h-full object-contain transition-transform duration-100 group-hover:scale-105";
 
 const UNIFORM_BODY =
   "flex flex-col flex-1 p-4 sm:p-5";
@@ -1060,11 +1066,12 @@ export default function Home() {
                   transition={{ duration: 0.3 }}
                   className={UNIFORM_CARD}
                 >
-                  <div className={UNIFORM_IMAGE_WRAP}>
+                  {/* FIXED: use BOOK_IMAGE_WRAP for proper portrait aspect ratio */}
+                  <div className={BOOK_IMAGE_WRAP}>
                     <img
                       src={book.coverUrl || 'https://via.placeholder.com/600x800/e6e8ff/2A35CC?text=Book'}
                       alt={book.title}
-                      className={UNIFORM_IMAGE}
+                      className={BOOK_IMAGE}
                       onError={(e) => {
                         e.target.src = 'https://via.placeholder.com/600x800/e6e8ff/2A35CC?text=Book';
                       }}
@@ -1105,11 +1112,12 @@ export default function Home() {
                   transition={{ duration: 0.3 }}
                   className={UNIFORM_CARD}
                 >
-                  <div className={UNIFORM_IMAGE_WRAP}>
+                  {/* FIXED: use BOOK_IMAGE_WRAP for proper portrait aspect ratio */}
+                  <div className={BOOK_IMAGE_WRAP}>
                     <img
                       src={data[book.imgf] || book.fb}
                       alt="Book cover"
-                      className={UNIFORM_IMAGE}
+                      className={BOOK_IMAGE}
                       onError={(e) => {
                         e.target.src = 'https://via.placeholder.com/600x800/e6e8ff/2A35CC?text=Book';
                       }}

@@ -188,7 +188,7 @@ export default function Blog() {
 
             <motion.h1
               variants={fadeInUp}
-              className="max-w-3xl font-['Playfair_Display'] text-5xl font-bold leading-[0.95] text-white sm:text-6xl lg:text-7xl"
+              className="max-w-3xl font-['Playfair_Display'] text-5xl font-bold leading-[0.95] text-white sm:text-6xl lg:text-7xl text-center"
             >
               <EditableText
                 collection="content"
