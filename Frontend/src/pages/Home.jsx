@@ -54,10 +54,14 @@ const UNIFORM_META =
   "flex items-center gap-2 text-gray-500 text-xs sm:text-sm font-['Inter'] mb-3";
 
 const UNIFORM_TITLE =
-  "text-lg sm:text-xl font-['Playfair_Display'] font-bold text-[#111111] leading-tight line-clamp-2 min-h-[48px]";
+  "text-xl sm:text-2xl font-['Playfair_Display'] font-bold text-[#111111] leading-tight line-clamp-2 min-h-[48px]";
 
 const UNIFORM_TEXT =
-  "text-xs sm:text-sm font-['Inter'] text-gray-600 leading-relaxed line-clamp-3 min-h-[48px]";
+  "text-sm sm:text-base font-['Inter'] text-gray-600 leading-relaxed line-clamp-3 min-h-[48px]";
+
+// Global sizing helpers to keep headings and body text consistent across the home page
+const GLOBAL_HEADING = "text-3xl sm:text-4xl lg:text-5xl font-['Playfair_Display'] font-bold";
+const GLOBAL_BODY = "text-base sm:text-lg font-['Inter']";
 
 const UNIFORM_FOOTER =
   "mt-auto pt-4 border-t border-gray-200 flex items-center justify-between gap-3";
@@ -550,7 +554,7 @@ export default function Home() {
       <EditableText
         field="hero_title"
         defaultValue={data.hero_title || 'Creating Happy Leaders'}
-        className="text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-['Playfair_Display'] font-bold text-white leading-[1.05] mb-2 block hero-title"
+        className={`${GLOBAL_HEADING} text-white leading-[1.05] mb-2 block hero-title`}
       />
       {/* Animated shimmer underline */}
       <div className="hero-shimmer-line mb-3" />
@@ -558,13 +562,13 @@ export default function Home() {
       <EditableText
         field="hero_name"
         defaultValue={data.hero_name}
-        className="text-2xl sm:text-3xl md:text-4xl xl:text-5xl font-['Playfair_Display'] text-[#F5C400] font-semibold mb-4 block"
+        className={`${GLOBAL_HEADING} text-[#F5C400] font-semibold mb-4 block`}
       />
 
       <EditableText
         field="hero_description"
         defaultValue={data.hero_description}
-        className="text-base sm:text-lg md:text-xl xl:text-2xl font-['Inter'] text-gray-300 leading-relaxed block mb-4"
+        className={`${GLOBAL_BODY} text-gray-300 leading-relaxed block mb-4`}
         multiline={true}
       />
 
@@ -645,7 +649,7 @@ export default function Home() {
             <EditableText
               field="courses_heading"
               defaultValue={data.courses_heading}
-              className="text-2xl sm:text-3xl lg:text-4xl font-['Playfair_Display'] font-bold text-[#111111] mb-3 block transition-colors duration-300"
+              className={`${GLOBAL_HEADING} text-[#111111] mb-3 block transition-colors duration-300`}
             />
             <div className="w-24 h-1 bg-[#004B8D] rounded-full mx-auto group-hover:bg-[#F5C400] transition-colors duration-300 group-hover:w-32 transition-all" />
           </motion.div>
@@ -779,7 +783,7 @@ export default function Home() {
                 <EditableText
                   field="blog_heading"
                   defaultValue={data.blog_heading || 'My Blogs'}
-                  className="text-3xl sm:text-5xl lg:text-6xl font-['Playfair_Display'] font-bold text-[#111111] block transition-colors duration-300"
+                  className={`${GLOBAL_HEADING} text-[#111111] block transition-colors duration-300`}
                 />
                 <div className="w-24 h-1 bg-[#004B8D] rounded-full mt-4 mx-auto group-hover:bg-[#F5C400] group-hover:w-32 transition-all duration-300" />
               </div>
@@ -1045,7 +1049,7 @@ export default function Home() {
             <EditableText
               field="books_heading"
               defaultValue={data.books_heading}
-              className="text-2xl sm:text-3xl lg:text-4xl font-['Playfair_Display'] font-bold text-[#111111] block mb-3"
+              className={`${GLOBAL_HEADING} text-[#111111] block mb-3`}
             />
             <div className="w-24 h-1 bg-[#004B8D] rounded-full mx-auto group-hover:bg-[#F5C400] group-hover:w-32 transition-all duration-300" />
           </motion.div>
@@ -1190,13 +1194,13 @@ export default function Home() {
           <EditableText
             field="speaking_heading"
             defaultValue={data.speaking_heading}
-            className="text-2xl sm:text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#111111] mb-6 leading-tight block relative z-10"
+            className={`${GLOBAL_HEADING} text-[#111111] mb-6 leading-tight block relative z-10`}
           />
 
           <EditableText
             field="speaking_description"
             defaultValue={data.speaking_description}
-            className="text-sm sm:text-base lg:text-lg font-['Inter'] text-gray-700 mb-10 max-w-lg leading-relaxed block relative z-10"
+            className={`${GLOBAL_BODY} text-gray-700 mb-10 max-w-lg leading-relaxed block relative z-10`}
             multiline={true}
           />
 
@@ -1242,7 +1246,7 @@ export default function Home() {
             <EditableText
               field="newsletter_heading"
               defaultValue={data.newsletter_heading}
-              className="text-3xl sm:text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#111111] leading-tight block"
+              className={`${GLOBAL_HEADING} text-[#111111] leading-tight block`}
             />
           </motion.div>
 
@@ -1256,7 +1260,7 @@ export default function Home() {
             <EditableText
               field="newsletter_description"
               defaultValue={data.newsletter_description}
-              className="text-sm sm:text-base lg:text-lg font-['Inter'] text-gray-700 leading-relaxed block"
+              className={`${GLOBAL_BODY} text-gray-700 leading-relaxed block`}
               multiline={true}
             />
 
