@@ -778,8 +778,8 @@ export default function Home() {
             viewport={viewportOptions}
             variants={fadeInUp}
           >
-            <div className="flex items-center justify-between flex-wrap gap-4 mb-4">
-                <div className="group">
+            <div className="flex items-center justify-center flex-wrap gap-4 mb-4">
+                <div className="group text-center w-full">
                 <EditableText
                   field="blog_heading"
                   defaultValue={data.blog_heading || 'My Blogs'}
@@ -803,7 +803,7 @@ export default function Home() {
           </motion.div>
 
           <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center"
             initial="hidden"
             whileInView="visible"
             viewport={viewportOptions}
