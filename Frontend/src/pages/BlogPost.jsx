@@ -31,8 +31,197 @@ if (typeof document !== 'undefined' && !document.getElementById('bp-styles')) {
 
     .bp-body { max-width:780px; margin:0 auto; padding:0 24px 80px; }
     .bp-hero-img { width:100%; max-height:480px; object-fit:cover; border-radius:0; margin:0 0 48px; display:block; }
-    .bp-content { font-family:'Inter',sans-serif; font-size:1.05rem; color:#374151; line-height:1.85; white-space:pre-wrap; }
-    .bp-content p { margin:0 0 1.4em; }
+
+    /* ── Rich HTML content styles ── */
+    .bp-content {
+      font-family: 'Inter', sans-serif;
+      font-size: 1.05rem;
+      color: #374151;
+      line-height: 1.85;
+    }
+    .bp-content p {
+      margin: 0 0 1.5em;
+    }
+    .bp-content h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin: 2em 0 0.6em;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+    .bp-content h2 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin: 2em 0 0.6em;
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+      padding-bottom: 0.3em;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    .bp-content h3 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin: 1.75em 0 0.5em;
+      line-height: 1.3;
+    }
+    .bp-content h4 {
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin: 1.5em 0 0.4em;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .bp-content strong, .bp-content b {
+      font-weight: 700;
+      color: #111827;
+    }
+    .bp-content em, .bp-content i {
+      font-style: italic;
+      color: #4b5563;
+    }
+    .bp-content u {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .bp-content a {
+      color: #004B8D;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      transition: color 0.2s;
+    }
+    .bp-content a:hover {
+      color: #003366;
+    }
+    .bp-content ul {
+      list-style: disc;
+      padding-left: 1.6em;
+      margin: 0 0 1.4em;
+    }
+    .bp-content ol {
+      list-style: decimal;
+      padding-left: 1.6em;
+      margin: 0 0 1.4em;
+    }
+    .bp-content li {
+      margin-bottom: 0.5em;
+      line-height: 1.75;
+    }
+    .bp-content blockquote {
+      border-left: 4px solid #004B8D;
+      padding: 0.75em 1.25em;
+      margin: 2em 0;
+      background: #f8faff;
+      border-radius: 0 8px 8px 0;
+      font-style: italic;
+      color: #4b5563;
+      font-size: 1.05rem;
+      line-height: 1.8;
+    }
+    .bp-content pre {
+      background: #1a1e2e;
+      color: #e2e8f0;
+      padding: 1.25em 1.5em;
+      border-radius: 10px;
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 0.875rem;
+      overflow-x: auto;
+      margin: 2em 0;
+      line-height: 1.6;
+    }
+    .bp-content code {
+      background: #f3f4f6;
+      color: #c45a04;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', 'Courier New', monospace;
+      font-size: 0.875em;
+    }
+    .bp-content pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+      font-size: inherit;
+    }
+    .bp-content hr {
+      border: none;
+      border-top: 1px solid #e5e7eb;
+      margin: 3em 0;
+    }
+
+    /* ── Images in between text — medium size like editor ── */
+    .bp-content img {
+      max-width: 62%;
+      width: auto;
+      height: auto;
+      display: block;
+      margin: 2em auto;
+      border-radius: 12px;
+      box-shadow: 0 6px 28px rgba(0,0,0,0.13);
+    }
+    .bp-content figure {
+      margin: 2em 0;
+      text-align: center;
+      width: 100%;
+    }
+    .bp-content figure img {
+      display: inline-block;
+      max-width: 62%;
+      width: auto;
+      height: auto;
+      margin: 0 auto 0.75em;
+      border-radius: 12px;
+      box-shadow: 0 6px 28px rgba(0,0,0,0.13);
+    }
+    .bp-content figcaption {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      color: #9ca3af;
+      font-style: italic;
+      text-align: center;
+    }
+
+    /* ── Tables ── */
+    .bp-content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 2em 0;
+      font-size: 0.92rem;
+      overflow-x: auto;
+      display: block;
+    }
+    .bp-content thead {
+      background: #f1f5f9;
+    }
+    .bp-content th {
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #374151;
+      padding: 10px 14px;
+      border: 1px solid #e5e7eb;
+      text-align: left;
+    }
+    .bp-content td {
+      padding: 9px 14px;
+      border: 1px solid #e5e7eb;
+      color: #374151;
+      vertical-align: top;
+      line-height: 1.6;
+    }
+    .bp-content tr:nth-child(even) td {
+      background: #f9fafb;
+    }
+
     .bp-divider { height:1px; background:#f0f0f0; margin:56px 0; }
 
     /* Comments */
@@ -75,33 +264,24 @@ if (typeof document !== 'undefined' && !document.getElementById('bp-styles')) {
   document.head.appendChild(style);
 }
 
-// Robust date normalization to handle Firestore Timestamp objects ({ seconds, nanoseconds }),
-// legacy {_seconds,_nanoseconds}, numeric epochs, ISO strings, Date instances, and objects
-// returned from backend endpoints.
+// Robust date normalization
 const toDateObject = (val) => {
   if (!val) return null;
-  // Firestore Timestamp instance
   if (typeof val === 'object' && typeof val.toDate === 'function') return val.toDate();
-  // Serialized Firestore timestamp { seconds, nanoseconds }
   if (val && (val.seconds != null || val._seconds != null)) {
     const seconds = Number(val.seconds ?? val._seconds);
     const nanoseconds = Number(val.nanoseconds ?? val._nanoseconds ?? 0);
     if (!Number.isFinite(seconds)) return null;
     return new Date(seconds * 1000 + Math.floor(nanoseconds / 1e6));
   }
-  // Numeric epoch (seconds or milliseconds) — try to infer
   if (typeof val === 'number') {
-    // if it's in seconds (reasonable range), convert to ms
     if (val < 1e12) return new Date(val * 1000);
     return new Date(val);
   }
-  // String (ISO) or Date-like
   try {
     const d = new Date(val);
     if (!Number.isNaN(d.getTime())) return d;
-  } catch (e) {
-    // fallthrough
-  }
+  } catch (e) {}
   return null;
 };
 
@@ -130,18 +310,13 @@ export default function BlogPost() {
   const [replyText, setReplyText] = useState('');
   const [replySubmitting, setReplySubmitting] = useState(false);
 
-  // Combined comments (approved from snapshot + local pending ones)
-  const comments = [
-    ...snapshotComments,
-    ...localPendingComments
-  ];
+  const comments = [...snapshotComments, ...localPendingComments];
 
-  // Form state
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState(null); // null | 'success' | 'error'
+  const [submitStatus, setSubmitStatus] = useState(null);
   const [submitMessage, setSubmitMessage] = useState('');
 
   // Fetch blog by slug or doc id
@@ -149,7 +324,6 @@ export default function BlogPost() {
     const fetchBlog = async () => {
       setLoading(true);
       try {
-        // Try by slug field first
         const q = query(
           collection(db, 'blogs'),
           where('slug', '==', slug),
@@ -159,7 +333,6 @@ export default function BlogPost() {
         if (!snap.empty) {
           setBlog({ id: snap.docs[0].id, ...snap.docs[0].data() });
         } else {
-          // Fallback: try by document ID
           const docSnap = await getDoc(doc(db, 'blogs', slug));
           if (docSnap.exists() && docSnap.data().published) {
             setBlog({ id: docSnap.id, ...docSnap.data() });
@@ -192,73 +365,23 @@ export default function BlogPost() {
       const unsub = onSnapshot(q, (snap) => {
         const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         setSnapshotComments(data);
-        // Remove any local pending comments that match newly approved ones and notify user
-        try {
-          setLocalPendingComments((prev) => {
-            const removed = prev.filter((p) => data.some((s) => (s.comment || '').trim() === (p.comment || '').trim() && (s.name || '').trim() === (p.name || '').trim()));
-            const remaining = prev.filter((p) => !data.some((s) => (s.comment || '').trim() === (p.comment || '').trim() && (s.name || '').trim() === (p.name || '').trim()));
-            if (removed.length > 0) setApprovalToast('Your comment was approved and is now visible.');
-            return remaining;
-          });
-        } catch (e) {
-          // swallow
-        }
+        setLocalPendingComments((prev) => {
+          const removed = prev.filter((p) => data.some((s) => (s.comment || '').trim() === (p.comment || '').trim() && (s.name || '').trim() === (p.name || '').trim()));
+          const remaining = prev.filter((p) => !data.some((s) => (s.comment || '').trim() === (p.comment || '').trim() && (s.name || '').trim() === (p.name || '').trim()));
+          if (removed.length > 0) setApprovalToast('Your comment was approved and is now visible.');
+          return remaining;
+        });
         setCommentsLoading(false);
       }, async (err) => {
         console.error('Comments realtime error:', err);
-        // If permission denied, fallback to backend admin endpoint
-        try {
-          const resp = await fetch((window && window.__BACKEND_NOTIFY_URL_BASE) ? `${window.__BACKEND_NOTIFY_URL_BASE.replace(/\/$/, '')}/api/comments?blogId=${blog.id}` : `http://localhost:5000/api/comments?blogId=${blog.id}`);
-          if (resp.ok) {
-            const json = await resp.json();
-            if (json && json.comments) {
-              setSnapshotComments(json.comments);
-              setLocalPendingComments((prev) => {
-                const removed = prev.filter((p) => json.comments.some((s) => (s.comment || '').trim() === (p.comment || '').trim() && (s.name || '').trim() === (p.name || '').trim()));
-                const remaining = prev.filter((p) => !json.comments.some((s) => (s.comment || '').trim() === (p.comment || '').trim() && (s.name || '').trim() === (p.name || '').trim()));
-                if (removed.length > 0) setApprovalToast('Your comment was approved and is now visible.');
-                return remaining;
-              });
-            }
-          } else {
-            console.warn('Backend comments fetch returned non-OK', resp.status);
-          }
-        } catch (fetchErr) {
-          console.warn('Backend comments fetch failed', fetchErr);
-        }
         setCommentsLoading(false);
       });
-      // ensure we unsubscribe on cleanup
       return () => {
-        if (!unsubCalled) {
-          unsubCalled = true;
-          unsub();
-        }
+        if (!unsubCalled) { unsubCalled = true; unsub(); }
       };
     } catch (e) {
-      console.error('Realtime listener setup failed, falling back to backend:', e);
-      // fallback: fetch via backend admin endpoint
-      (async () => {
-        try {
-          const resp = await fetch((window && window.__BACKEND_NOTIFY_URL_BASE) ? `${window.__BACKEND_NOTIFY_URL_BASE.replace(/\/$/, '')}/api/comments?blogId=${blog.id}` : `http://localhost:5000/api/comments?blogId=${blog.id}`);
-            if (resp.ok) {
-            const json = await resp.json();
-            if (json && json.comments) {
-              setSnapshotComments(json.comments);
-              setLocalPendingComments((prev) => {
-                const removed = prev.filter((p) => json.comments.some((s) => (s.comment || '').trim() === (p.comment || '').trim() && (s.name || '').trim() === (p.name || '').trim()));
-                const remaining = prev.filter((p) => !json.comments.some((s) => (s.comment || '').trim() === (p.comment || '').trim() && (s.name || '').trim() === (p.name || '').trim()));
-                if (removed.length > 0) setApprovalToast('Your comment was approved and is now visible.');
-                return remaining;
-              });
-            }
-          }
-        } catch (err) {
-          console.error('Backend comments fetch error:', err);
-        } finally {
-          setCommentsLoading(false);
-        }
-      })();
+      console.error('Realtime listener setup failed:', e);
+      setCommentsLoading(false);
       return () => {};
     }
   }, [blog?.id]);
@@ -266,12 +389,9 @@ export default function BlogPost() {
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!name.trim() || !comment.trim()) return;
-
-    // Basic sanitization
     const safeName = name.trim().slice(0, 100);
     const safeEmail = email.trim().slice(0, 200);
     const safeComment = comment.trim().slice(0, 2000);
-
     setSubmitting(true);
     setSubmitStatus(null);
     try {
@@ -281,75 +401,36 @@ export default function BlogPost() {
         name: safeName,
         email: safeEmail,
         comment: safeComment,
-        approved: false, // admin must approve
+        approved: false,
         createdAt: serverTimestamp(),
       });
-      // Show the comment locally as pending so the user sees it isn't lost
-      try {
-        const pendingComment = {
-          id: `pending-${Date.now()}`,
-          name: safeName,
-          email: safeEmail,
-          comment: safeComment,
-          createdAt: new Date().toISOString(),
-          pending: true
-        };
-        setLocalPendingComments((s) => [...s, pendingComment]);
-        // Start a short-lived poll to check if admin approves quickly
-        (function pollApproval(attemptsLeft = 6) {
-          if (attemptsLeft <= 0) return;
-          setTimeout(async () => {
-            try {
-              const resp = await fetch((window && window.__BACKEND_NOTIFY_URL_BASE) ? `${window.__BACKEND_NOTIFY_URL_BASE.replace(/\/$/, '')}/api/comments?blogId=${blog.id}` : `http://localhost:5000/api/comments?blogId=${blog.id}`);
-              if (resp.ok) {
-                const json = await resp.json();
-                const approved = (json && json.comments) ? json.comments.find(c => (c.comment||'').trim() === safeComment && (c.name||'').trim() === safeName) : null;
-                if (approved) {
-                  // approved by admin — remove local pending and notify
-                  setLocalPendingComments((prev) => {
-                    const remaining = prev.filter((p) => !(p.comment === safeComment && p.name === safeName));
-                    const removed = prev.length - remaining.length;
-                    if (removed > 0) setApprovalToast('Your comment was approved and is now visible.');
-                    return remaining;
-                  });
-                  return;
-                }
-              }
-            } catch (err) {
-              // ignore
-            }
-            pollApproval(attemptsLeft - 1);
-          }, 3000);
-        })();
-      } catch (e) {
-        console.warn('Failed to append pending comment locally', e);
-      }
+      const pendingComment = {
+        id: `pending-${Date.now()}`,
+        name: safeName,
+        email: safeEmail,
+        comment: safeComment,
+        createdAt: new Date().toISOString(),
+        pending: true
+      };
+      setLocalPendingComments((s) => [...s, pendingComment]);
 
-      // Attempt to notify admin via backend (non-blocking)
+      // Non-blocking admin notify
       (async () => {
         try {
           const notifyUrl = (window && window.__BACKEND_NOTIFY_URL) || 'http://localhost:5000/api/notify/comment';
           await fetch(notifyUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              name: safeName,
-              email: safeEmail,
-              comment: safeComment,
-              blogTitle: blog.title,
-              blogId: blog.id,
-              blogSlug: blog.slug || blog.id
-            })
+            body: JSON.stringify({ name: safeName, email: safeEmail, comment: safeComment, blogTitle: blog.title, blogId: blog.id, blogSlug: blog.slug || blog.id })
           });
         } catch (notifyErr) {
           console.warn('Notification failed:', notifyErr);
         }
       })();
+
       setSubmitStatus('success');
       setSubmitMessage('Your comment has been submitted and is awaiting moderation. Thank you!');
-      setName('');
-      setEmail('');
-      setComment('');
+      setName(''); setEmail(''); setComment('');
     } catch (err) {
       console.error('Error submitting comment:', err);
       setSubmitStatus('error');
@@ -359,7 +440,6 @@ export default function BlogPost() {
     }
   };
 
-  // Auto-hide approval toast
   useEffect(() => {
     if (!approvalToast) return;
     const t = setTimeout(() => setApprovalToast(null), 4000);
@@ -401,7 +481,10 @@ export default function BlogPost() {
             {blog.date && <span className="bp-date"><FiCalendar size={11} />{formatDate(blog.date)}</span>}
           </div>
           <h1 className="bp-title">{blog.title}</h1>
-          {blog.excerpt && <p className="bp-excerpt">{blog.excerpt}</p>}
+          {blog.excerpt && (
+            // excerpt may be plain text (old posts) or have HTML — strip tags for the header pull quote
+            <p className="bp-excerpt">{blog.excerpt.replace(/<[^>]*>/g, '')}</p>
+          )}
         </div>
       </div>
 
@@ -419,15 +502,14 @@ export default function BlogPost() {
           />
         )}
 
-        {/* Main content */}
+        {/* ── Main content — renders rich HTML from editor (images, headings, tables, etc.) ── */}
         <motion.div
           className="bp-content"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.65, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-        >
-          {blog.content || blog.excerpt || ''}
-        </motion.div>
+          dangerouslySetInnerHTML={{ __html: blog.content || blog.excerpt || '' }}
+        />
 
         <div className="bp-divider" />
 
@@ -437,12 +519,12 @@ export default function BlogPost() {
             <FiMessageSquare style={{ display: 'inline', marginRight: 10, verticalAlign: 'middle' }} size={22} />
             {commentsLoading ? 'Comments' : `${comments.length} Comment${comments.length !== 1 ? 's' : ''}`}
           </h2>
-            {approvalToast && (
-              <div style={{ marginTop: 12 }} className="bp-success-msg">
-                <FiCheck size={16} />
-                {approvalToast}
-              </div>
-            )}
+          {approvalToast && (
+            <div style={{ marginTop: 12 }} className="bp-success-msg">
+              <FiCheck size={16} />
+              {approvalToast}
+            </div>
+          )}
           <p className="bp-comments-sub">Join the conversation below.</p>
 
           {/* Comment list */}
@@ -452,10 +534,7 @@ export default function BlogPost() {
             <p className="bp-no-comments">No comments yet. Be the first to share your thoughts!</p>
           ) : (
             <ul className="bp-comment-list">
-              {([
-                ...snapshotComments,
-                ...localPendingComments
-              ]).map((c) => (
+              {comments.map((c) => (
                 <li key={c.id} className="bp-comment">
                   <div className="bp-comment-header">
                     <div className="bp-avatar">{c.name?.charAt(0)?.toUpperCase() || '?'}</div>
@@ -463,62 +542,62 @@ export default function BlogPost() {
                       <p className="bp-comment-author">
                         {c.name}
                         {c.pending && (
-                          <span style={{ color: '#f97316', fontSize: '0.8rem', marginLeft: 8 }}> (Awaiting moderation)</span>
+                          <span style={{ color: '#f97316', fontSize: '0.8rem', marginLeft: 8 }}>(Awaiting moderation)</span>
                         )}
                       </p>
-                          <p className="bp-comment-date">{formatCommentDate(c.createdAt) || (c.pending ? 'Just now' : '')}{c.pending ? ' • Pending' : ''}</p>
+                      <p className="bp-comment-date">{formatCommentDate(c.createdAt) || (c.pending ? 'Just now' : '')}{c.pending ? ' • Pending' : ''}</p>
                     </div>
                   </div>
-                      <p className="bp-comment-text" style={c.pending ? { opacity: 0.9, fontStyle: 'italic' } : {}}>{c.comment}</p>
+                  <p className="bp-comment-text" style={c.pending ? { opacity: 0.9, fontStyle: 'italic' } : {}}>{c.comment}</p>
 
-                      {/* Admin reply display */}
-                      {c.reply && (
-                        <div style={{ marginTop: 10, marginLeft: 54, background: '#f8fafc', padding: 12, borderRadius: 8, border: '1px solid #e6edf6' }}>
-                          <p style={{ margin: 0, fontWeight: 600, color: '#004B8D' }}>VISHAL GUPTA</p>
-                          <p style={{ margin: '6px 0 0', color: '#374151' }}>{c.reply}</p>
-                          {c.replyAt && <p style={{ margin: '6px 0 0', fontSize: '0.8rem', color: '#9ca3af' }}>{formatCommentDate(c.replyAt)}</p>}
-                        </div>
-                      )}
+                  {/* Admin reply display */}
+                  {c.reply && (
+                    <div style={{ marginTop: 10, marginLeft: 54, background: '#f8fafc', padding: 12, borderRadius: 8, border: '1px solid #e6edf6' }}>
+                      <p style={{ margin: 0, fontWeight: 600, color: '#004B8D', fontFamily: 'Inter, sans-serif', fontSize: '0.85rem' }}>VISHAL GUPTA</p>
+                      <p style={{ margin: '6px 0 0', color: '#374151', fontFamily: 'Inter, sans-serif' }}>{c.reply}</p>
+                      {c.replyAt && <p style={{ margin: '6px 0 0', fontSize: '0.8rem', color: '#9ca3af', fontFamily: 'Inter, sans-serif' }}>{formatCommentDate(c.replyAt)}</p>}
+                    </div>
+                  )}
 
-                      {/* Reply UI for admin */}
-                      {isAdmin && c.id && !c.pending && (
-                        <div style={{ marginTop: 8, marginLeft: 54 }}>
-                          {replyOpenId === c.id ? (
-                            <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                              <textarea
-                                value={replyText}
-                                onChange={(e) => setReplyText(e.target.value)}
-                                placeholder="Write a reply..."
-                                style={{ width: 380, maxWidth: '100%', minHeight: 72, padding: 8, borderRadius: 6, border: '1px solid #e5e7eb' }}
-                              />
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                                <button
-                                  onClick={async () => {
-                                    if (!replyText.trim()) return;
-                                    setReplySubmitting(true);
-                                    try {
-                                      await updateDoc(doc(db, 'blog_comments', c.id), { reply: replyText.trim(), replyAt: serverTimestamp() });
-                                      setReplyOpenId(null);
-                                      setReplyText('');
-                                    } catch (err) {
-                                      console.error('Failed to save reply', err);
-                                    } finally {
-                                      setReplySubmitting(false);
-                                    }
-                                  }}
-                                  disabled={replySubmitting}
-                                  style={{ background: '#004B8D', color: 'white', border: 'none', padding: '8px 12px', borderRadius: 6, cursor: 'pointer' }}
-                                >
-                                  {replySubmitting ? 'Saving…' : 'Send reply'}
-                                </button>
-                                <button onClick={() => { setReplyOpenId(null); setReplyText(''); }} style={{ background: 'transparent', border: 'none', color: '#6b7280', cursor: 'pointer' }}>Cancel</button>
-                              </div>
-                            </div>
-                          ) : (
-                            <button onClick={() => { setReplyOpenId(c.id); setReplyText(c.reply || ''); }} style={{ background: 'transparent', border: 'none', color: '#004B8D', cursor: 'pointer', fontWeight: 600 }}>Reply</button>
-                          )}
+                  {/* Reply UI for admin */}
+                  {isAdmin && c.id && !c.pending && (
+                    <div style={{ marginTop: 8, marginLeft: 54 }}>
+                      {replyOpenId === c.id ? (
+                        <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                          <textarea
+                            value={replyText}
+                            onChange={(e) => setReplyText(e.target.value)}
+                            placeholder="Write a reply..."
+                            style={{ width: 380, maxWidth: '100%', minHeight: 72, padding: 8, borderRadius: 6, border: '1px solid #e5e7eb', fontFamily: 'Inter, sans-serif' }}
+                          />
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                            <button
+                              onClick={async () => {
+                                if (!replyText.trim()) return;
+                                setReplySubmitting(true);
+                                try {
+                                  await updateDoc(doc(db, 'blog_comments', c.id), { reply: replyText.trim(), replyAt: serverTimestamp() });
+                                  setReplyOpenId(null);
+                                  setReplyText('');
+                                } catch (err) {
+                                  console.error('Failed to save reply', err);
+                                } finally {
+                                  setReplySubmitting(false);
+                                }
+                              }}
+                              disabled={replySubmitting}
+                              style={{ background: '#004B8D', color: 'white', border: 'none', padding: '8px 12px', borderRadius: 6, cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}
+                            >
+                              {replySubmitting ? 'Saving…' : 'Send reply'}
+                            </button>
+                            <button onClick={() => { setReplyOpenId(null); setReplyText(''); }} style={{ background: 'transparent', border: 'none', color: '#6b7280', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>Cancel</button>
+                          </div>
                         </div>
+                      ) : (
+                        <button onClick={() => { setReplyOpenId(c.id); setReplyText(c.reply || ''); }} style={{ background: 'transparent', border: 'none', color: '#004B8D', cursor: 'pointer', fontWeight: 600, fontFamily: 'Inter, sans-serif' }}>Reply</button>
                       )}
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>
@@ -526,7 +605,6 @@ export default function BlogPost() {
 
           {/* Comment form */}
           <h3 className="bp-form-heading">Leave a Comment</h3>
-
           {submitStatus === 'success' ? (
             <div className="bp-success-msg">
               <FiCheck size={16} />
@@ -540,45 +618,18 @@ export default function BlogPost() {
               <div className="bp-form-row">
                 <div className="bp-field">
                   <label className="bp-label" htmlFor="bp-name"><FiUser size={10} style={{ marginRight: 4 }} />Name *</label>
-                  <input
-                    id="bp-name"
-                    className="bp-input"
-                    type="text"
-                    required
-                    value={name}
-                    onChange={e => setName(e.target.value)}
-                    placeholder="Your name"
-                    maxLength={100}
-                  />
+                  <input id="bp-name" className="bp-input" type="text" required value={name} onChange={e => setName(e.target.value)} placeholder="Your name" maxLength={100} />
                 </div>
                 <div className="bp-field">
                   <label className="bp-label" htmlFor="bp-email"><FiMail size={10} style={{ marginRight: 4 }} />Email (optional)</label>
-                  <input
-                    id="bp-email"
-                    className="bp-input"
-                    type="email"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    placeholder="Your email (not published)"
-                    maxLength={200}
-                  />
+                  <input id="bp-email" className="bp-input" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Your email (not published)" maxLength={200} />
                 </div>
               </div>
               <div className="bp-field">
                 <label className="bp-label" htmlFor="bp-comment">Comment *</label>
-                <textarea
-                  id="bp-comment"
-                  className="bp-textarea"
-                  required
-                  value={comment}
-                  onChange={e => setComment(e.target.value)}
-                  placeholder="Share your thoughts…"
-                  maxLength={2000}
-                />
+                <textarea id="bp-comment" className="bp-textarea" required value={comment} onChange={e => setComment(e.target.value)} placeholder="Share your thoughts…" maxLength={2000} />
               </div>
-              <p className="bp-policy">
-                Your email address will not be published. All comments are moderated and will appear after approval.
-              </p>
+              <p className="bp-policy">Your email address will not be published. All comments are moderated and will appear after approval.</p>
               <button type="submit" className="bp-submit" disabled={submitting || !name.trim() || !comment.trim()}>
                 {submitting ? (
                   <>
