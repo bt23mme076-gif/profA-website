@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FiYoutube, FiBook, FiUsers, FiTrendingUp, FiBarChart2, FiFileText, FiExternalLink, FiPlay, FiPlus, FiEdit2, FiTrash2, FiSave, FiX, FiChevronUp, FiChevronDown } from 'react-icons/fi';
 import { useFirestoreCollection } from '../hooks/useFirestoreCollection';
 import { useFirestoreDoc } from '../hooks/useFirestoreDoc';
@@ -7,6 +7,7 @@ import EditableText from '../components/EditableText';
 import { useAuth } from '../context/AuthContext';
 import { collection, addDoc, updateDoc, deleteDoc, doc, where } from 'firebase/firestore';
 import { db } from '../firebase/config';
+import { uploadToCloudinary } from '../utils/cloudinaryUpload';
 
 export default function Courses() {
   const { isAdmin } = useAuth() || {};
@@ -957,6 +958,42 @@ function CourseForm({ course, onSave, onCancel }) {
     youtubeUrl: '',
     thumbnail: ''
   });
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+  const fileInputRef = useRef();
+
+  const handleDrop = async (e) => {
+    e.preventDefault();
+    setUploadError('');
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const url = await uploadToCloudinary(file, 'courses');
+      setFormData((prev) => ({ ...prev, thumbnail: url }));
+    } catch (err) {
+      setUploadError(err.message || 'Upload failed');
+    }
+    setUploading(false);
+  };
+
+  const handleFileChange = async (e) => {
+    setUploadError('');
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const url = await uploadToCloudinary(file, 'courses');
+      setFormData((prev) => ({ ...prev, thumbnail: url }));
+    } catch (err) {
+      setUploadError(err.message || 'Upload failed');
+    }
+    setUploading(false);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -1020,13 +1057,38 @@ function CourseForm({ course, onSave, onCancel }) {
           placeholder="https://www.youtube.com/watch?v=..."
         />
       </div>
+      {/* Drag-and-drop thumbnail upload */}
       <div>
-        <label className="block text-sm font-semibold mb-2 text-gray-700">Custom Thumbnail URL (optional)</label>
+        <label className="block text-sm font-semibold mb-2 text-gray-700">Course Thumbnail</label>
+        <div
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          className={`w-full flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-4 mb-2 transition-colors ${uploading ? 'border-gray-400 bg-gray-50' : 'border-[#004B8D] bg-white'} cursor-pointer`}
+          style={{ minHeight: 120 }}
+          onClick={() => fileInputRef.current && fileInputRef.current.click()}
+        >
+          {formData.thumbnail ? (
+            <img src={formData.thumbnail} alt="Thumbnail preview" className="max-h-32 mb-2 rounded shadow" />
+          ) : (
+            <span className="text-gray-400">Drag & drop image here, or click to select</span>
+          )}
+          <input
+            type="file"
+            accept="image/*"
+            ref={fileInputRef}
+            style={{ display: 'none' }}
+            onChange={handleFileChange}
+            disabled={uploading}
+          />
+        </div>
+        {uploading && <div className="text-xs text-blue-600">Uploading...</div>}
+        {uploadError && <div className="text-xs text-red-600">{uploadError}</div>}
+        <div className="text-xs text-gray-500">Or use a direct image URL below (optional, overrides drag-drop)</div>
         <input
           type="url"
           value={formData.thumbnail}
           onChange={(e) => setFormData({ ...formData, thumbnail: e.target.value })}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#004B8D] outline-none transition-shadow"
+          className="w-full px-4 py-2 border border-gray-200 rounded-lg mt-1 focus:ring-2 focus:ring-[#004B8D] outline-none"
           placeholder="Will fallback to YouTube thumbnail if empty"
         />
       </div>
@@ -1053,6 +1115,7 @@ function CourseForm({ course, onSave, onCancel }) {
         <button
           type="submit"
           className="px-6 py-2 bg-[#004B8D] hover:bg-[#003870] text-white rounded-lg font-semibold transition-colors shadow-md"
+          disabled={uploading}
         >
           <FiSave className="inline mr-2" /> Save Course
         </button>
