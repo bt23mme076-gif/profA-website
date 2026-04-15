@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
-import { FiYoutube, FiBook, FiUsers, FiTrendingUp, FiBarChart2, FiFileText, FiExternalLink, FiPlay, FiPlus, FiEdit2, FiTrash2, FiSave, FiX, FiChevronUp, FiChevronDown } from 'react-icons/fi';
+import { FiYoutube, FiBook, FiUsers, FiTrendingUp, FiBarChart2, FiFileText, FiExternalLink, FiPlay, FiPlus, FiEdit2, FiTrash2, FiSave, FiX, FiChevronUp, FiChevronDown, FiBookOpen } from 'react-icons/fi';
 import { useFirestoreCollection } from '../hooks/useFirestoreCollection';
 import { useFirestoreDoc } from '../hooks/useFirestoreDoc';
 import EditableText from '../components/EditableText';
@@ -8,6 +8,14 @@ import { useAuth } from '../context/AuthContext';
 import { collection, addDoc, updateDoc, deleteDoc, doc, where } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import { uploadToCloudinary } from '../utils/cloudinaryUpload';
+
+/* ─── Font Injection (Matching Books Page) ───────────────────────────── */
+if (typeof document !== 'undefined') {
+  const _coursesLink = document.createElement('link');
+  _coursesLink.href = 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap';
+  _coursesLink.rel = 'stylesheet';
+  document.head.appendChild(_coursesLink);
+}
 
 export default function Courses() {
   const { isAdmin } = useAuth() || {};
@@ -45,6 +53,8 @@ export default function Courses() {
   const [showAddCourse, setShowAddCourse] = useState(false);
   const [editingCourse, setEditingCourse] = useState(null);
   const [showAddResearch, setShowAddResearch] = useState(false);
+  const [editingResearch, setEditingResearch] = useState(null);
+  const [showResearchLinks, setShowResearchLinks] = useState(false);
   const [reorderMode, setReorderMode] = useState(false);
 
   const fadeInUp = {
@@ -71,6 +81,18 @@ export default function Courses() {
 
   // Fetch dynamic research courses
   const { data: researchCourses, loading: researchLoading } = useFirestoreCollection('researchCourses', [], true);
+
+  const managementCoursesCount = sortedCourses.length;
+  const researchMethodsCoursesCount = (researchCourses?.length || 0) + 5; // 5 are static
+
+  const allCourseYears = [
+    ...sortedCourses.map(c => c.year || new Date(c.createdAt?.toDate()).getFullYear()),
+    ...(researchCourses || []).map(c => c.year || new Date(c.createdAt?.toDate()).getFullYear())
+  ].filter(Boolean);
+
+  const minYear = allCourseYears.length ? Math.min(...allCourseYears) : '...';
+  const maxYear = allCourseYears.length ? Math.max(...allCourseYears) : '...';
+  const yearRange = minYear === maxYear ? minYear : `${minYear}–${maxYear}`;
 
   // Helper function to extract YouTube video ID from various URL formats
   const extractVideoId = (url) => {
@@ -288,7 +310,7 @@ export default function Courses() {
   return (
     <div className="bg-white min-h-screen">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-[#dce8f5] to-[#fff7ed] py-20 px-6 lg:px-16">
+      <section className="bg-gradient-to-br from-[#dce8f5] to-[#fff7ed] pt-20 pb-8 px-6 lg:px-16">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial="hidden"
@@ -316,6 +338,93 @@ export default function Courses() {
                 multiline
               />
             </p>
+
+            {/* KPI Stat Cards (Matching Books and Research Page Design) */}
+            <div className="flex flex-wrap justify-center gap-6 mt-10 mb-2">
+              <div style={{
+                display: 'inline-flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                background: 'white',
+                borderRadius: '10px',
+                padding: '10px 22px',
+                boxShadow: '0 4px 20px rgba(0,75,141,.1)',
+                border: '1px solid rgba(0,75,141,.08)',
+                minWidth: '160px'
+              }}>
+                <strong style={{
+                  fontFamily: "'Playfair Display', serif",
+                  fontSize: '1.8rem',
+                  fontWeight: 700,
+                  color: '#004B8D'
+                }}>{managementCoursesCount}</strong>
+                <span style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: '.72rem',
+                  fontWeight: 500,
+                  color: '#9ca3af',
+                  letterSpacing: '.09em',
+                  textTransform: 'uppercase',
+                  marginTop: '2px'
+                }}>Management Courses</span>
+              </div>
+
+              <div style={{
+                display: 'inline-flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                background: 'white',
+                borderRadius: '10px',
+                padding: '10px 22px',
+                boxShadow: '0 4px 20px rgba(0,75,141,.1)',
+                border: '1px solid rgba(0,75,141,.08)',
+                minWidth: '160px'
+              }}>
+                <strong style={{
+                  fontFamily: "'Playfair Display', serif",
+                  fontSize: '1.8rem',
+                  fontWeight: 700,
+                  color: '#004B8D'
+                }}>{yearRange}</strong>
+                <span style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: '.72rem',
+                  fontWeight: 500,
+                  color: '#9ca3af',
+                  letterSpacing: '.09em',
+                  textTransform: 'uppercase',
+                  marginTop: '2px'
+                }}>Publication Range</span>
+              </div>
+
+              <div style={{
+                display: 'inline-flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                background: 'white',
+                borderRadius: '10px',
+                padding: '10px 22px',
+                boxShadow: '0 4px 20px rgba(0,75,141,.1)',
+                border: '1px solid rgba(0,75,141,.08)',
+                minWidth: '160px'
+              }}>
+                <strong style={{
+                  fontFamily: "'Playfair Display', serif",
+                  fontSize: '1.8rem',
+                  fontWeight: 700,
+                  color: '#004B8D'
+                }}>{researchMethodsCoursesCount}</strong>
+                <span style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: '.72rem',
+                  fontWeight: 500,
+                  color: '#9ca3af',
+                  letterSpacing: '.09em',
+                  textTransform: 'uppercase',
+                  marginTop: '2px'
+                }}>Research Methods</span>
+              </div>
+            </div>
           </motion.div>
         </div>
       </section>

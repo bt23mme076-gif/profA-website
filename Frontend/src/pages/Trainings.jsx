@@ -9,6 +9,14 @@ import { useState, useRef } from 'react';
 import { db } from '../firebase/config';
 import { collection, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 
+/* ─── Font Injection (Matching Books Page) ───────────────────────────── */
+if (typeof document !== 'undefined') {
+  const _trainingsLink = document.createElement('link');
+  _trainingsLink.href = 'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@300;400;500;600&display=swap';
+  _trainingsLink.rel = 'stylesheet';
+  document.head.appendChild(_trainingsLink);
+}
+
 export default function Trainings() {
   const { isAdmin } = useAuth() || {};
   const { data: pageData } = useFirestoreDoc('content', 'trainings', {
@@ -284,6 +292,93 @@ export default function Trainings() {
               />
             </div>
           </motion.div>
+
+          {/* KPI Stat Cards (Matching Books and Research Page Design) */}
+          <div className="flex flex-wrap justify-center gap-6 mt-10 mb-2">
+            <div style={{
+              display: 'inline-flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              background: 'white',
+              borderRadius: '10px',
+              padding: '10px 22px',
+              boxShadow: '0 4px 20px rgba(0,75,141,.1)',
+              border: '1px solid rgba(0,75,141,.08)',
+              minWidth: '160px'
+            }}>
+              <strong style={{
+                fontFamily: "'Playfair Display', serif",
+                fontSize: '1.8rem',
+                fontWeight: 700,
+                color: '#004B8D'
+              }}>{(programs || []).length || 5}</strong>
+              <span style={{
+                fontFamily: "'Inter', sans-serif",
+                fontSize: '.72rem',
+                fontWeight: 500,
+                color: '#9ca3af',
+                letterSpacing: '.09em',
+                textTransform: 'uppercase',
+                marginTop: '2px'
+              }}>Active Programs</span>
+            </div>
+
+            <div style={{
+              display: 'inline-flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              background: 'white',
+              borderRadius: '10px',
+              padding: '10px 22px',
+              boxShadow: '0 4px 20px rgba(0,75,141,.1)',
+              border: '1px solid rgba(0,75,141,.08)',
+              minWidth: '160px'
+            }}>
+              <strong style={{
+                fontFamily: "'Playfair Display', serif",
+                fontSize: '1.8rem',
+                fontWeight: 700,
+                color: '#004B8D'
+              }}>1,000</strong>
+              <span style={{
+                fontFamily: "'Inter', sans-serif",
+                fontSize: '.72rem',
+                fontWeight: 500,
+                color: '#9ca3af',
+                letterSpacing: '.09em',
+                textTransform: 'uppercase',
+                marginTop: '2px'
+              }}>Alumni Trained</span>
+            </div>
+
+            <div style={{
+              display: 'inline-flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              background: 'white',
+              borderRadius: '10px',
+              padding: '10px 22px',
+              boxShadow: '0 4px 20px rgba(0,75,141,.1)',
+              border: '1px solid rgba(0,75,141,.08)',
+              minWidth: '160px'
+            }}>
+              <strong style={{
+                fontFamily: "'Playfair Display', serif",
+                fontSize: '1.8rem',
+                fontWeight: 700,
+                color: '#004B8D'
+              }}>4.8/5</strong>
+              <span style={{
+                fontFamily: "'Inter', sans-serif",
+                fontSize: '.72rem',
+                fontWeight: 500,
+                color: '#9ca3af',
+                letterSpacing: '.09em',
+                textTransform: 'uppercase',
+                marginTop: '2px'
+              }}>Average Rating</span>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -441,33 +536,33 @@ export default function Trainings() {
       {/* CTA Section */}
       <section className="py-16 bg-linear-to-br from-[#004B8D] to-[#003870] text-white">
         <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-3xl lg:text-4xl font-['Playfair_Display'] font-bold mb-4">
+          <h2 className="text-3xl lg:text-4xl font-['Playfair_Display'] font-bold mb-4 text-white">
             <EditableText
               collection="content"
               docId="trainings"
               field="cta_heading"
               defaultValue={pageData?.cta_heading || 'Ready to Transform Your Leadership?'}
-              className="text-3xl lg:text-4xl font-['Playfair_Display'] font-bold mb-4"
+              className="text-3xl lg:text-4xl font-['Playfair_Display'] font-bold mb-4 text-white"
             />
           </h2>
-          <p className="text-lg font-['Inter'] mb-8 opacity-90">
+          <p className="text-lg font-['Inter'] mb-8 opacity-90 text-white">
             <EditableText
               collection="content"
               docId="trainings"
               field="cta_description"
               defaultValue={pageData?.cta_description || 'Join thousands of executives who have enhanced their leadership capabilities through our programs'}
-              className="text-lg font-['Inter'] mb-8 opacity-90"
+              className="text-lg font-['Inter'] mb-8 opacity-90 text-white"
               multiline
             />
           </p>
 
           <div className="relative inline-block">
             <a
-              href={pageData?.cta_button_link || '#contact'}
+              href="/#newsletter"
               className="inline-block px-8 py-4 bg-white text-[#004B8D] font-['Inter'] font-semibold rounded-lg shadow-lg hover:shadow-xl hover:bg-gray-50 transition-all duration-300"
             >
               <span className="text-sm font-['Inter'] font-semibold text-[#004B8D]">
-                {!isAdmin ? (pageData?.cta_button_text || 'Get in Touch') : <span className="opacity-0">{pageData?.cta_button_text || 'Get in Touch'}</span>}
+                {!isAdmin ? (pageData?.cta_button_text || 'Join Newsletter') : <span className="opacity-0">{pageData?.cta_button_text || 'Join Newsletter'}</span>}
               </span>
             </a>
 
@@ -478,7 +573,7 @@ export default function Trainings() {
                   collection="content"
                   docId="trainings"
                   field="cta_button_text"
-                  defaultValue={pageData?.cta_button_text || 'Get in Touch'}
+                  defaultValue={pageData?.cta_button_text || 'Join Newsletter'}
                   className="w-full inline-block text-sm font-['Inter'] font-semibold text-[#004B8D] text-center px-2"
                 />
               </div>

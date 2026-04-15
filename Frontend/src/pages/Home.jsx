@@ -1184,7 +1184,7 @@ export default function Home() {
       </section>
 
       {/* 7. SPEAKING */}
-      <section id="contact" className="grid lg:grid-cols-2 min-h-[600px]">
+      <section id="contact" className="grid lg:grid-cols-2 min-h-[400px]">
         <motion.div
           className="bg-[#ebf2f8] p-6 sm:p-12 lg:p-20 flex flex-col justify-center items-start order-2 lg:order-1 relative overflow-hidden border-l-4 border-[#004B8D]"
           initial="hidden"

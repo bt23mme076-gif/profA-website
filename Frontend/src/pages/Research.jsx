@@ -760,32 +760,94 @@ export default function Research() {
 
           {/* Publications Dashboard */}
           <div className="flex flex-wrap justify-center gap-6 mt-10 mb-2">
-            {/* CHANGED: Publications now counts all types combined */}
-            <div className="bg-white rounded-xl shadow-md px-10 py-6 text-center min-w-[160px]">
-              <div className="text-3xl font-bold text-[#004B8D]">{totalPublications}</div>
-              <div className="uppercase text-xs tracking-wider text-gray-400 mt-1">Publications</div>
+            <div style={{
+              display: 'inline-flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              background: 'white',
+              borderRadius: '10px',
+              padding: '10px 22px',
+              boxShadow: '0 4px 20px rgba(0,75,141,.1)',
+              border: '1px solid rgba(0,75,141,.08)',
+              minWidth: '160px'
+            }}>
+              <strong style={{
+                fontFamily: "'Playfair Display', serif",
+                fontSize: '1.8rem',
+                fontWeight: 700,
+                color: '#004B8D'
+              }}>{totalPublications}</strong>
+              <span style={{
+                fontFamily: "'Inter', sans-serif",
+                fontSize: '.72rem',
+                fontWeight: 500,
+                color: '#9ca3af',
+                letterSpacing: '.09em',
+                textTransform: 'uppercase',
+                marginTop: '2px'
+              }}>Publications</span>
             </div>
 
-            {/* Year Range — unchanged */}
-            <div className="bg-white rounded-xl shadow-md px-10 py-6 text-center min-w-[160px]">
-              <div className="text-3xl font-bold text-[#004B8D]">{yearRange}</div>
-              <div className="uppercase text-xs tracking-wider text-gray-400 mt-1">Year Range</div>
+            <div style={{
+              display: 'inline-flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              background: 'white',
+              borderRadius: '10px',
+              padding: '10px 22px',
+              boxShadow: '0 4px 20px rgba(0,75,141,.1)',
+              border: '1px solid rgba(0,75,141,.08)',
+              minWidth: '160px'
+            }}>
+              <strong style={{
+                fontFamily: "'Playfair Display', serif",
+                fontSize: '1.8rem',
+                fontWeight: 700,
+                color: '#004B8D'
+              }}>{yearRange}</strong>
+              <span style={{
+                fontFamily: "'Inter', sans-serif",
+                fontSize: '.72rem',
+                fontWeight: 500,
+                color: '#9ca3af',
+                letterSpacing: '.09em',
+                textTransform: 'uppercase',
+                marginTop: '2px'
+              }}>Year Range</span>
             </div>
 
-            {/* CHANGED: Journals → Citations, linked to Google Scholar */}
-            <div className="bg-white rounded-xl shadow-md px-10 py-6 text-center min-w-[160px]">
+            <div style={{
+              display: 'inline-flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              background: 'white',
+              borderRadius: '10px',
+              padding: '10px 22px',
+              boxShadow: '0 4px 20px rgba(0,75,141,.1)',
+              border: '1px solid rgba(0,75,141,.08)',
+              minWidth: '160px'
+            }}>
               <a
                 href="https://scholar.google.co.in/citations?user=_kfodNoAAAAJ&hl=en"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group block"
+                style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
               >
-                <div className="text-3xl font-bold text-[#004B8D] group-hover:text-[#f97316] transition-colors duration-200">
-                  3,540+
-                </div>
-                <div className="uppercase text-xs tracking-wider text-gray-400 mt-1 group-hover:text-[#f97316] transition-colors duration-200">
-                  Citations
-                </div>
+                <strong style={{
+                  fontFamily: "'Playfair Display', serif",
+                  fontSize: '1.8rem',
+                  fontWeight: 700,
+                  color: '#004B8D'
+                }}>3,540+</strong>
+                <span style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: '.72rem',
+                  fontWeight: 500,
+                  color: '#9ca3af',
+                  letterSpacing: '.09em',
+                  textTransform: 'uppercase',
+                  marginTop: '2px'
+                }}>Citations</span>
               </a>
             </div>
           </div>

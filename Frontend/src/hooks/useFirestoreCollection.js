@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { db } from '../firebase/config';
 import { collection, getDocs, query, onSnapshot } from 'firebase/firestore';
 
@@ -6,6 +6,11 @@ export function useFirestoreCollection(collectionName, constraints = [], realtim
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // stabilize constraints
+  const constraintsKey = JSON.stringify(constraints);
+  const constraintsRef = useRef(constraintsKey);
+  constraintsRef.current = constraintsKey;
 
   useEffect(() => {
     console.log(`${realtime ? 'Setting up real-time listener' : 'Fetching'} for ${collectionName}...`);
@@ -65,7 +70,7 @@ export function useFirestoreCollection(collectionName, constraints = [], realtim
     };
 
     fetchData();
-  }, [collectionName, JSON.stringify(constraints), realtime]);
+  }, [collectionName, constraintsRef.current, realtime]);
 
   return { data, loading, error };
 }

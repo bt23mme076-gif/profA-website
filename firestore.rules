@@ -15,8 +15,7 @@ service cloud.firestore {
     match /newsletter_subscribers/{subscriberId} {
       // Allow anyone (even unauthenticated) to create if email is present and non-empty
       allow create: if request.resource.data.email is string &&
-                      request.resource.data.email.size() > 0 &&
-                      (request.auth == null || request.auth != null);
+                      request.resource.data.email.size() > 0;
       allow read, update, delete: if isAdmin();
     }
     
@@ -39,7 +38,7 @@ service cloud.firestore {
       allow get: if resource.data.approved == true || isAdmin();
 
       // Allow list queries if the client filters for approved==true, or if the requester is an admin
-      allow list: if request.query.where('approved','==',true) || isAdmin();
+      allow list: if resource.data.approved == true || isAdmin();
 
       // Admins can update/delete (for approving or moderating)
       allow update, delete: if isAdmin();
@@ -96,6 +95,38 @@ service cloud.firestore {
     }
 
     match /training_programs/{docId} {
+      allow read: if true;
+      allow write, update, delete: if isAdmin();
+    }
+    
+    // Opinions page collections
+    match /opinionTalks/{docId} {
+      allow read: if true;
+      allow write, update, delete: if isAdmin();
+    }
+    match /opinionArticles/{docId} {
+      allow read: if true;
+      allow write, update, delete: if isAdmin();
+    }
+
+    // Consulting page collections
+    match /consultingAssignments/{docId} {
+      allow read: if true;
+      allow write, update, delete: if isAdmin();
+    }
+    match /consultingGrants/{docId} {
+      allow read: if true;
+      allow write, update, delete: if isAdmin();
+    }
+    match /consultingExecPrograms/{docId} {
+      allow read: if true;
+      allow write, update, delete: if isAdmin();
+    }
+    match /consultingGovtOrgs/{docId} {
+      allow read: if true;
+      allow write, update, delete: if isAdmin();
+    }
+    match /consultingPrivateOrgs/{docId} {
       allow read: if true;
       allow write, update, delete: if isAdmin();
     }

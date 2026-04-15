@@ -7,12 +7,15 @@ import { FiLogOut, FiSettings, FiMenu, FiX, FiEdit2, FiCheck, FiMoreVertical } f
 
 // Default navbar content (fallback when Firestore has no data yet)
 const DEFAULT_NAV_LINKS = [
-  { id: 'research', name: 'Research', path: '/research' },
+  { id: 'about', name: 'About me', path: '/about' },
   { id: 'books', name: 'Books', path: '/book' },
-  { id: 'consulting', name: 'Consulting', path: '/about' },
-  { id: 'recognitions', name: 'Recognitions', path: '/about' },
-  { id: 'opinions', name: 'Blogs', path: '/blog' },
+  { id: 'research', name: 'Research', path: '/research' },
+  { id: 'consulting', name: 'Consulting', path: '/consulting' },
+  { id: 'opinions', name: 'Opinions', path: '/opinions' },
   { id: 'courses', name: 'Courses', path: '/courses' },
+  { id: 'blog', name: 'Blog', path: '/blog' },
+  { id: 'trainings', name: 'Trainings', path: '/trainings' },
+  { id: 'digitalavatar', name: 'Digital Avatar', path: '/digitalavatar' },
   { id: 'contact', name: 'Contact', hash: '#contact' },
 ];
 
@@ -226,10 +229,15 @@ export default function Navbar() {
 
   const handleNavClick = (link) => {
     setMobileMenuOpen(false); // Close mobile menu on nav click
-    
-    // Explicit override for Blogs/Opinions to ensure correct routing
-    if (link.id === 'opinions' || link.name === 'Blogs' || link.name === 'Opinions') {
-      navigate('/blog');
+
+    // Direct navigation for Consulting and Opinions
+    if (link.id === 'consulting') {
+      navigate('/consulting');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    if (link.id === 'opinions') {
+      navigate('/opinions');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -530,46 +538,84 @@ export default function Navbar() {
                     </div>
                   ) : (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                      <button
-                        onClick={() => handleNavClick(link)}
-                        onMouseEnter={() => setHoveredLink(link.name)}
-                        onMouseLeave={() => setHoveredLink(null)}
-                        style={{ 
-                          fontSize: '0.875rem', 
-                          fontFamily: '"Inter", -apple-system, sans-serif', 
-                          fontWeight: 500, 
-                          color: showDark
-                            ? (hoveredLink === link.name ? '#F5C400' : 'rgba(255,255,255,0.8)')
-                            : (hoveredLink === link.name ? '#1a1a1a' : '#555555'),
-                          background: 'none', 
-                          border: 'none', 
-                          cursor: 'pointer',
-                          letterSpacing: '0.02em',
-                          transition: 'all 0.2s ease',
-                          padding: 0,
-                          position: 'relative',
-                          paddingBottom: '2px'
-                        }}
-                      >
-                        {link.name}
-                        {hoveredLink === link.name && (
-                          <span style={{
-                            position: 'absolute',
-                            bottom: '-2px',
-                            left: 0,
-                            right: 0,
-                            height: '2px',
-                            backgroundColor: showDark ? '#F5C400' : '#1a1a1a',
-                            transition: 'all 0.2s ease'
-                          }} />
-                        )}
-                      </button>
+                      {link.name === 'Digital Avatar' ? (
+                        <a
+                          href="https://vishalgupta.kavisha.ai"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onMouseEnter={() => setHoveredLink(link.name)}
+                          onMouseLeave={() => setHoveredLink(null)}
+                          style={{
+                            textDecoration: 'none',
+                            fontSize: '0.875rem', 
+                            fontFamily: '"Inter", -apple-system, sans-serif', 
+                            fontWeight: 500, 
+                            color: showDark
+                              ? (hoveredLink === link.name ? '#F5C400' : 'rgba(255,255,255,0.8)')
+                              : (hoveredLink === link.name ? '#1a1a1a' : '#555555'),
+                            letterSpacing: '0.02em',
+                            transition: 'all 0.2s ease',
+                            padding: 0,
+                            position: 'relative',
+                            paddingBottom: '2px'
+                          }}
+                        >
+                          {link.name}
+                          {hoveredLink === link.name && (
+                            <span style={{
+                              position: 'absolute',
+                              bottom: '-2px',
+                              left: 0,
+                              right: 0,
+                              height: '2px',
+                              backgroundColor: showDark ? '#F5C400' : '#1a1a1a',
+                              transition: 'all 0.2s ease'
+                            }} />
+                          )}
+                        </a>
+                      ) : (
+                        <button
+                          onClick={() => handleNavClick(link)}
+                          onMouseEnter={() => setHoveredLink(link.name)}
+                          onMouseLeave={() => setHoveredLink(null)}
+                          style={{ 
+                            fontSize: '0.875rem', 
+                            fontFamily: '"Inter", -apple-system, sans-serif', 
+                            fontWeight: 500, 
+                            color: showDark
+                              ? (hoveredLink === link.name ? '#F5C400' : 'rgba(255,255,255,0.8)')
+                              : (hoveredLink === link.name ? '#1a1a1a' : '#555555'),
+                            background: 'none', 
+                            border: 'none', 
+                            cursor: 'pointer',
+                            letterSpacing: '0.02em',
+                            transition: 'all 0.2s ease',
+                            padding: 0,
+                            position: 'relative',
+                            paddingBottom: '2px'
+                          }}
+                        >
+                          {link.name}
+                          {hoveredLink === link.name && (
+                            <span style={{
+                              position: 'absolute',
+                              bottom: '-2px',
+                              left: 0,
+                              right: 0,
+                              height: '2px',
+                              backgroundColor: showDark ? '#F5C400' : '#1a1a1a',
+                              transition: 'all 0.2s ease'
+                            }} />
+                          )}
+                        </button>
+                      )}
+                      
                       {/* Edit label button - admin only */}
                       {isAdmin && (
                         <button
                           onClick={() => startEdit(link.id || link.name, link.name)}
                           title="Edit label"
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '1px', color: '#ccc', display: 'flex' }}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '1px', color: '#bbb', flexShrink: 0, display: 'flex' }}
                         >
                           <FiEdit2 size={10} />
                         </button>
@@ -780,27 +826,54 @@ export default function Navbar() {
                           <FiMoreVertical size={15} />
                         </span>
                       )}
-                      <button
-                        onClick={() => handleNavClick(link)}
-                        style={{
-                          flex: 1,
-                          fontSize: windowWidth < 480 ? '1.05rem' : '1.15rem',
-                          fontFamily: '"Inter", -apple-system, sans-serif',
-                          fontWeight: 500,
-                          color: '#1a1a1a',
-                          background: 'transparent',
-                          border: 'none',
-                          cursor: 'pointer',
-                          padding: windowWidth < 480 ? '1rem 0.75rem' : '1.1rem 1rem',
-                          textAlign: 'left',
-                          borderRadius: '6px',
-                        }}
-                        onMouseDown={(e) => { e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.08)'; }}
-                        onMouseUp={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
-                      >
-                        {link.name}
-                      </button>
+                      
+                      {link.name === 'Digital Avatar' ? (
+                        <a
+                          href="https://vishalgupta.kavisha.ai"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            textDecoration: 'none',
+                            flex: 1,
+                            fontSize: windowWidth < 480 ? '1.05rem' : '1.15rem',
+                            fontFamily: '"Inter", -apple-system, sans-serif',
+                            fontWeight: 500,
+                            color: '#1a1a1a',
+                            background: 'transparent',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: windowWidth < 480 ? '1rem 0.75rem' : '1.1rem 1rem',
+                            textAlign: 'left',
+                            borderRadius: '6px',
+                            display: 'block'
+                          }}
+                        >
+                          {link.name}
+                        </a>
+                      ) : (
+                        <button
+                          onClick={() => handleNavClick(link)}
+                          style={{
+                            flex: 1,
+                            fontSize: windowWidth < 480 ? '1.05rem' : '1.15rem',
+                            fontFamily: '"Inter", -apple-system, sans-serif',
+                            fontWeight: 500,
+                            color: '#1a1a1a',
+                            background: 'transparent',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: windowWidth < 480 ? '1rem 0.75rem' : '1.1rem 1rem',
+                            textAlign: 'left',
+                            borderRadius: '6px',
+                          }}
+                          onMouseDown={(e) => { e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.08)'; }}
+                          onMouseUp={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+                        >
+                          {link.name}
+                        </button>
+                      )}
+                      
                       {isAdmin && (
                         <button
                           onClick={() => startEdit(link.id || link.name, link.name)}
