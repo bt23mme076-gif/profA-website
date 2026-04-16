@@ -13,8 +13,6 @@ export function useFirestoreCollection(collectionName, constraints = [], realtim
   constraintsRef.current = constraintsKey;
 
   useEffect(() => {
-    console.log(`${realtime ? 'Setting up real-time listener' : 'Fetching'} for ${collectionName}...`);
-    
     const collectionRef = collection(db, collectionName);
     let q = collectionRef;
     if (constraints.length > 0) {
@@ -30,13 +28,12 @@ export function useFirestoreCollection(collectionName, constraints = [], realtim
             id: doc.id,
             ...doc.data()
           }));
-          console.log(`✅ Real-time update for ${collectionName}:`, items.length, 'items');
           setData(items);
           setLoading(false);
           setError(null);
         },
         (err) => {
-          console.error(`❌ Real-time listener error for ${collectionName}:`, err);
+          console.error(`Real-time listener error for ${collectionName}:`, err);
           setError(err.message);
           setLoading(false);
         }
@@ -44,7 +41,6 @@ export function useFirestoreCollection(collectionName, constraints = [], realtim
 
       // Cleanup function
       return () => {
-        console.log(`🔌 Unsubscribing from ${collectionName}`);
         unsubscribe();
       };
     }
@@ -58,7 +54,6 @@ export function useFirestoreCollection(collectionName, constraints = [], realtim
           id: doc.id,
           ...doc.data()
         }));
-        console.log(`${collectionName} fetched:`, items.length, 'items');
         setData(items);
         setError(null);
       } catch (err) {

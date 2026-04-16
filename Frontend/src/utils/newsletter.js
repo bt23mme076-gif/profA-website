@@ -1,4 +1,4 @@
-import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
+import { collection, doc, setDoc, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
 /**
@@ -17,21 +17,15 @@ export async function subscribeToNewsletter(email) {
       };
     }
 
-    // Check if email already exists
-    const newsletterRef = collection(db, 'newsletter_subscribers');
-    const q = query(newsletterRef, where('email', '==', email.toLowerCase()));
-    const querySnapshot = await getDocs(q);
-
-    if (!querySnapshot.empty) {
-      return {
-        success: false,
-        message: 'This email is already subscribed!'
-      };
-    }
-
-    // Add new subscriber
-    await addDoc(newsletterRef, {
-      email: email.toLowerCase(),
+    const normalizedEmail = email.toLowerCase();
+    
+    // We cannot query ('getDocs') the collection due to safety rules, 
+    // so we attempt to create the document with the email as its ID.
+    // If it already exists, Firestore will throw a 'permission-denied' error because over-writing requires update permissions.
+    const newsletterDocRef = doc(db, 'newsletter_subscribers', normalizedEmail);
+    
+    await setDoc(newsletterDocRef, {
+      email: normalizedEmail,
       subscribedAt: new Date().toISOString(),
       status: 'active',
       source: 'website'
@@ -42,6 +36,12 @@ export async function subscribeToNewsletter(email) {
       message: 'Thank you for subscribing! Check your inbox for confirmation.'
     };
   } catch (error) {
+    if (error.code === 'permission-denied') {
+      return {
+        success: false,
+        message: 'This email is already subscribed!'
+      };
+    }
     console.error('Newsletter subscription error:', error);
     return {
       success: false,
