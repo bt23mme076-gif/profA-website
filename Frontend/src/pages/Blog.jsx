@@ -863,7 +863,7 @@ export default function Blog() {
         <div className="relative mx-auto grid max-w-7xl gap-12 px-6 py-20 lg:grid-cols-[1.1fr_0.9fr] lg:px-12 xl:py-24">
           <motion.div initial="hidden" animate="visible" variants={staggerContainer} className="max-w-3xl">
             <motion.div variants={fadeInUp} className="mb-6 inline-flex items-center rounded-full border border-white/20 bg-white/10 px-4 py-2 backdrop-blur-sm">
-              <span className="font-['Inter'] text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-[#f5c400]">
+              <span className="font-['Inter'] text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-[#FFCC00]">
                 Essays, notes, and teaching reflections
               </span>
             </motion.div>
@@ -914,7 +914,7 @@ export default function Blog() {
                 />
                 <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,20,37,0.05),rgba(8,20,37,0.7))]" />
                 <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <p className="font-['Inter'] text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[#f5c400]">Latest from the journal</p>
+                  <p className="font-['Inter'] text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-[#FFCC00]">Latest from the journal</p>
                   <p className="mt-3 font-['Playfair_Display'] text-2xl font-semibold leading-tight text-white">
                     {latestBlog?.title || 'Fresh writing will appear here.'}
                   </p>
@@ -1109,8 +1109,8 @@ export default function Blog() {
                             <button type="button" onClick={() => handleToggleHome(featuredBlog)}
                               className={`inline-flex items-center gap-2 rounded-full border px-5 py-2.5 font-['Inter'] text-sm font-semibold transition-colors ${
                                 featuredBlog.showOnHome
-                                  ? 'border-[#f5c400] bg-[#fffbea] text-[#9a7200]'
-                                  : 'border-[#bfd0e4] text-[#10233d] hover:border-[#f5c400] hover:bg-[#fffbea]'
+                                  ? 'border-[#FFCC00] bg-[#fffbea] text-[#9a7200]'
+                                  : 'border-[#bfd0e4] text-[#10233d] hover:border-[#FFCC00] hover:bg-[#fffbea]'
                               }`}>
                               <FiHome size={14} /> {featuredBlog.showOnHome ? 'On Home ✔' : 'Pin to Home'}
                             </button>
@@ -1165,7 +1165,7 @@ export default function Blog() {
                             </span>
                           )}
                           {isAdmin && blog.showOnHome && (
-                            <span className="absolute right-4 bottom-4 inline-flex items-center gap-1 rounded-full bg-[#f5c400] px-3 py-1.5 font-['Inter'] text-[0.65rem] font-semibold text-[#5a4500]">
+                            <span className="absolute right-4 bottom-4 inline-flex items-center gap-1 rounded-full bg-[#FFCC00] px-3 py-1.5 font-['Inter'] text-[0.65rem] font-semibold text-[#5a4500]">
                               <FiHome size={10} /> Home
                             </span>
                           )}
@@ -1211,8 +1211,8 @@ export default function Blog() {
                                 <button type="button" onClick={() => handleToggleHome(blog)}
                                   className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-2 font-['Inter'] text-xs font-semibold transition-colors ${
                                     blog.showOnHome
-                                      ? 'border-[#f5c400] bg-[#fffbea] text-[#9a7200]'
-                                      : 'border-[#d6deea] text-[#51657d] hover:border-[#f5c400]'
+                                      ? 'border-[#FFCC00] bg-[#fffbea] text-[#9a7200]'
+                                      : 'border-[#d6deea] text-[#51657d] hover:border-[#FFCC00]'
                                   }`}>
                                   <FiHome size={11} /> {blog.showOnHome ? 'Pinned' : 'Pin'}
                                 </button>

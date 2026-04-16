@@ -263,7 +263,7 @@ export default function Trainings() {
             transition={{ duration: 0.35 }}
             className="text-center"
           >
-            <div className="w-20 h-1 bg-[#f97316] mb-8 rounded-full mx-auto"></div>
+            <div className="w-20 h-1 bg-[#FFCC00] mb-8 rounded-full mx-auto"></div>
             <div className="text-5xl lg:text-6xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-6" role="heading" aria-level={1}>
               <EditableText
                 collection="content"
@@ -406,10 +406,10 @@ export default function Trainings() {
             {loading && <p>Loading programs...</p>}
             {sortedPrograms.map((program, index) => {
               const isEven = index % 2 === 0;
-              const headerBg = isEven ? 'bg-[#004B8D]' : 'bg-[#f97316]';
+              const headerBg = isEven ? 'bg-[#004B8D]' : 'bg-[#FFCC00]';
               const buttonGradient = isEven
                 ? 'bg-linear-to-r from-[#004B8D] to-[#003870] hover:from-[#003870] hover:to-[#002a5a]'
-                : 'bg-linear-to-r from-[#f97316] to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c]';
+                : 'bg-linear-to-r from-[#FFCC00] to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c]';
 
                 return (
               <div key={program.id}>
@@ -480,15 +480,15 @@ export default function Trainings() {
                           {/* Program Details */}
                           <div className="space-y-4">
                             <div className="flex items-center gap-3 text-gray-700">
-                              <FiClock className="text-[#f97316] text-xl" />
+                              <FiClock className="text-[#FFCC00] text-xl" />
                               <span className="font-['Inter']"><strong>Duration:</strong> {program.duration}</span>
                             </div>
                             <div className="flex items-center gap-3 text-gray-700">
-                              <FiCalendar className="text-[#f97316] text-xl" />
+                              <FiCalendar className="text-[#FFCC00] text-xl" />
                               <span className="font-['Inter']"><strong>Format:</strong> {program.format}</span>
                             </div>
                             <div className="flex items-center gap-3 text-gray-700">
-                              <FiMapPin className="text-[#f97316] text-xl" />
+                              <FiMapPin className="text-[#FFCC00] text-xl" />
                               <span className="font-['Inter']"><strong>Location:</strong> {program.location}</span>
                             </div>
                           </div>
@@ -497,13 +497,13 @@ export default function Trainings() {
                         {/* Right Column - Highlights */}
                         <div>
                           <h3 className="text-2xl font-['Playfair_Display'] font-bold text-gray-900 mb-4 flex items-center gap-2">
-                            <FiTarget className="text-[#f97316]" />
+                            <FiTarget className="text-[#FFCC00]" />
                             Key Highlights
                           </h3>
                           <ul className="space-y-3">
                             {program.highlights && program.highlights.map((highlight, idx) => (
                               <li key={idx} className="flex items-start gap-3">
-                                <span className="text-[#f97316] text-xl mt-1">•</span>
+                                <span className="text-[#FFCC00] text-xl mt-1">•</span>
                                 <span className="text-gray-700 font-['Inter']">{highlight}</span>
                               </li>
                             ))}

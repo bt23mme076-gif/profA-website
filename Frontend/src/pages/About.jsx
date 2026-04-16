@@ -258,7 +258,7 @@ export default function About() {
           <motion.div initial="hidden" whileInView="visible" viewport={viewportOptions} variants={fadeInUp}>
             <div className="flex items-center justify-between gap-4 mb-10 flex-wrap">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-[#fb923c] to-[#f97316] rounded-2xl flex items-center justify-center text-white text-3xl shadow-xl">
+                <div className="w-16 h-16 bg-gradient-to-br from-[#F5C400] to-[#f5b800] rounded-2xl flex items-center justify-center text-white text-3xl shadow-xl">
                   <FiAward />
                 </div>
                 <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a]">Awards & Recognition</h2>

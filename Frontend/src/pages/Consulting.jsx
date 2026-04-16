@@ -218,7 +218,7 @@ export default function Consulting() {
       <section className="bg-gradient-to-br from-[#dce8f5] to-[#fff7ed] pt-20 pb-8 px-6 lg:px-16">
         <div className="max-w-7xl mx-auto">
           <motion.div initial="hidden" animate="visible" variants={fadeInUp} className="text-center">
-            <div className="w-20 h-1 bg-[#f97316] mb-8 rounded-full mx-auto" />
+            <div className="w-20 h-1 bg-[#FFCC00] mb-8 rounded-full mx-auto" />
             <h1 className="text-5xl lg:text-7xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-6">
               <EditableText
                 collection="content" docId="consulting" field="page_heading"
@@ -238,8 +238,8 @@ export default function Consulting() {
             {/* KPI Stat Cards */}
             <div className="flex flex-wrap justify-center gap-6 mt-10 mb-2">
               {[
-                { value: totalAssignments, defaultLabel: 'Consulting Assignments', field: 'kpi_1_label' },
-                { value: allGrants.length, defaultLabel: 'Research Grants', field: 'kpi_2_label' },
+                { value: totalAssignments, defaultLabel: 'Organisations Consulted', field: 'kpi_1_label' },
+                { value: '300,000', defaultLabel: 'Professionals Trained', field: 'kpi_4_label' },
                 { value: allGovtOrgs.length + allPrivateOrgs.length, defaultLabel: 'Organisations Trained', field: 'kpi_3_label' },
               ].map(({ value, defaultLabel, field }) => (
                 <div key={field} style={{
@@ -273,11 +273,11 @@ export default function Consulting() {
               <div className="group">
                 <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-4">
                   <EditableText collection="content" docId="consulting" field="assignments_heading"
-                    defaultValue={pageData?.assignments_heading || 'Consulting Assignments'}
+                    defaultValue={pageData?.assignments_heading || 'Organisations Consulted'}
                     className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a]"
                   />
                 </h2>
-                <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#F5C400] group-hover:w-32 transition-all duration-300" />
+                <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#FFCC00] group-hover:w-32 transition-all duration-300" />
               </div>
               {isAdmin && (
                 <button
@@ -332,7 +332,7 @@ export default function Consulting() {
                     className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a]"
                   />
                 </h2>
-                <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#F5C400] group-hover:w-32 transition-all duration-300" />
+                <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#FFCC00] group-hover:w-32 transition-all duration-300" />
               </div>
               {isAdmin && (
                 <button onClick={() => setShowAddGrant(true)}
@@ -399,7 +399,7 @@ export default function Consulting() {
                   className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a]"
                 />
               </h2>
-              <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#F5C400] group-hover:w-32 transition-all duration-300 mb-4" />
+              <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#FFCC00] group-hover:w-32 transition-all duration-300 mb-4" />
               <p className="text-lg font-['Inter'] text-gray-600 max-w-3xl">
                 <EditableText collection="content" docId="consulting" field="training_subtitle"
                   defaultValue={pageData?.training_subtitle || ''}
@@ -470,12 +470,12 @@ export default function Consulting() {
 
             {/* Private Sector */}
             <motion.div initial="hidden" whileInView="visible" viewport={viewportOptions} variants={fadeInUp}
-              className="bg-[#fff7ed] rounded-xl shadow-md border-l-4 border-[#f97316] overflow-hidden"
+              className="bg-[#fff7ed] rounded-xl shadow-md border-l-4 border-[#FFCC00] overflow-hidden"
             >
-              <div className="bg-[#f97316] p-6 flex flex-wrap items-center justify-between gap-4">
+              <div className="bg-[#FFCC00] p-6 flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <div className="bg-[#fff7ed] p-3 rounded-xl">
-                    <FiBriefcase className="w-6 h-6 text-[#f97316]" />
+                    <FiBriefcase className="w-6 h-6 text-[#FFCC00]" />
                   </div>
                   <h3 className="text-2xl font-['Playfair_Display'] font-bold text-white" style={{ color: 'white' }}>
                     <EditableText collection="content" docId="consulting" field="private_heading"
@@ -486,7 +486,7 @@ export default function Consulting() {
                 </div>
                 {isAdmin && (
                   <button onClick={() => setShowAddPrivateOrg(true)}
-                    className="flex items-center gap-1 bg-white hover:bg-gray-100 text-[#f97316] px-3 py-1.5 rounded text-sm font-semibold transition-all">
+                    className="flex items-center gap-1 bg-white hover:bg-gray-100 text-[#FFCC00] px-3 py-1.5 rounded text-sm font-semibold transition-all">
                     <FiPlus /> Add
                   </button>
                 )}
@@ -591,11 +591,11 @@ export default function Consulting() {
               />
             </p>
             <div className="relative inline-block mt-4">
-              <a href={pageData?.cta_button_link || "/#newsletter"}
-                className="inline-flex items-center gap-2 px-8 py-4 bg-[#004B8D] hover:bg-[#003870] text-white font-['Inter'] font-bold rounded-lg transition-all shadow-xl hover:shadow-2xl text-lg"
+              <a href={pageData?.cta_button_link || "mailto:vishal@iima.ac.in"}
+                className="inline-flex items-center gap-3 px-8 py-4 bg-[#FFCC00] hover:bg-[#f5b800] text-black font-['Inter'] font-bold rounded-lg transition-all shadow-xl hover:shadow-2xl text-lg"
               >
                 <FiBriefcase className="w-5 h-5" />
-                <span className="text-lg font-['Inter'] font-bold text-white">
+                <span className="text-lg font-['Inter'] font-bold">
                   {!isAdmin ? (pageData?.cta_button_text || 'Get in Touch') : <span className="opacity-0">{pageData?.cta_button_text || 'Get in Touch'}</span>}
                 </span>
               </a>
@@ -623,10 +623,10 @@ export default function Consulting() {
 /* ─── Assignment Card ────────────────────────────────────────────────── */
 function AssignmentCard({ assignment, index }) {
   const isAlt = index % 2 === 1;
-  const borderColor = isAlt ? 'border-[#f97316]' : 'border-[#004B8D]';
-  const headerBg = isAlt ? 'bg-[#f97316]' : 'bg-[#004B8D]';
+  const borderColor = isAlt ? 'border-[#FFCC00]' : 'border-[#004B8D]';
+  const headerBg = isAlt ? 'bg-[#FFCC00]' : 'bg-[#004B8D]';
   const iconBg = isAlt ? 'bg-[#fff7ed]' : 'bg-[#dce8f5]';
-  const iconColor = isAlt ? 'text-[#f97316]' : 'text-[#004B8D]';
+  const iconColor = isAlt ? 'text-[#FFCC00]' : 'text-[#004B8D]';
   const cardBg = isAlt ? 'bg-[#fff7ed]' : 'bg-white';
 
   return (
@@ -655,7 +655,7 @@ function AssignmentCard({ assignment, index }) {
         <div className="flex flex-wrap gap-3">
           {assignment.link && (
             <a href={assignment.link} target="_blank" rel="noopener noreferrer"
-              className={`inline-flex items-center gap-2 px-4 py-2 text-white font-['Inter'] text-sm font-semibold rounded-lg transition-all shadow-md ${isAlt ? 'bg-[#fb923c] hover:bg-[#f97316]' : 'bg-[#004B8D] hover:bg-[#003870]'}`}
+              className={`inline-flex items-center gap-2 px-4 py-2 font-['Inter'] text-sm font-semibold rounded-lg transition-all shadow-md ${isAlt ? 'bg-[#F5C400] hover:bg-[#f5b800] text-black' : 'bg-[#004B8D] hover:bg-[#003870] text-white'}`}
             >
               {assignment.linkLabel || 'View More'} <FiExternalLink size={13} />
             </a>

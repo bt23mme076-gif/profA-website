@@ -275,7 +275,7 @@ export default function Navbar() {
         {/* Admin edit mode banner */}
         {isAdmin && (
           <div style={{
-            background: 'linear-gradient(90deg, #ffcc00, #ffe066)',
+            background: 'linear-gradient(90deg, #F5C400, #ffe066)',
             color: '#1a1a1a',
             fontSize: '0.68rem',
             fontFamily: '"Inter", sans-serif',
@@ -357,7 +357,7 @@ export default function Navbar() {
                       fontSize: windowWidth < 768 ? '0.9rem' : '1.2rem',
                       fontFamily: '"Playfair Display", Georgia, serif',
                       fontWeight: 700,
-                      border: '2px solid #ffcc00',
+                      border: '2px solid #F5C400',
                       borderRadius: '4px',
                       padding: '6px 8px',
                       width: 'clamp(160px, 28vw, 420px)',
@@ -368,7 +368,7 @@ export default function Navbar() {
                   />
                   <button
                     onClick={commitEdit}
-                    style={{ background: '#ffcc00', border: 'none', borderRadius: '50%', width: 22, height: 22, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                    style={{ background: '#F5C400', border: 'none', borderRadius: '50%', width: 22, height: 22, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
                   ><FiCheck size={12} /></button>
                   <button
                     onClick={cancelEdit}
@@ -424,7 +424,7 @@ export default function Navbar() {
                       style={{
                         fontSize: '0.65rem',
                         fontFamily: '"Inter", sans-serif',
-                        border: '2px solid #ffcc00',
+                        border: '2px solid #F5C400',
                         borderRadius: '4px',
                         padding: '1px 4px',
                         width: '140px',
@@ -434,7 +434,7 @@ export default function Navbar() {
                     />
                     <button
                       onClick={commitEdit}
-                      style={{ background: '#ffcc00', border: 'none', borderRadius: '50%', width: 18, height: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                      style={{ background: '#F5C400', border: 'none', borderRadius: '50%', width: 18, height: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
                     ><FiCheck size={10} /></button>
                     <button
                       onClick={cancelEdit}
@@ -511,7 +511,7 @@ export default function Navbar() {
                   style={{
                     display: 'flex', alignItems: 'center', gap: '3px',
                     opacity: dragIndex === index ? 0.4 : 1,
-                    outline: dragOverIndex === index && dragIndex !== index ? '2px dashed #ffcc00' : 'none',
+                    outline: dragOverIndex === index && dragIndex !== index ? '2px dashed #F5C400' : 'none',
                     borderRadius: '4px',
                     transition: 'opacity 0.2s'
                   }}
@@ -531,9 +531,9 @@ export default function Navbar() {
                         value={editValue}
                         onChange={e => setEditValue(e.target.value)}
                         onKeyDown={e => { if (e.key === 'Enter') commitEdit(); if (e.key === 'Escape') cancelEdit(); }}
-                        style={{ fontSize: '0.8rem', border: '2px solid #ffcc00', borderRadius: '4px', padding: '2px 5px', width: '100px', outline: 'none' }}
+                        style={{ fontSize: '0.8rem', border: '2px solid #F5C400', borderRadius: '4px', padding: '2px 5px', width: '100px', outline: 'none' }}
                       />
-                      <button onClick={commitEdit} style={{ background: '#ffcc00', border: 'none', borderRadius: '50%', width: 18, height: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiCheck size={10} /></button>
+                      <button onClick={commitEdit} style={{ background: '#F5C400', border: 'none', borderRadius: '50%', width: 18, height: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiCheck size={10} /></button>
                       <button onClick={cancelEdit} style={{ background: '#eee', border: 'none', borderRadius: '50%', width: 18, height: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FiX size={10} /></button>
                     </div>
                   ) : (
@@ -633,7 +633,7 @@ export default function Navbar() {
                     onClick={() => navigate('/admin/dashboard')}
                     style={{ 
                       padding: '0.7rem 1.6rem', 
-                      backgroundColor: '#ffcc00', 
+                      backgroundColor: '#F5C400', 
                       color: '#1a1a1a', 
                       fontWeight: 600,
                       fontSize: '0.8rem',
@@ -711,7 +711,7 @@ export default function Navbar() {
                     }}
                     style={{ 
                       padding: '0.7rem 1.6rem', 
-                      backgroundColor: '#F5C400', 
+                      backgroundColor: '#FFCC00', 
                       color: '#0B1628', 
                       fontWeight: 700,
                       fontSize: '0.8rem',
@@ -989,7 +989,7 @@ export default function Navbar() {
                   }}
                   style={{
                     padding: windowWidth < 480 ? '1rem' : '1.1rem',
-                    backgroundColor: '#F5C400',
+                    backgroundColor: '#FFCC00',
                     color: '#0B1628',
                     fontWeight: 600,
                     fontSize: windowWidth < 480 ? '0.9rem' : '0.95rem',

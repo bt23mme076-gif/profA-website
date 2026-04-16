@@ -231,7 +231,7 @@ export default function Consulting() {
                     className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a]"
                   />
                 </h2>
-                <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#F5C400] group-hover:w-32 transition-all duration-300" />
+                <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#FFCC00] group-hover:w-32 transition-all duration-300" />
               </div>
               {isAdmin && (
                 <button
@@ -285,7 +285,7 @@ export default function Consulting() {
                   className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a]"
                 />
               </h2>
-              <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#F5C400] group-hover:w-32 transition-all duration-300" />
+              <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#FFCC00] group-hover:w-32 transition-all duration-300" />
             </div>
           </motion.div>
 
@@ -330,7 +330,7 @@ export default function Consulting() {
                   className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a]"
                 />
               </h2>
-              <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#F5C400] group-hover:w-32 transition-all duration-300 mb-4" />
+              <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#FFCC00] group-hover:w-32 transition-all duration-300 mb-4" />
               <p className="text-lg font-['Inter'] text-gray-600 max-w-3xl">
                 <EditableText collection="content" docId="consulting" field="training_subtitle"
                   defaultValue={pageData?.training_subtitle || ''}

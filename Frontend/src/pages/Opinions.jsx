@@ -146,7 +146,7 @@ export default function Opinions() {
     talks_heading: 'Talks & Podcasts',
     articles_heading: 'Articles in Popular Media',
     cta_heading: 'Stay Updated',
-    cta_subtitle: 'Subscribe to the YouTube channel for the latest talks, lectures, and conversations.',
+    cta_subtitle: 'Join the newsletter for the latest talks, lectures, and conversations.',
   });
 
   /* Dynamic entries */
@@ -191,7 +191,7 @@ export default function Opinions() {
       <section className="bg-gradient-to-br from-[#dce8f5] to-[#fff7ed] pt-20 pb-8 px-6 lg:px-16">
         <div className="max-w-7xl mx-auto">
           <motion.div initial="hidden" animate="visible" variants={fadeInUp} className="text-center">
-            <div className="w-20 h-1 bg-[#f97316] mb-8 rounded-full mx-auto" />
+            <div className="w-20 h-1 bg-[#FFCC00] mb-8 rounded-full mx-auto" />
             <h1 className="text-5xl lg:text-7xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-6">
               <EditableText
                 collection="content" docId="opinions" field="page_heading"
@@ -250,7 +250,7 @@ export default function Opinions() {
                     className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a]"
                   />
                 </h2>
-                <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#F5C400] group-hover:w-32 transition-all duration-300" />
+                <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#FFCC00] group-hover:w-32 transition-all duration-300" />
               </div>
               {isAdmin && (
                 <button onClick={() => setShowAddTalk(true)}
@@ -271,12 +271,14 @@ export default function Opinions() {
             {allTalks.map((talk, i) => {
               const isAlt = i % 2 === 1;
               const isYt = talk.type === 'youtube';
-              const headerBg = isAlt ? 'bg-[#f97316]' : 'bg-[#004B8D]';
+              const headerBg = isAlt ? 'bg-[#FFCC00]' : 'bg-[#004B8D]';
               const iconBg = isAlt ? 'bg-[#fff7ed]' : 'bg-[#dce8f5]';
-              const iconColor = isAlt ? 'text-[#f97316]' : 'text-[#004B8D]';
-              const borderColor = isAlt ? 'border-[#f97316]' : 'border-[#004B8D]';
+              const iconColor = isAlt ? 'text-[#FFCC00]' : 'text-[#004B8D]';
+              const borderColor = isAlt ? 'border-[#FFCC00]' : 'border-[#004B8D]';
               const cardBg = isAlt ? 'bg-[#fff7ed]' : 'bg-white';
-              const btnClass = isAlt ? 'bg-[#fb923c] hover:bg-[#f97316]' : 'bg-[#004B8D] hover:bg-[#003870]';
+              const btnClass = isAlt 
+                ? 'bg-[#F5C400] hover:bg-[#f5b800] text-black' 
+                : 'bg-[#004B8D] hover:bg-[#003870] text-white';
 
               return (
                 <div key={talk.id} className="relative">
@@ -299,7 +301,7 @@ export default function Opinions() {
                       <p className="font-['Inter'] text-gray-500 text-sm mb-4">{talk.venue}</p>
                       {talk.link && (
                         <a href={talk.link} target="_blank" rel="noopener noreferrer"
-                          className={`inline-flex items-center gap-2 px-4 py-2.5 ${btnClass} text-white font-['Inter'] text-sm font-semibold rounded-lg transition-all shadow-md w-fit`}>
+                          className={`inline-flex items-center gap-2 px-4 py-2.5 ${btnClass} font-['Inter'] text-sm font-semibold rounded-lg transition-all shadow-md w-fit`}>
                           {isYt ? <><FiYoutube size={13} /> Watch</> : <><FiExternalLink size={13} /> Listen</>}
                         </a>
                       )}
@@ -330,7 +332,7 @@ export default function Opinions() {
                     className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a]"
                   />
                 </h2>
-                <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#F5C400] group-hover:w-32 transition-all duration-300" />
+                <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#FFCC00] group-hover:w-32 transition-all duration-300" />
               </div>
               {isAdmin && (
                 <button onClick={() => setShowAddArticle(true)}
@@ -418,29 +420,28 @@ export default function Opinions() {
             </h2>
             <p className="text-xl font-['Inter'] text-gray-700 mb-8">
               <EditableText collection="content" docId="opinions" field="cta_subtitle"
-                defaultValue={pageData?.cta_subtitle || ''}
+                defaultValue={pageData?.cta_subtitle || 'Join the newsletter for the latest talks, lectures, and conversations.'}
                 className="text-xl font-['Inter'] text-gray-700"
                 multiline
               />
             </p>
             <div className="relative inline-block">
-              <a href={pageData?.cta_button_link || "https://www.youtube.com/@ProfVishalGupta"} target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-[#004B8D] hover:bg-[#003870] text-white font-['Inter'] font-bold rounded-lg transition-all shadow-xl hover:shadow-2xl text-lg"
+              <a href="/#newsletter"
+                className="inline-flex items-center gap-3 px-8 py-4 bg-[#004B8D] hover:bg-[#003870] text-white font-['Inter'] font-bold rounded-lg transition-all shadow-xl hover:shadow-2xl text-lg"
               >
-                <FiYoutube className="w-6 h-6" />
                 <span className="text-lg font-['Inter'] font-bold text-white">
-                  {!isAdmin ? (pageData?.cta_button_text || 'Subscribe to YouTube Channel') : <span className="opacity-0">{pageData?.cta_button_text || 'Subscribe to YouTube Channel'}</span>}
+                  {!isAdmin ? (pageData?.cta_button_text || 'Stay Updated – Join Newsletter') : <span className="opacity-0">{pageData?.cta_button_text || 'Stay Updated – Join Newsletter'}</span>}
                 </span>
               </a>
 
               {/* Editable overlay placed outside the interactive anchor to avoid nested interactive elements */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none pl-8">
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                 <div className="flex items-center justify-center w-full pointer-events-auto">
                   <EditableText
                     collection="content"
                     docId="opinions"
                     field="cta_button_text"
-                    defaultValue={pageData?.cta_button_text || 'Subscribe to YouTube Channel'}
+                    defaultValue={pageData?.cta_button_text || 'Stay Updated – Join Newsletter'}
                     className="w-full inline-block text-lg font-['Inter'] font-bold text-white text-center px-2"
                   />
                 </div>

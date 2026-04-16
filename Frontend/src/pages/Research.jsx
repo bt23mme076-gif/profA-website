@@ -893,7 +893,7 @@ export default function Research() {
                 <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-4 transition-colors duration-300">
                   Featured Peer-reviewed Publications
                 </h2>
-                <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#F5C400] group-hover:w-32 transition-all duration-300"></div>
+                <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#FFCC00] group-hover:w-32 transition-all duration-300"></div>
               </div>
               {isAdmin && (
                 <button
@@ -1008,7 +1008,7 @@ export default function Research() {
           >
             <div className="flex items-center justify-between flex-wrap gap-3 mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-[#fb923c] rounded-lg flex items-center justify-center">
+                <div className="w-12 h-12 bg-[#F5C400] rounded-lg flex items-center justify-center">
                   <FiFileText className="text-white text-xl" />
                 </div>
                 <h2 className="text-3xl lg:text-4xl font-['Playfair_Display'] font-bold text-[#1a1a1a]">
@@ -1018,7 +1018,7 @@ export default function Research() {
               {isAdmin && (
                 <button
                   onClick={() => setShowAddCase(true)}
-                  className="flex items-center gap-2 bg-[#fb923c] hover:bg-[#ea580c] text-white px-3 py-1.5 rounded-lg text-sm font-semibold transition-all"
+                  className="flex items-center gap-2 bg-[#F5C400] hover:bg-[#f5b800] text-black px-3 py-1.5 rounded-lg text-sm font-semibold transition-all"
                 >
                   <FiPlus size={16} /> Add Case
                 </button>
@@ -1026,7 +1026,7 @@ export default function Research() {
             </div>
 
             {showAddCase && isAdmin && (
-              <div className="mb-4 p-4 bg-white rounded-lg border-2 border-[#fb923c]">
+              <div className="mb-4 p-4 bg-white rounded-lg border-2 border-[#F5C400]">
                 <CaseForm
                   onSave={addCase}
                   onCancel={() => setShowAddCase(false)}
@@ -1036,7 +1036,7 @@ export default function Research() {
 
             <ul className="space-y-3">
               {displayCases.map((caseItem, index) => (
-                <li key={caseItem.id || index} className="font-['Inter'] text-gray-700 pl-4 border-l-2 border-[#fb923c] hover:bg-[#fff7ed] p-2 transition-colors relative group">
+                <li key={caseItem.id || index} className="font-['Inter'] text-gray-700 pl-4 border-l-2 border-[#F5C400] hover:bg-[#fff7ed] p-2 transition-colors relative group">
                   {isAdmin && (
                     <button
                       onClick={() => deleteCase(caseItem)}
@@ -1053,7 +1053,7 @@ export default function Research() {
                         href={caseItem.link} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-[#fb923c] hover:text-[#ea580c] text-sm inline-flex items-center gap-1 mt-1"
+                        className="text-[#F5C400] hover:text-[#f5b800] text-sm inline-flex items-center gap-1 mt-1"
                       >
                         <FiExternalLink size={12} /> View Case
                       </a>
@@ -1118,7 +1118,7 @@ export default function Research() {
                 <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-4 transition-colors duration-300">
                   Book Chapters & Conference Proceedings
                 </h2>
-                <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#F5C400] group-hover:w-32 transition-all duration-300"></div>
+                <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#FFCC00] group-hover:w-32 transition-all duration-300"></div>
               </div>
               {isAdmin && (
                 <button
@@ -1305,7 +1305,7 @@ export default function Research() {
             <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-4 transition-colors duration-300">
               PhD Students Guided
             </h2>
-            <div className="w-24 h-1 bg-[#004B8D] rounded-full mx-auto group-hover:bg-[#F5C400] group-hover:w-32 transition-all duration-300"></div>
+            <div className="w-24 h-1 bg-[#004B8D] rounded-full mx-auto group-hover:bg-[#FFCC00] group-hover:w-32 transition-all duration-300"></div>
           </motion.div>
 
           <div className="grid md:grid-cols-2 gap-12">
@@ -1362,7 +1362,7 @@ export default function Research() {
               </h3>
               <div className="space-y-3">
                 {phdStudents.member.map((student, index) => (
-                  <div key={index} className="border-l-4 border-[#fb923c] pl-4 py-2 hover:bg-[#fff7ed] transition-colors flex items-center justify-between">
+                  <div key={index} className="border-l-4 border-[#F5C400] pl-4 py-2 hover:bg-[#fff7ed] transition-colors flex items-center justify-between">
                     <p className="font-['Inter'] text-gray-700">{student}</p>
                     {isAdmin && (
                       <div className="flex gap-2">
@@ -1379,7 +1379,7 @@ export default function Research() {
                   <button onClick={() => {
                     const newVal = prompt('Member Name (with details)');
                     if (newVal) addMember(newVal);
-                  }} className="mt-2 px-3 py-1 bg-[#fb923c] text-white rounded hover:bg-[#ea580c]">+ Add Member</button>
+                  }} className="mt-2 px-3 py-1 bg-[#F5C400] text-black rounded hover:bg-[#f5b800]">+ Add Member</button>
                 )}
               </div>
             </motion.div>

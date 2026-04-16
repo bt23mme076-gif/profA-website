@@ -208,9 +208,9 @@ export default function Courses() {
 
   // Shared Course card mimicking the Research.jsx card styling
   const CourseCard = ({ icon: Icon, title, description, link, linkText = "Access Course", badge, borderColor = "border-[#004B8D]", children, alt = false }) => {
-    const headerBg = alt ? 'bg-[#f97316]' : 'bg-[#004B8D]';
+    const headerBg = alt ? 'bg-[#FFCC00]' : 'bg-[#004B8D]';
     const headerIconBg = alt ? 'bg-[#fff7ed]' : 'bg-[#dce8f5]';
-    const headerIconColor = alt ? 'text-[#f97316]' : 'text-[#004B8D]';
+    const headerIconColor = alt ? 'text-[#FFCC00]' : 'text-[#004B8D]';
     const cardBg = alt ? 'bg-[#fff7ed]' : 'bg-white';
 
     return (
@@ -249,7 +249,7 @@ export default function Courses() {
               href={link}
               target="_blank"
               rel="noopener noreferrer"
-              className={`inline-flex items-center gap-2 px-6 py-3 text-white font-['Inter'] font-semibold rounded-lg transition-all shadow-md hover:shadow-lg ${alt ? 'bg-[#fb923c] hover:bg-[#f97316]' : 'bg-[#004B8D] hover:bg-[#003870]'}`}
+              className={`inline-flex items-center gap-2 px-6 py-3 text-white font-['Inter'] font-semibold rounded-lg transition-all shadow-md hover:shadow-lg ${alt ? 'bg-[#F5C400] hover:bg-[#f5b800] text-black' : 'bg-[#004B8D] hover:bg-[#003870]'}`}
             >
               {linkText}
               <FiExternalLink className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -266,7 +266,7 @@ export default function Courses() {
       whileInView="visible"
       viewport={viewportOptions}
       variants={fadeInUp}
-      className="bg-gradient-to-br from-[#fff7ed] to-white p-6 rounded-xl shadow-md hover:shadow-xl transition-shadow border-l-4 border-[#f97316] flex flex-col"
+      className="bg-gradient-to-br from-[#fff7ed] to-white p-6 rounded-xl shadow-md hover:shadow-xl transition-shadow border-l-4 border-[#FFCC00] flex flex-col"
     >
       <div className="text-xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-3">
         {title}
@@ -290,7 +290,7 @@ export default function Courses() {
             href={youtubeLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#fb923c] hover:bg-[#f97316] text-white font-['Inter'] text-sm font-semibold rounded-lg transition-all shadow-md"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#F5C400] hover:bg-[#f5b800] text-black font-['Inter'] text-sm font-semibold rounded-lg transition-all shadow-md"
           >
             <FiYoutube size={14} /> Access Course Videos
           </a>
@@ -318,7 +318,7 @@ export default function Courses() {
             variants={fadeInUp}
             className="text-center"
           >
-            <div className="w-20 h-1 bg-[#f97316] mb-8 rounded-full mx-auto"></div>
+            <div className="w-20 h-1 bg-[#FFCC00] mb-8 rounded-full mx-auto"></div>
             <h1 className="text-5xl lg:text-7xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-6">
               <EditableText
                 collection="content"
@@ -424,6 +424,34 @@ export default function Courses() {
                   marginTop: '2px'
                 }}>Research Methods</span>
               </div>
+
+              <div style={{
+                display: 'inline-flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                background: 'white',
+                borderRadius: '10px',
+                padding: '10px 22px',
+                boxShadow: '0 4px 20px rgba(0,75,141,.1)',
+                border: '1px solid rgba(0,75,141,.08)',
+                minWidth: '160px'
+              }}>
+                <strong style={{
+                  fontFamily: "'Playfair Display', serif",
+                  fontSize: '1.8rem',
+                  fontWeight: 700,
+                  color: '#004B8D'
+                }}>250K+</strong>
+                <span style={{
+                  fontFamily: "'Inter', sans-serif",
+                  fontSize: '.72rem',
+                  fontWeight: 500,
+                  color: '#9ca3af',
+                  letterSpacing: '.09em',
+                  textTransform: 'uppercase',
+                  marginTop: '2px'
+                }}>Active Learners</span>
+              </div>
             </div>
           </motion.div>
         </div>
@@ -451,7 +479,7 @@ export default function Courses() {
                     className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a]"
                   />
                 </h2>
-                <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#F5C400] group-hover:w-32 transition-all duration-300"></div>
+                <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#FFCC00] group-hover:w-32 transition-all duration-300"></div>
                 </div>
               </div>
               {isAdmin && (
@@ -464,7 +492,7 @@ export default function Courses() {
                   </button>
                   <button
                     onClick={() => setReorderMode((s) => !s)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${reorderMode ? 'bg-[#f97316] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${reorderMode ? 'bg-[#FFCC00] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                     title="Toggle reorder mode"
                   >
                     {reorderMode ? 'Reorder: ON' : 'Reorder'}
@@ -495,9 +523,9 @@ export default function Courses() {
                   const videoId = course.youtubeUrl ? extractVideoId(course.youtubeUrl) : null;
                   const thumbnailUrl = course.thumbnail || (videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : null);
                   const isAlt = index % 2 === 1;
-                  const borderColor = isAlt ? 'border-[#f97316]' : 'border-[#004B8D]';
-                  const playBg = isAlt ? 'bg-[#fb923c] bg-opacity-90' : 'bg-[#004B8D] bg-opacity-90';
-                  const ytButtonClass = isAlt ? 'bg-[#fb923c] hover:bg-[#f97316]' : 'bg-[#004B8D] hover:bg-[#003870]';
+                  const borderColor = isAlt ? 'border-[#FFCC00]' : 'border-[#004B8D]';
+                  const playBg = isAlt ? 'bg-[#F5C400] bg-opacity-90' : 'bg-[#004B8D] bg-opacity-90';
+                  const ytButtonClass = isAlt ? 'bg-[#FFCC00] hover:bg-[#f5b800] text-black' : 'bg-[#004B8D] hover:bg-[#003870] text-white';
 
                   return (
                     <div key={course.id} className="relative">
@@ -547,7 +575,7 @@ export default function Courses() {
                             href={course.courseraUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center justify-center gap-2 w-full px-4 py-3 bg-[#fb923c] hover:bg-[#f97316] text-white font-['Inter'] font-semibold rounded-lg transition-all shadow-md"
+                            className="inline-flex items-center justify-center gap-2 w-full px-4 py-3 bg-[#F5C400] hover:bg-[#f5b800] text-black font-['Inter'] font-semibold rounded-lg transition-all shadow-md"
                           >
                             Enroll on Coursera
                             <FiExternalLink className="w-4 h-4" />
@@ -653,7 +681,7 @@ export default function Courses() {
                     className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a]"
                   />
                 </h2>
-                <div className="w-24 h-1 bg-[#004B8D] rounded-full mb-4 group-hover:bg-[#F5C400] group-hover:w-32 transition-all duration-300"></div>
+                <div className="w-24 h-1 bg-[#004B8D] rounded-full mb-4 group-hover:bg-[#FFCC00] group-hover:w-32 transition-all duration-300"></div>
               </div>
                 <p className="text-lg font-['Inter'] text-gray-600 max-w-2xl">
                   <EditableText
