@@ -666,54 +666,57 @@ export default function Home() {
             variants={staggerContainer}
           >
             {courses && courses.filter((c) => c.showOnHome).length > 0 ? (
-              courses.filter((c) => c.showOnHome).map((course) => {
-                const videoId = course.youtubeUrl ? extractVideoId(course.youtubeUrl) : null;
-                const thumbnailUrl =
-                  course.thumbnail || (videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : null);
+              courses
+                .filter((c) => c.showOnHome)
+                .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+                .map((course) => {
+                  const videoId = course.youtubeUrl ? extractVideoId(course.youtubeUrl) : null;
+                  const thumbnailUrl =
+                    course.thumbnail || (videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : null);
 
-                return (
-                  <motion.div
-                    key={course.id}
-                    variants={fadeInUp}
-                    whileHover={{ scale: 1.02, y: -4 }}
-                    transition={{ duration: 0.3 }}
-                    className={`${UNIFORM_CARD} border-l-4 border-l-[#004B8D]`}
-                  >
-                    <div className={UNIFORM_IMAGE_WRAP}>
-                      {thumbnailUrl ? (
-                        <img
-                          src={thumbnailUrl}
-                          alt={course.title}
-                          className={UNIFORM_IMAGE}
-                          onError={(e) => {
-                            if (videoId && !course.thumbnail) {
-                              e.target.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-                            }
-                          }}
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-[#ebf2f8]" />
-                      )}
-                    </div>
+                  return (
+                    <motion.div
+                      key={course.id}
+                      variants={fadeInUp}
+                      whileHover={{ scale: 1.02, y: -4 }}
+                      transition={{ duration: 0.3 }}
+                      className={`${UNIFORM_CARD} border-l-4 border-l-[#004B8D]`}
+                    >
+                      <div className={UNIFORM_IMAGE_WRAP}>
+                        {thumbnailUrl ? (
+                          <img
+                            src={thumbnailUrl}
+                            alt={course.title}
+                            className={UNIFORM_IMAGE}
+                            onError={(e) => {
+                              if (videoId && !course.thumbnail) {
+                                e.target.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+                              }
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-[#ebf2f8]" />
+                        )}
+                      </div>
 
-                    <div className={UNIFORM_BODY}>
-                      <h3 className={UNIFORM_TITLE}>{course.title}</h3>
+                      <div className={UNIFORM_BODY}>
+                        <h3 className={UNIFORM_TITLE}>{course.title}</h3>
 
-                      <p className={`${UNIFORM_TEXT} mt-4`}>
-                        {course.description}
-                      </p>
+                        <p className={`${UNIFORM_TEXT} mt-4`}>
+                          {course.description}
+                        </p>
 
-                      <motion.button
-                        whileHover={{ backgroundColor: '#004B8D' }}
-                        className={UNIFORM_BUTTON}
-                        onClick={() => navigate('/courses')}
-                      >
-                        EXPLORE COURSE
-                      </motion.button>
-                    </div>
-                  </motion.div>
-                );
-              })
+                        <motion.button
+                          whileHover={{ backgroundColor: '#004B8D' }}
+                          className={UNIFORM_BUTTON}
+                          onClick={() => navigate('/courses')}
+                        >
+                          EXPLORE COURSE
+                        </motion.button>
+                      </div>
+                    </motion.div>
+                  );
+                })
             ) : (
               [
                 { titleF: 'course1_title', descF: 'course1_description', ytF: 'course1_youtube' },

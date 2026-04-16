@@ -311,7 +311,15 @@ export default function Trainings() {
                 fontSize: '1.8rem',
                 fontWeight: 700,
                 color: '#004B8D'
-              }}>{(programs || []).length || 5}</strong>
+              }}>
+                <EditableText
+                  collection="content"
+                  docId="trainings"
+                  field="kpi_1_value"
+                  defaultValue={pageData?.kpi_1_value || `${(programs || []).length || 5}`}
+                  className="font-['Playfair_Display'] text-[1.8rem] font-bold text-[#004B8D]"
+                />
+              </strong>
               <span style={{
                 fontFamily: "'Inter', sans-serif",
                 fontSize: '.72rem',
@@ -320,7 +328,15 @@ export default function Trainings() {
                 letterSpacing: '.09em',
                 textTransform: 'uppercase',
                 marginTop: '2px'
-              }}>Active Programs</span>
+              }}>
+                <EditableText
+                  collection="content"
+                  docId="trainings"
+                  field="kpi_1_label"
+                  defaultValue={pageData?.kpi_1_label || 'Active Programs'}
+                  className="font-['Inter'] text-[.72rem] font-medium text-[#9ca3af] uppercase tracking-[.09em]"
+                />
+              </span>
             </div>
 
             <div style={{
@@ -339,7 +355,15 @@ export default function Trainings() {
                 fontSize: '1.8rem',
                 fontWeight: 700,
                 color: '#004B8D'
-              }}>1,000</strong>
+              }}>
+                <EditableText
+                  collection="content"
+                  docId="trainings"
+                  field="kpi_2_value"
+                  defaultValue={pageData?.kpi_2_value || '1,000+'}
+                  className="font-['Playfair_Display'] text-[1.8rem] font-bold text-[#004B8D]"
+                />
+              </strong>
               <span style={{
                 fontFamily: "'Inter', sans-serif",
                 fontSize: '.72rem',
@@ -348,7 +372,15 @@ export default function Trainings() {
                 letterSpacing: '.09em',
                 textTransform: 'uppercase',
                 marginTop: '2px'
-              }}>Alumni Trained</span>
+              }}>
+                <EditableText
+                  collection="content"
+                  docId="trainings"
+                  field="kpi_2_label"
+                  defaultValue={pageData?.kpi_2_label || 'Alumni Trained'}
+                  className="font-['Inter'] text-[.72rem] font-medium text-[#9ca3af] uppercase tracking-[.09em]"
+                />
+              </span>
             </div>
 
             <div style={{
@@ -367,7 +399,15 @@ export default function Trainings() {
                 fontSize: '1.8rem',
                 fontWeight: 700,
                 color: '#004B8D'
-              }}>4.8/5</strong>
+              }}>
+                <EditableText
+                  collection="content"
+                  docId="trainings"
+                  field="kpi_3_value"
+                  defaultValue={pageData?.kpi_3_value || '4.8/5'}
+                  className="font-['Playfair_Display'] text-[1.8rem] font-bold text-[#004B8D]"
+                />
+              </strong>
               <span style={{
                 fontFamily: "'Inter', sans-serif",
                 fontSize: '.72rem',
@@ -376,7 +416,15 @@ export default function Trainings() {
                 letterSpacing: '.09em',
                 textTransform: 'uppercase',
                 marginTop: '2px'
-              }}>Average Rating</span>
+              }}>
+                <EditableText
+                  collection="content"
+                  docId="trainings"
+                  field="kpi_3_label"
+                  defaultValue={pageData?.kpi_3_label || 'Average Rating'}
+                  className="font-['Inter'] text-[.72rem] font-medium text-[#9ca3af] uppercase tracking-[.09em]"
+                />
+              </span>
             </div>
           </div>
         </div>
@@ -405,11 +453,8 @@ export default function Trainings() {
           <div className="space-y-16">
             {loading && <p>Loading programs...</p>}
             {sortedPrograms.map((program, index) => {
-              const isEven = index % 2 === 0;
-              const headerBg = isEven ? 'bg-[#004B8D]' : 'bg-[#FFCC00]';
-              const buttonGradient = isEven
-                ? 'bg-linear-to-r from-[#004B8D] to-[#003870] hover:from-[#003870] hover:to-[#002a5a]'
-                : 'bg-linear-to-r from-[#FFCC00] to-[#ea580c] hover:from-[#ea580c] hover:to-[#c2410c]';
+              const headerBg = 'bg-[#004B8D]';
+              const buttonGradient = 'bg-linear-to-r from-[#004B8D] to-[#003870] hover:from-[#003870] hover:to-[#002a5a]';
 
                 return (
               <div key={program.id}>
@@ -424,7 +469,7 @@ export default function Trainings() {
                     initial={{ opacity: 0.85, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.35, delay: index * 0.08 }}
-                    className={`${index % 2 === 0 ? 'bg-white' : 'bg-[#fff3e6]'} rounded-2xl shadow-xl overflow-hidden border-2 border-gray-100 hover:shadow-2xl transition-shadow duration-300 relative`}
+                    className={`bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-gray-100 hover:shadow-2xl transition-shadow duration-300 relative`}
                   >
                     {isAdmin && (
                       <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
@@ -480,15 +525,15 @@ export default function Trainings() {
                           {/* Program Details */}
                           <div className="space-y-4">
                             <div className="flex items-center gap-3 text-gray-700">
-                              <FiClock className="text-[#FFCC00] text-xl" />
+                              <FiClock className="text-[#004B8D] text-xl" />
                               <span className="font-['Inter']"><strong>Duration:</strong> {program.duration}</span>
                             </div>
                             <div className="flex items-center gap-3 text-gray-700">
-                              <FiCalendar className="text-[#FFCC00] text-xl" />
+                              <FiCalendar className="text-[#004B8D] text-xl" />
                               <span className="font-['Inter']"><strong>Format:</strong> {program.format}</span>
                             </div>
                             <div className="flex items-center gap-3 text-gray-700">
-                              <FiMapPin className="text-[#FFCC00] text-xl" />
+                              <FiMapPin className="text-[#004B8D] text-xl" />
                               <span className="font-['Inter']"><strong>Location:</strong> {program.location}</span>
                             </div>
                           </div>
@@ -497,13 +542,13 @@ export default function Trainings() {
                         {/* Right Column - Highlights */}
                         <div>
                           <h3 className="text-2xl font-['Playfair_Display'] font-bold text-gray-900 mb-4 flex items-center gap-2">
-                            <FiTarget className="text-[#FFCC00]" />
+                            <FiTarget className="text-[#004B8D]" />
                             Key Highlights
                           </h3>
                           <ul className="space-y-3">
                             {program.highlights && program.highlights.map((highlight, idx) => (
                               <li key={idx} className="flex items-start gap-3">
-                                <span className="text-[#FFCC00] text-xl mt-1">•</span>
+                                <span className="text-[#004B8D] text-xl mt-1">•</span>
                                 <span className="text-gray-700 font-['Inter']">{highlight}</span>
                               </li>
                             ))}

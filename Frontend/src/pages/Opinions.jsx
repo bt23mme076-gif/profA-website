@@ -191,7 +191,7 @@ export default function Opinions() {
       <section className="bg-gradient-to-br from-[#dce8f5] to-[#fff7ed] pt-20 pb-8 px-6 lg:px-16">
         <div className="max-w-7xl mx-auto">
           <motion.div initial="hidden" animate="visible" variants={fadeInUp} className="text-center">
-            <div className="w-20 h-1 bg-[#FFCC00] mb-8 rounded-full mx-auto" />
+            <div className="w-20 h-1 bg-[#004B8C] mb-8 rounded-full mx-auto" />
             <h1 className="text-5xl lg:text-7xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-6">
               <EditableText
                 collection="content" docId="opinions" field="page_heading"
@@ -221,7 +221,15 @@ export default function Opinions() {
                   boxShadow: '0 4px 20px rgba(0,75,141,.1)', border: '1px solid rgba(0,75,141,.08)',
                   minWidth: '160px'
                 }}>
-                  <strong style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.8rem', fontWeight: 700, color: '#004B8D' }}>{value}+</strong>
+                  <strong style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.8rem', fontWeight: 700, color: '#004B8D' }}>
+                    <EditableText
+                      collection="content"
+                      docId="opinions"
+                      field={field.replace('_label', '_value')}
+                      defaultValue={pageData?.[field.replace('_label', '_value')] || `${value}+`}
+                      className="font-['Playfair_Display'] text-[1.8rem] font-bold text-[#004B8D]"
+                    />
+                  </strong>
                   <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '.72rem', fontWeight: 500, color: '#9ca3af', letterSpacing: '.09em', textTransform: 'uppercase', marginTop: '2px' }}>
                     <EditableText
                       collection="content"
@@ -250,7 +258,7 @@ export default function Opinions() {
                     className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a]"
                   />
                 </h2>
-                <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#FFCC00] group-hover:w-32 transition-all duration-300" />
+                <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#004B8C] group-hover:w-32 transition-all duration-300" />
               </div>
               {isAdmin && (
                 <button onClick={() => setShowAddTalk(true)}
@@ -271,13 +279,13 @@ export default function Opinions() {
             {allTalks.map((talk, i) => {
               const isAlt = i % 2 === 1;
               const isYt = talk.type === 'youtube';
-              const headerBg = isAlt ? 'bg-[#FFCC00]' : 'bg-[#004B8D]';
+              const headerBg = isAlt ? 'bg-[#004B8C]' : 'bg-[#004B8D]';
               const iconBg = isAlt ? 'bg-[#fff7ed]' : 'bg-[#dce8f5]';
-              const iconColor = isAlt ? 'text-[#FFCC00]' : 'text-[#004B8D]';
-              const borderColor = isAlt ? 'border-[#FFCC00]' : 'border-[#004B8D]';
-              const cardBg = isAlt ? 'bg-[#fff7ed]' : 'bg-white';
-              const btnClass = isAlt 
-                ? 'bg-[#F5C400] hover:bg-[#f5b800] text-black' 
+              const iconColor = isAlt ? 'text-[#004B8C]' : 'text-[#004B8D]';
+              const borderColor = isAlt ? 'border-[#004B8C]' : 'border-[#004B8D]';
+              const cardBg = 'bg-white';
+              const btnClass = isAlt
+                ? 'bg-[#004B8C] hover:bg-[#003870] text-white'
                 : 'bg-[#004B8D] hover:bg-[#003870] text-white';
 
               return (
@@ -332,7 +340,7 @@ export default function Opinions() {
                     className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a]"
                   />
                 </h2>
-                <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#FFCC00] group-hover:w-32 transition-all duration-300" />
+                <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#004B8C] group-hover:w-32 transition-all duration-300" />
               </div>
               {isAdmin && (
                 <button onClick={() => setShowAddArticle(true)}
@@ -430,7 +438,7 @@ export default function Opinions() {
                 className="inline-flex items-center gap-3 px-8 py-4 bg-[#004B8D] hover:bg-[#003870] text-white font-['Inter'] font-bold rounded-lg transition-all shadow-xl hover:shadow-2xl text-lg"
               >
                 <span className="text-lg font-['Inter'] font-bold text-white">
-                  {!isAdmin ? (pageData?.cta_button_text || 'Stay Updated – Join Newsletter') : <span className="opacity-0">{pageData?.cta_button_text || 'Stay Updated – Join Newsletter'}</span>}
+                  {!isAdmin ? (pageData?.cta_button_text || 'Join Newsletter') : <span className="opacity-0">{pageData?.cta_button_text || ' Join Newsletter'}</span>}
                 </span>
               </a>
 
@@ -441,7 +449,7 @@ export default function Opinions() {
                     collection="content"
                     docId="opinions"
                     field="cta_button_text"
-                    defaultValue={pageData?.cta_button_text || 'Stay Updated – Join Newsletter'}
+                    defaultValue={pageData?.cta_button_text || ' Join Newsletter'}
                     className="w-full inline-block text-lg font-['Inter'] font-bold text-white text-center px-2"
                   />
                 </div>

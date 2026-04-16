@@ -59,8 +59,8 @@ export default function Courses() {
 
   const fadeInUp = {
     hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       transition: { duration: 0.5, ease: "easeOut" }
     }
@@ -208,10 +208,10 @@ export default function Courses() {
 
   // Shared Course card mimicking the Research.jsx card styling
   const CourseCard = ({ icon: Icon, title, description, link, linkText = "Access Course", badge, borderColor = "border-[#004B8D]", children, alt = false }) => {
-    const headerBg = alt ? 'bg-[#FFCC00]' : 'bg-[#004B8D]';
+    const headerBg = alt ? 'bg-[#004B8C]' : 'bg-[#004B8D]';
     const headerIconBg = alt ? 'bg-[#fff7ed]' : 'bg-[#dce8f5]';
-    const headerIconColor = alt ? 'text-[#FFCC00]' : 'text-[#004B8D]';
-    const cardBg = alt ? 'bg-[#fff7ed]' : 'bg-white';
+    const headerIconColor = alt ? 'text-[#004B8C]' : 'text-[#004B8D]';
+    const cardBg = 'bg-white';
 
     return (
       <motion.div
@@ -221,9 +221,9 @@ export default function Courses() {
         variants={fadeInUp}
         className={`${cardBg} rounded-lg shadow-md hover:shadow-xl transition-shadow border-l-4 ${borderColor} relative group overflow-hidden`}
       >
-        <div className={`${headerBg} p-6`}> 
+        <div className={`${headerBg} p-6`}>
           <div className="flex items-start gap-4">
-            <div className={`${headerIconBg} p-3 rounded-xl`}> 
+            <div className={`${headerIconBg} p-3 rounded-xl`}>
               {Icon && <Icon className={`w-6 h-6 ${headerIconColor}`} />}
             </div>
             <div className="flex-1">
@@ -249,7 +249,7 @@ export default function Courses() {
               href={link}
               target="_blank"
               rel="noopener noreferrer"
-              className={`inline-flex items-center gap-2 px-6 py-3 text-white font-['Inter'] font-semibold rounded-lg transition-all shadow-md hover:shadow-lg ${alt ? 'bg-[#F5C400] hover:bg-[#f5b800] text-black' : 'bg-[#004B8D] hover:bg-[#003870]'}`}
+              className={`inline-flex items-center gap-2 px-6 py-3 text-white font-['Inter'] font-semibold rounded-lg transition-all shadow-md hover:shadow-lg ${alt ? 'bg-[#004B8C] hover:bg-[#f5b800] text-black' : 'bg-[#004B8D] hover:bg-[#003870]'}`}
             >
               {linkText}
               <FiExternalLink className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -266,7 +266,7 @@ export default function Courses() {
       whileInView="visible"
       viewport={viewportOptions}
       variants={fadeInUp}
-      className="bg-gradient-to-br from-[#fff7ed] to-white p-6 rounded-xl shadow-md hover:shadow-xl transition-shadow border-l-4 border-[#FFCC00] flex flex-col"
+      className="bg-gradient-to-br from-[#fff7ed] to-white p-6 rounded-xl shadow-md hover:shadow-xl transition-shadow border-l-4 border-[#004B8C] flex flex-col"
     >
       <div className="text-xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-3">
         {title}
@@ -280,7 +280,7 @@ export default function Courses() {
             href={driveLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#004B8D] hover:bg-[#003870] text-white font-['Inter'] text-sm font-semibold rounded-lg transition-all shadow-md"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#004B8D] text-white font-['Inter'] text-sm font-semibold rounded-lg transition-all shadow-md hover:bg-transparent hover:text-[#004B8D] hover:-translate-y-px border-2 border-transparent hover:border-[#004B8D]"
           >
             <FiExternalLink size={14} /> Access Course Material
           </a>
@@ -290,7 +290,7 @@ export default function Courses() {
             href={youtubeLink}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#F5C400] hover:bg-[#f5b800] text-black font-['Inter'] text-sm font-semibold rounded-lg transition-all shadow-md"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500 text-black font-['Inter'] text-sm font-semibold rounded-lg transition-all shadow-md hover:bg-transparent hover:text-yellow-500 hover:-translate-y-px border-2 border-transparent hover:border-yellow-5-yellow-5-yellow-500"
           >
             <FiYoutube size={14} /> Access Course Videos
           </a>
@@ -318,7 +318,7 @@ export default function Courses() {
             variants={fadeInUp}
             className="text-center"
           >
-            <div className="w-20 h-1 bg-[#FFCC00] mb-8 rounded-full mx-auto"></div>
+            <div className="w-20 h-1 bg-[#004B8C] mb-8 rounded-full mx-auto"></div>
             <h1 className="text-5xl lg:text-7xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-6">
               <EditableText
                 collection="content"
@@ -357,7 +357,15 @@ export default function Courses() {
                   fontSize: '1.8rem',
                   fontWeight: 700,
                   color: '#004B8D'
-                }}>{managementCoursesCount}</strong>
+                }}>
+                  <EditableText
+                    collection="content"
+                    docId="courses"
+                    field="kpi_1_value"
+                    defaultValue={pageData?.kpi_1_value || `${managementCoursesCount}`}
+                    className="font-['Playfair_Display'] text-[1.8rem] font-bold text-[#004B8D]"
+                  />
+                </strong>
                 <span style={{
                   fontFamily: "'Inter', sans-serif",
                   fontSize: '.72rem',
@@ -366,7 +374,15 @@ export default function Courses() {
                   letterSpacing: '.09em',
                   textTransform: 'uppercase',
                   marginTop: '2px'
-                }}>Management Courses</span>
+                }}>
+                  <EditableText
+                    collection="content"
+                    docId="courses"
+                    field="kpi_1_label"
+                    defaultValue={pageData?.kpi_1_label || 'Management Courses'}
+                    className="font-['Inter'] text-[.72rem] font-medium text-[#9ca3af] uppercase tracking-[.09em]"
+                  />
+                </span>
               </div>
 
               <div style={{
@@ -385,7 +401,15 @@ export default function Courses() {
                   fontSize: '1.8rem',
                   fontWeight: 700,
                   color: '#004B8D'
-                }}>{yearRange}</strong>
+                }}>
+                  <EditableText
+                    collection="content"
+                    docId="courses"
+                    field="kpi_2_value"
+                    defaultValue={pageData?.kpi_2_value || `${yearRange}`}
+                    className="font-['Playfair_Display'] text-[1.8rem] font-bold text-[#004B8D]"
+                  />
+                </strong>
                 <span style={{
                   fontFamily: "'Inter', sans-serif",
                   fontSize: '.72rem',
@@ -394,7 +418,15 @@ export default function Courses() {
                   letterSpacing: '.09em',
                   textTransform: 'uppercase',
                   marginTop: '2px'
-                }}>Publication Range</span>
+                }}>
+                  <EditableText
+                    collection="content"
+                    docId="courses"
+                    field="kpi_2_label"
+                    defaultValue={pageData?.kpi_2_label || 'Publication Range'}
+                    className="font-['Inter'] text-[.72rem] font-medium text-[#9ca3af] uppercase tracking-[.09em]"
+                  />
+                </span>
               </div>
 
               <div style={{
@@ -413,7 +445,15 @@ export default function Courses() {
                   fontSize: '1.8rem',
                   fontWeight: 700,
                   color: '#004B8D'
-                }}>{researchMethodsCoursesCount}</strong>
+                }}>
+                  <EditableText
+                    collection="content"
+                    docId="courses"
+                    field="kpi_3_value"
+                    defaultValue={pageData?.kpi_3_value || `${researchMethodsCoursesCount}`}
+                    className="font-['Playfair_Display'] text-[1.8rem] font-bold text-[#004B8D]"
+                  />
+                </strong>
                 <span style={{
                   fontFamily: "'Inter', sans-serif",
                   fontSize: '.72rem',
@@ -422,7 +462,15 @@ export default function Courses() {
                   letterSpacing: '.09em',
                   textTransform: 'uppercase',
                   marginTop: '2px'
-                }}>Research Methods</span>
+                }}>
+                  <EditableText
+                    collection="content"
+                    docId="courses"
+                    field="kpi_3_label"
+                    defaultValue={pageData?.kpi_3_label || 'Research Methods'}
+                    className="font-['Inter'] text-[.72rem] font-medium text-[#9ca3af] uppercase tracking-[.09em]"
+                  />
+                </span>
               </div>
 
               <div style={{
@@ -441,7 +489,15 @@ export default function Courses() {
                   fontSize: '1.8rem',
                   fontWeight: 700,
                   color: '#004B8D'
-                }}>250K+</strong>
+                }}>
+                  <EditableText
+                    collection="content"
+                    docId="courses"
+                    field="kpi_4_value"
+                    defaultValue={pageData?.kpi_4_value || '250K+'}
+                    className="font-['Playfair_Display'] text-[1.8rem] font-bold text-[#004B8D]"
+                  />
+                </strong>
                 <span style={{
                   fontFamily: "'Inter', sans-serif",
                   fontSize: '.72rem',
@@ -450,7 +506,15 @@ export default function Courses() {
                   letterSpacing: '.09em',
                   textTransform: 'uppercase',
                   marginTop: '2px'
-                }}>Active Learners</span>
+                }}>
+                  <EditableText
+                    collection="content"
+                    docId="courses"
+                    field="kpi_4_label"
+                    defaultValue={pageData?.kpi_4_label || 'Active Learners'}
+                    className="font-['Inter'] text-[.72rem] font-medium text-[#9ca3af] uppercase tracking-[.09em]"
+                  />
+                </span>
               </div>
             </div>
           </motion.div>
@@ -470,16 +534,16 @@ export default function Courses() {
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div>
                 <div className="group">
-                <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-4 transition-colors duration-300">
-                  <EditableText
-                    collection="content"
-                    docId="courses"
-                    field="mgmt_heading"
-                    defaultValue={pageData?.mgmt_heading || 'Management Courses'}
-                    className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a]"
-                  />
-                </h2>
-                <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#FFCC00] group-hover:w-32 transition-all duration-300"></div>
+                  <h2 className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-4 transition-colors duration-300">
+                    <EditableText
+                      collection="content"
+                      docId="courses"
+                      field="mgmt_heading"
+                      defaultValue={pageData?.mgmt_heading || 'Management Courses'}
+                      className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a]"
+                    />
+                  </h2>
+                  <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#004B8C] group-hover:w-32 transition-all duration-300"></div>
                 </div>
               </div>
               {isAdmin && (
@@ -492,7 +556,7 @@ export default function Courses() {
                   </button>
                   <button
                     onClick={() => setReorderMode((s) => !s)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${reorderMode ? 'bg-[#FFCC00] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${reorderMode ? 'bg-[#004B8C] text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                     title="Toggle reorder mode"
                   >
                     {reorderMode ? 'Reorder: ON' : 'Reorder'}
@@ -520,24 +584,24 @@ export default function Courses() {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {/* All courses now come from Firestore - fully editable */}
               {sortedCourses && sortedCourses.map((course, index) => {
-                  const videoId = course.youtubeUrl ? extractVideoId(course.youtubeUrl) : null;
-                  const thumbnailUrl = course.thumbnail || (videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : null);
-                  const isAlt = index % 2 === 1;
-                  const borderColor = isAlt ? 'border-[#FFCC00]' : 'border-[#004B8D]';
-                  const playBg = isAlt ? 'bg-[#F5C400] bg-opacity-90' : 'bg-[#004B8D] bg-opacity-90';
-                  const ytButtonClass = isAlt ? 'bg-[#FFCC00] hover:bg-[#f5b800] text-black' : 'bg-[#004B8D] hover:bg-[#003870] text-white';
+                const videoId = course.youtubeUrl ? extractVideoId(course.youtubeUrl) : null;
+                const thumbnailUrl = course.thumbnail || (videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : null);
+                const isAlt = index % 2 === 1;
+                const borderColor = isAlt ? 'border-[#004B8C]' : 'border-[#004B8D]';
+                const playBg = isAlt ? 'bg-[#004B8C] bg-opacity-90' : 'bg-[#004B8D] bg-opacity-90';
+                const ytButtonClass = isAlt ? 'bg-[#004B8C] hover:bg-[#f5b800] text-black' : 'bg-[#004B8D] hover:bg-[#003870] text-white';
 
-                  return (
-                    <div key={course.id} className="relative">
-                      <CourseCard
-                        key={course.id}
-                        icon={FiFileText}
-                        title={course.title}
-                        description={course.description}
-                        badge={course.courseraUrl ? 'COURSERA' : null}
-                        borderColor={borderColor}
-                        alt={isAlt}
-                      >
+                return (
+                  <div key={course.id} className="relative">
+                    <CourseCard
+                      key={course.id}
+                      icon={FiFileText}
+                      title={course.title}
+                      description={course.description}
+                      badge={course.courseraUrl ? 'COURSERA' : null}
+                      borderColor={borderColor}
+                      alt={isAlt}
+                    >
                       {thumbnailUrl && (
                         <div className="mb-6">
                           <a
@@ -575,7 +639,7 @@ export default function Courses() {
                             href={course.courseraUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center justify-center gap-2 w-full px-4 py-3 bg-[#F5C400] hover:bg-[#f5b800] text-black font-['Inter'] font-semibold rounded-lg transition-all shadow-md"
+                            className="inline-flex items-center justify-center gap-2 w-full px-4 py-3 bg-[#f5b800] hover:bg-[#004B8C] text-black font-['Inter'] font-semibold rounded-lg transition-all shadow-md"
                           >
                             Enroll on Coursera
                             <FiExternalLink className="w-4 h-4" />
@@ -604,45 +668,45 @@ export default function Courses() {
                           </a>
                         )}
                       </div>
-                      </CourseCard>
+                    </CourseCard>
 
-                      {isAdmin && (
-                        <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
-                          {reorderMode && (
-                            <>
-                              <button
-                                onClick={() => moveCourse(course.id, 'up')}
-                                className="p-2 bg-white border rounded-md shadow-sm hover:bg-gray-50"
-                                title="Move up"
-                              >
-                                <FiChevronUp />
-                              </button>
-                              <button
-                                onClick={() => moveCourse(course.id, 'down')}
-                                className="p-2 bg-white border rounded-md shadow-sm hover:bg-gray-50"
-                                title="Move down"
-                              >
-                                <FiChevronDown />
-                              </button>
-                            </>
-                          )}
-                          <button
-                            onClick={() => setEditingCourse(course)}
-                            className="p-2 bg-blue-50 text-blue-600 border rounded-md shadow-sm hover:bg-blue-100"
-                            title="Edit"
-                          >
-                            <FiEdit2 />
-                          </button>
-                          <button
-                            onClick={() => deleteCourse(course.id)}
-                            className="p-2 bg-red-50 text-red-600 border rounded-md shadow-sm hover:bg-red-100"
-                            title="Delete"
-                          >
-                            <FiTrash2 />
-                          </button>
-                        </div>
-                      )}
-                    </div>
+                    {isAdmin && (
+                      <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
+                        {reorderMode && (
+                          <>
+                            <button
+                              onClick={() => moveCourse(course.id, 'up')}
+                              className="p-2 bg-white border rounded-md shadow-sm hover:bg-gray-50"
+                              title="Move up"
+                            >
+                              <FiChevronUp />
+                            </button>
+                            <button
+                              onClick={() => moveCourse(course.id, 'down')}
+                              className="p-2 bg-white border rounded-md shadow-sm hover:bg-gray-50"
+                              title="Move down"
+                            >
+                              <FiChevronDown />
+                            </button>
+                          </>
+                        )}
+                        <button
+                          onClick={() => setEditingCourse(course)}
+                          className="p-2 bg-blue-50 text-blue-600 border rounded-md shadow-sm hover:bg-blue-100"
+                          title="Edit"
+                        >
+                          <FiEdit2 />
+                        </button>
+                        <button
+                          onClick={() => deleteCourse(course.id)}
+                          className="p-2 bg-red-50 text-red-600 border rounded-md shadow-sm hover:bg-red-100"
+                          title="Delete"
+                        >
+                          <FiTrash2 />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </div>
@@ -663,7 +727,7 @@ export default function Courses() {
       {/* Research Methods Section */}
       <section className="py-16 px-6 lg:px-16 bg-white">
         <div className="max-w-7xl mx-auto">
-          <motion.div 
+          <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={viewportOptions}
@@ -681,18 +745,18 @@ export default function Courses() {
                     className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a]"
                   />
                 </h2>
-                <div className="w-24 h-1 bg-[#004B8D] rounded-full mb-4 group-hover:bg-[#FFCC00] group-hover:w-32 transition-all duration-300"></div>
+                <div className="w-24 h-1 bg-[#004B8D] rounded-full mb-4 group-hover:bg-[#004B8D] group-hover:w-32 transition-all duration-300"></div>
               </div>
-                <p className="text-lg font-['Inter'] text-gray-600 max-w-2xl">
-                  <EditableText
-                    collection="content"
-                    docId="courses"
-                    field="research_subtitle"
-                    defaultValue={pageData?.research_subtitle || 'Comprehensive lecture series on advanced research methodologies for scholars and practitioners'}
-                    className="text-lg font-['Inter'] text-gray-600"
-                    multiline
-                  />
-                </p>
+              <p className="text-lg font-['Inter'] text-gray-600 max-w-2xl">
+                <EditableText
+                  collection="content"
+                  docId="courses"
+                  field="research_subtitle"
+                  defaultValue={pageData?.research_subtitle || 'Comprehensive lecture series on advanced research methodologies for scholars and practitioners'}
+                  className="text-lg font-['Inter'] text-gray-600"
+                  multiline
+                />
+              </p>
               {isAdmin && (
                 <button
                   onClick={() => setShowAddResearch(true)}
@@ -715,7 +779,7 @@ export default function Courses() {
 
           <div className="space-y-12">
             {/* Multilevel Modeling */}
-            <motion.div 
+            <motion.div
               initial="hidden"
               whileInView="visible"
               viewport={viewportOptions}
@@ -760,7 +824,7 @@ export default function Courses() {
                     href={pageData.multilevel_youtube}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 bg-[#fb923c] hover:bg-[#f97316] text-white px-6 py-3 rounded-lg font-['Inter'] font-semibold transition-all shadow-md"
+                    className="inline-flex items-center gap-2 bg-[#f5b800] hover:bg-[#f5b800] text-black px-6 py-3 rounded-lg font-['Inter'] font-semibold transition-all shadow-md"
                   >
                     <FiYoutube className="w-4 h-4" /> Access Course Videos
                   </a>
@@ -775,12 +839,12 @@ export default function Courses() {
             </motion.div>
 
             {/* Covariance-Based SEM */}
-            <motion.div 
+            <motion.div
               initial="hidden"
               whileInView="visible"
               viewport={viewportOptions}
               variants={fadeInUp}
-              className="bg-[#faf8f5] p-8 rounded-xl shadow-md border-l-4 border-[#f97316]"
+              className="bg-[#faf8f5] p-8 rounded-xl shadow-md border-l-4 border-[#F5B800]"     
             >
               <div className="flex items-center gap-4 mb-4">
                 <div className="p-3 bg-[#fff7ed] rounded-xl">
@@ -820,7 +884,7 @@ export default function Courses() {
                     href={pageData.sem_youtube}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 bg-[#fb923c] hover:bg-[#f97316] text-white px-6 py-3 rounded-lg font-['Inter'] font-semibold transition-all shadow-md"
+                    className="inline-flex items-center gap-2 bg-[#f5b800] hover:bg-[#f5b800] text-black px-6 py-3 rounded-lg font-['Inter'] font-semibold transition-all shadow-md"
                   >
                     <FiYoutube className="w-4 h-4" /> Access Course Videos
                   </a>
@@ -903,7 +967,7 @@ export default function Courses() {
       {/* Call to Action */}
       <section className="py-20 px-6 lg:px-16 bg-[#dce8f5]">
         <div className="max-w-4xl mx-auto text-center">
-          <motion.div 
+          <motion.div
             initial="hidden"
             whileInView="visible"
             viewport={viewportOptions}

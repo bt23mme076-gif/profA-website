@@ -218,7 +218,7 @@ export default function Consulting() {
       <section className="bg-gradient-to-br from-[#dce8f5] to-[#fff7ed] pt-20 pb-8 px-6 lg:px-16">
         <div className="max-w-7xl mx-auto">
           <motion.div initial="hidden" animate="visible" variants={fadeInUp} className="text-center">
-            <div className="w-20 h-1 bg-[#FFCC00] mb-8 rounded-full mx-auto" />
+            <div className="w-20 h-1 bg-[#004B8D] mb-8 rounded-full mx-auto" />
             <h1 className="text-5xl lg:text-7xl font-['Playfair_Display'] font-bold text-[#1a1a1a] mb-6">
               <EditableText
                 collection="content" docId="consulting" field="page_heading"
@@ -238,17 +238,25 @@ export default function Consulting() {
             {/* KPI Stat Cards */}
             <div className="flex flex-wrap justify-center gap-6 mt-10 mb-2">
               {[
-                { value: totalAssignments, defaultLabel: 'Organisations Consulted', field: 'kpi_1_label' },
-                { value: '300,000', defaultLabel: 'Professionals Trained', field: 'kpi_4_label' },
-                { value: allGovtOrgs.length + allPrivateOrgs.length, defaultLabel: 'Organisations Trained', field: 'kpi_3_label' },
-              ].map(({ value, defaultLabel, field }) => (
+                { value: totalAssignments, defaultLabel: 'Organisations Consulted', field: 'kpi_1_label', valueField: 'kpi_1_value' },
+                { value: '300,000', defaultLabel: 'Professionals Trained', field: 'kpi_4_label', valueField: 'kpi_4_value' },
+                { value: allGovtOrgs.length + allPrivateOrgs.length, defaultLabel: 'Organisations Trained', field: 'kpi_3_label', valueField: 'kpi_3_value' },
+              ].map(({ value, defaultLabel, field, valueField }) => (
                 <div key={field} style={{
                   display: 'inline-flex', flexDirection: 'column', alignItems: 'center',
                   background: 'white', borderRadius: '10px', padding: '10px 22px',
                   boxShadow: '0 4px 20px rgba(0,75,141,.1)', border: '1px solid rgba(0,75,141,.08)',
                   minWidth: '160px'
                 }}>
-                  <strong style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.8rem', fontWeight: 700, color: '#004B8D' }}>{value}+</strong>
+                  <strong style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.8rem', fontWeight: 700, color: '#004B8D' }}>
+                    <EditableText
+                      collection="content"
+                      docId="consulting"
+                      field={valueField}
+                      defaultValue={pageData?.[valueField] || `${value}+`}
+                      className="font-['Playfair_Display'] text-[1.8rem] font-bold text-[#004B8D]"
+                    />
+                  </strong>
                   <div style={{ fontFamily: "'Inter', sans-serif", fontSize: '.72rem', fontWeight: 500, color: '#9ca3af', letterSpacing: '.09em', textTransform: 'uppercase', marginTop: '2px' }}>
                     <EditableText
                       collection="content"
@@ -277,7 +285,7 @@ export default function Consulting() {
                     className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a]"
                   />
                 </h2>
-                <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#FFCC00] group-hover:w-32 transition-all duration-300" />
+                <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#004B8D] group-hover:w-32 transition-all duration-300" />
               </div>
               {isAdmin && (
                 <button
@@ -332,7 +340,7 @@ export default function Consulting() {
                     className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a]"
                   />
                 </h2>
-                <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#FFCC00] group-hover:w-32 transition-all duration-300" />
+                <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#004B8D] group-hover:w-32 transition-all duration-300" />
               </div>
               {isAdmin && (
                 <button onClick={() => setShowAddGrant(true)}
@@ -399,7 +407,7 @@ export default function Consulting() {
                   className="text-4xl lg:text-5xl font-['Playfair_Display'] font-bold text-[#1a1a1a]"
                 />
               </h2>
-              <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#FFCC00] group-hover:w-32 transition-all duration-300 mb-4" />
+              <div className="w-24 h-1 bg-[#004B8D] rounded-full group-hover:bg-[#004B8D] group-hover:w-32 transition-all duration-300 mb-4" />
               <p className="text-lg font-['Inter'] text-gray-600 max-w-3xl">
                 <EditableText collection="content" docId="consulting" field="training_subtitle"
                   defaultValue={pageData?.training_subtitle || ''}
@@ -470,12 +478,12 @@ export default function Consulting() {
 
             {/* Private Sector */}
             <motion.div initial="hidden" whileInView="visible" viewport={viewportOptions} variants={fadeInUp}
-              className="bg-[#fff7ed] rounded-xl shadow-md border-l-4 border-[#FFCC00] overflow-hidden"
+              className="bg-[#fff7ed] rounded-xl shadow-md border-l-4 border-[#004B8D] overflow-hidden"
             >
-              <div className="bg-[#FFCC00] p-6 flex flex-wrap items-center justify-between gap-4">
+              <div className="bg-[#004B8D] p-6 flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <div className="bg-[#fff7ed] p-3 rounded-xl">
-                    <FiBriefcase className="w-6 h-6 text-[#FFCC00]" />
+                    <FiBriefcase className="w-6 h-6 text-[#004B8D]" />
                   </div>
                   <h3 className="text-2xl font-['Playfair_Display'] font-bold text-white" style={{ color: 'white' }}>
                     <EditableText collection="content" docId="consulting" field="private_heading"
@@ -486,7 +494,7 @@ export default function Consulting() {
                 </div>
                 {isAdmin && (
                   <button onClick={() => setShowAddPrivateOrg(true)}
-                    className="flex items-center gap-1 bg-white hover:bg-gray-100 text-[#FFCC00] px-3 py-1.5 rounded text-sm font-semibold transition-all">
+                    className="flex items-center gap-1 bg-white hover:bg-gray-100 text-[#004B8D] px-3 py-1.5 rounded text-sm font-semibold transition-all">
                     <FiPlus /> Add
                   </button>
                 )}
@@ -592,7 +600,7 @@ export default function Consulting() {
             </p>
             <div className="relative inline-block mt-4">
               <a href={pageData?.cta_button_link || "mailto:vishal@iima.ac.in"}
-                className="inline-flex items-center gap-3 px-8 py-4 bg-[#FFCC00] hover:bg-[#f5b800] text-black font-['Inter'] font-bold rounded-lg transition-all shadow-xl hover:shadow-2xl text-lg"
+                className="inline-flex items-center gap-3 px-8 py-4 bg-[#004B8D] hover:bg-[#f5b800] text-black font-['Inter'] font-bold rounded-lg transition-all shadow-xl hover:shadow-2xl text-lg"
               >
                 <FiBriefcase className="w-5 h-5" />
                 <span className="text-lg font-['Inter'] font-bold">
@@ -622,7 +630,7 @@ export default function Consulting() {
 
 /* ─── Assignment Card ────────────────────────────────────────────────── */
 function AssignmentCard({ assignment, index }) {
-  const isAlt = index % 2 === 1;
+  const isAlt = false; // Force uniform color, was: index % 2 === 1;
   const borderColor = isAlt ? 'border-[#FFCC00]' : 'border-[#004B8D]';
   const headerBg = isAlt ? 'bg-[#FFCC00]' : 'bg-[#004B8D]';
   const iconBg = isAlt ? 'bg-[#fff7ed]' : 'bg-[#dce8f5]';

@@ -476,9 +476,62 @@ export default function Books() {
             </p>
           </motion.div>
           <motion.div variants={fy} className="bk-stats">
-            <div className="bk-stat"><strong>{books.length || INITIAL_BOOKS.length}</strong><span>Books Published</span></div>
-            <div className="bk-stat"><strong>{yearRange}</strong><span>Publication Range</span></div>
-            {awardsCount > 0 && <div className="bk-stat"><strong>{awardsCount}</strong><span>Awards Won</span></div>}
+            <div className="bk-stat">
+              <EditableText
+                collection="content"
+                docId="books"
+                field="kpi_1_value"
+                defaultValue={pageData?.kpi_1_value || `${books.length || INITIAL_BOOKS.length}`}
+                className="bk-stat-strong"
+                style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.8rem', fontWeight: 700, color: '#004B8D' }}
+              />
+              <EditableText
+                collection="content"
+                docId="books"
+                field="kpi_1_label"
+                defaultValue={pageData?.kpi_1_label || 'Books Published'}
+                className="bk-stat-span"
+                style={{ fontFamily: "'Inter', sans-serif", fontSize: '.72rem', fontWeight: 500, color: '#9ca3af', letterSpacing: '.09em', textTransform: 'uppercase', marginTop: '2px' }}
+              />
+            </div>
+            <div className="bk-stat">
+              <EditableText
+                collection="content"
+                docId="books"
+                field="kpi_2_value"
+                defaultValue={pageData?.kpi_2_value || yearRange}
+                className="bk-stat-strong"
+                style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.8rem', fontWeight: 700, color: '#004B8D' }}
+              />
+              <EditableText
+                collection="content"
+                docId="books"
+                field="kpi_2_label"
+                defaultValue={pageData?.kpi_2_label || 'Publication Range'}
+                className="bk-stat-span"
+                style={{ fontFamily: "'Inter', sans-serif", fontSize: '.72rem', fontWeight: 500, color: '#9ca3af', letterSpacing: '.09em', textTransform: 'uppercase', marginTop: '2px' }}
+              />
+            </div>
+            {awardsCount > 0 && (
+              <div className="bk-stat">
+                <EditableText
+                  collection="content"
+                  docId="books"
+                  field="kpi_3_value"
+                  defaultValue={pageData?.kpi_3_value || `${awardsCount}`}
+                  className="bk-stat-strong"
+                  style={{ fontFamily: "'Playfair Display', serif", fontSize: '1.8rem', fontWeight: 700, color: '#004B8D' }}
+                />
+                <EditableText
+                  collection="content"
+                  docId="books"
+                  field="kpi_3_label"
+                  defaultValue={pageData?.kpi_3_label || 'Awards Won'}
+                  className="bk-stat-span"
+                  style={{ fontFamily: "'Inter', sans-serif", fontSize: '.72rem', fontWeight: 500, color: '#9ca3af', letterSpacing: '.09em', textTransform: 'uppercase', marginTop: '2px' }}
+                />
+              </div>
+            )}
           </motion.div>
         </motion.div>
       </section>

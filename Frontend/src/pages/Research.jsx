@@ -862,7 +862,7 @@ export default function Research() {
               href="https://scholar.google.co.in/citations?user=_kfodNoAAAAJ&hl=hi" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-[#004B8D] hover:bg-[#E0B000] text-white px-6 py-3 rounded-lg font-['Inter'] font-semibold transition-all shadow-lg hover:shadow-xl"
+              className="inline-flex items-center gap-2 bg-[#004B8D] text-white px-6 py-3 rounded-lg font-['Inter'] font-semibold transition-all shadow-lg border-2 border-[#004B8D] hover:bg-transparent hover:text-[#004B8D] hover:-translate-y-px"
             >
               <FiExternalLink /> Google Scholar Citations
             </a>
@@ -870,7 +870,7 @@ export default function Research() {
               href="https://www.researchgate.net/profile/YOUR_PROFILE" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-[#E0B000] hover:bg-[#003870] text-white px-6 py-3 rounded-lg font-['Inter'] font-semibold transition-all shadow-lg hover:shadow-xl"
+              className="inline-flex items-center gap-2 bg-[#E0B000] text-white px-6 py-3 rounded-lg font-['Inter'] font-semibold transition-all shadow-lg border-2 border-[#E0B000] hover:bg-transparent hover:text-[#E0B000] hover:-translate-y-px"
             >
               <FiExternalLink /> ResearchGate Profile
             </a>
