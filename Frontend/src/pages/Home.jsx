@@ -480,33 +480,40 @@ export default function Home() {
           /* Mobile adjustments to improve hero layout on small screens */
           @media (max-width: 640px) {
             .hero-section {
-              /* Horizontally split the screen: top = image, bottom = text */
               min-height: calc(100vh - 64px);
-              padding-top: 0;
-              padding-bottom: 0;
-              display: grid;
-              grid-template-columns: 1fr;
-              grid-template-rows: 1fr 1fr;
-              align-items: stretch;
-              gap: 0;
+              padding-top: 1rem;
+              padding-bottom: 2rem;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              gap: 1.5rem;
             }
             .hero-shimmer-line {
               width: 96px;
             }
-            .hero-image-col { grid-row: 1; display:flex; align-items:center; justify-content:center; padding-top: 12px; }
-            .hero-text-col { grid-row: 2; display:flex; align-items:center; }
+            .hero-image-col { 
+              display: flex; 
+              align-items: center; 
+              justify-content: center; 
+            }
+            .hero-text-col { 
+              display: flex; 
+              align-items: flex-start; 
+              justify-content: center;
+            }
             .hero-profile-photo {
               width: 100%;
-              height: 100%;
-              max-height: 100%;
+              height: auto;
+              max-height: 45vh;
               object-fit: cover;
               border-radius: 12px;
             }
-            /* Make the hero image much larger on mobile: fill the top half */
+            /* Make the hero image better scaled on mobile */
             .hero-image-col .hero-profile-photo {
-              max-width: 100% !important;
-              width: 100% !important;
-              height: 52vh !important;
+              max-width: 90% !important;
+              width: 90% !important;
+              height: auto !important;
+              max-height: 45vh !important;
               object-fit: cover !important;
               border-radius: 10px;
             }
@@ -530,7 +537,11 @@ export default function Home() {
             }
             .hero-greeting { font-size: 0.675rem !important; }
             .hero-name { font-size: 1.05rem !important; }
-            .hero-description { display: none; }
+            .hero-description { 
+              display: block !important; 
+              font-size: 0.9rem !important; 
+              line-height: 1.5 !important;
+            }
             .hero-btn-primary {
               padding: 0.5rem 0.75rem !important;
             }
@@ -541,8 +552,7 @@ export default function Home() {
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#004B8D]/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-[#F5C400]/5 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="flex flex-col justify-center space-y-4 sm:space-y-5 w-full h-full relative z-10 order-1 lg:order-1 hero-text-col"
-          style={{ maxWidth: 'min(640px, 54vw)' }}>
+        <div className="flex flex-col justify-center space-y-4 sm:space-y-5 w-full h-full relative z-10 order-1 lg:order-1 hero-text-col max-w-[92vw] sm:max-w-[85vw] md:max-w-[70vw] lg:max-w-[800px]">
           <motion.div
             initial={{ opacity: 0, y: 45 }}
             animate={{ opacity: 1, y: 0 }}
@@ -557,7 +567,8 @@ export default function Home() {
             <EditableText
               field="hero_title"
               defaultValue={data.hero_title || 'Creating Happy Leaders'}
-              className={`${GLOBAL_HEADING} text-white leading-[1.05] mb-2 block hero-title`}
+              className={`${GLOBAL_HEADING} text-white leading-[1.05] mb-2 block hero-title whitespace-pre-wrap`}
+              multiline={true}
             />
             {/* Animated shimmer underline */}
             <div className="hero-shimmer-line mb-3" />
