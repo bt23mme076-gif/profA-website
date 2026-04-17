@@ -133,7 +133,7 @@ export default function EditableText({
           
           <AnimatePresence>
             {showEditIcon && (
-              <motion.button
+              <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
@@ -143,17 +143,18 @@ export default function EditableText({
                   e.preventDefault();
                   setIsEditing(true);
                 }}
-                type="button"
-                className="absolute top-2 right-2 bg-black text-white p-2 rounded-md shadow-lg z-30"
+                className="absolute top-2 right-2 bg-black text-white p-2 rounded-md shadow-lg z-30 cursor-pointer"
               >
                 <FiEdit2 size={14} />
-              </motion.button>
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
       ) : (
         /* Floating Edit Modal Style */
-        <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="absolute left-0 top-0 z-50 w-full min-w-[300px] bg-white p-4 shadow-2xl rounded-xl border border-gray-100 max-h-[60vh] overflow-auto">
+        <motion.div 
+          onClick={(e) => e.stopPropagation()} 
+          initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="absolute left-0 top-0 z-50 w-full min-w-[300px] bg-white p-4 shadow-2xl rounded-xl border border-gray-100 max-h-[60vh] overflow-auto">
           {/* Toolbar: formatting + actions */}
           <div className="flex items-center justify-between mb-2">
             <div className="flex gap-2 items-center">

@@ -6,7 +6,8 @@ import {
   doc, getDoc, collection, query, where, orderBy, getDocs, addDoc, serverTimestamp, onSnapshot, updateDoc
 } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
-import { FiCalendar, FiTag, FiArrowLeft, FiMessageSquare, FiUser, FiMail, FiSend, FiCheck } from 'react-icons/fi';
+import { FiCalendar, FiTag, FiArrowLeft, FiMessageSquare, FiUser, FiMail, FiSend, FiCheck, FiShare2 } from 'react-icons/fi';
+import { FaWhatsapp, FaLinkedinIn, FaTwitter, FaLink } from 'react-icons/fa';
 
 /* ─── Font + CSS injection ───────────────────────────── */
 if (typeof document !== 'undefined' && !document.getElementById('bp-styles')) {
@@ -548,6 +549,56 @@ export default function BlogPost() {
           transition={{ duration: 0.65, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
           dangerouslySetInnerHTML={{ __html: blog.content || blog.excerpt || '' }}
         />
+
+        {/* ── Share Component ── */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '16px', margin: '48px 0 0', padding: '32px 0 0', borderTop: '1px solid #f3f4f6' }}>
+          <span style={{ fontFamily: '"Playfair Display", Georgia, serif', fontWeight: 700, fontSize: '1.25rem', color: '#1a1a1a' }}>Share this article</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <button 
+              onClick={() => window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(blog.title + " " + window.location.href)}`, '_blank')} 
+              style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#25D366', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'transform 0.2s' }}
+              onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+              onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+              title="Share on WhatsApp"
+            >
+              <FaWhatsapp size={18} />
+            </button>
+            <button 
+              onClick={() => window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`, '_blank')} 
+              style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#0077b5', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'transform 0.2s' }}
+              onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+              onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+              title="Share on LinkedIn"
+            >
+              <FaLinkedinIn size={18} />
+            </button>
+            <button 
+              onClick={() => window.open(`https://twitter.com/intent/tweet?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(blog.title)}`, '_blank')} 
+              style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#1da1f2', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'transform 0.2s' }}
+              onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+              onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+              title="Share on Twitter"
+            >
+              <FaTwitter size={18} />
+            </button>
+            <button 
+              onClick={() => {
+                if (navigator.share) {
+                  navigator.share({ title: blog.title, url: window.location.href }).catch(console.error);
+                } else {
+                  navigator.clipboard.writeText(window.location.href);
+                  alert('Link copied to clipboard!');
+                }
+              }} 
+              style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#4b5563', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', transition: 'transform 0.2s' }}
+              onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+              onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+              title="Share or Copy Link"
+            >
+              <FaLink size={18} />
+            </button>
+          </div>
+        </div>
 
         <div className="bp-divider" />
 

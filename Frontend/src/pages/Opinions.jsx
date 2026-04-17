@@ -434,7 +434,7 @@ export default function Opinions() {
               />
             </p>
             <div className="relative inline-block">
-              <a href="/#newsletter"
+              <a href="/newsletter"
                 className="inline-flex items-center gap-3 px-8 py-4 bg-[#004B8D] hover:bg-[#003870] text-white font-['Inter'] font-bold rounded-lg transition-all shadow-xl hover:shadow-2xl text-lg"
               >
                 <span className="text-lg font-['Inter'] font-bold text-white">
@@ -443,17 +443,22 @@ export default function Opinions() {
               </a>
 
               {/* Editable overlay placed outside the interactive anchor to avoid nested interactive elements */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="flex items-center justify-center w-full pointer-events-auto">
-                  <EditableText
-                    collection="content"
-                    docId="opinions"
-                    field="cta_button_text"
-                    defaultValue={pageData?.cta_button_text || ' Join Newsletter'}
-                    className="w-full inline-block text-lg font-['Inter'] font-bold text-white text-center px-2"
-                  />
+              {isAdmin && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div 
+                    className="flex items-center justify-center w-full pointer-events-auto cursor-pointer"
+                    onClick={(e) => e.currentTarget.parentElement.previousElementSibling?.click()}
+                  >
+                    <EditableText
+                      collection="content"
+                      docId="opinions"
+                      field="cta_button_text"
+                      defaultValue={pageData?.cta_button_text || ' Join Newsletter'}
+                      className="w-full inline-block text-lg font-['Inter'] font-bold text-white text-center px-2"
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </motion.div>
         </div>

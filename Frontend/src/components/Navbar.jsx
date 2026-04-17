@@ -733,6 +733,7 @@ export default function Navbar() {
                       e.currentTarget.style.transform = 'translateY(0)';
                       e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
                     }}
+                    onClick={() => navigate('/newsletter')}
                   >
                     Join Newsletter
                   </button>
@@ -1018,6 +1019,10 @@ export default function Navbar() {
                   onMouseLeave={(e) => {
                     e.currentTarget.style.transform = 'scale(1)';
                     e.currentTarget.style.boxShadow = '0 3px 12px rgba(0,0,0,0.12)';
+                  }}
+                  onClick={() => {
+                    navigate('/newsletter');
+                    setMobileMenuOpen(false);
                   }}
                 >
                   JOIN NEWSLETTER

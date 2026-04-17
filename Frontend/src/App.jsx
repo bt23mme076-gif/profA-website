@@ -14,6 +14,7 @@ import BlogPost from './pages/BlogPost';
 import Books from './pages/book';
 import Consulting from './pages/Consulting';
 import Opinions from './pages/Opinions';
+import Newsletter from './pages/Newsletter';
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           <Route path="/book" element={<Books />} />
           <Route path="/consulting" element={<Consulting />} />
           <Route path="/opinions" element={<Opinions />} />
+          <Route path="/newsletter" element={<Newsletter />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
         </Routes>

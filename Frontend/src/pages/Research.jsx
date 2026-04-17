@@ -18,6 +18,15 @@ export default function Research() {
   const [pubSearch, setPubSearch] = useState('');
   const [showAddSpecialIssue, setShowAddSpecialIssue] = useState(false);
   const [editingSpecialIssue, setEditingSpecialIssue] = useState(null);
+  
+  // Collapse/Expand state for each section
+  const [showAllPubs, setShowAllPubs] = useState(false);
+  const [showAllCases, setShowAllCases] = useState(false);
+  const [showAllChapters, setShowAllChapters] = useState(false);
+  const [showAllNotes, setShowAllNotes] = useState(false);
+  const [showAllChairperson, setShowAllChairperson] = useState(false);
+  const [showAllMember, setShowAllMember] = useState(false);
+
   const fadeInUp = {
     hidden: { opacity: 0, y: 20 },
     visible: { 
@@ -941,7 +950,7 @@ export default function Research() {
           )}
 
           <div className="space-y-6">
-            {filteredPublications.map((pub, index) => (
+            {(showAllPubs ? filteredPublications : filteredPublications.slice(0, 3)).map((pub, index) => (
               <motion.div
                 key={pub.id || index}
                 initial="hidden"
@@ -982,6 +991,17 @@ export default function Research() {
                 )}
               </motion.div>
             ))}
+            
+            {filteredPublications.length > 3 && !pubSearch && (
+              <div className="text-center mt-8">
+                <button
+                  onClick={() => setShowAllPubs(!showAllPubs)}
+                  className="inline-block border-2 border-[#004B8D] text-[#004B8D] hover:bg-[#004B8D] hover:text-white font-semibold py-2 px-6 rounded-full transition-colors"
+                >
+                  {showAllPubs ? 'Show Less' : `View All ${filteredPublications.length} Publications`}
+                </button>
+              </div>
+            )}
 
             {editingPub && isAdmin && (
               <div className="mt-6 p-6 bg-white rounded-xl border-2 border-[#004B8D] shadow-lg">
@@ -1035,7 +1055,7 @@ export default function Research() {
             )}
 
             <ul className="space-y-3">
-              {displayCases.map((caseItem, index) => (
+              {(showAllCases ? displayCases : displayCases.slice(0, 3)).map((caseItem, index) => (
                 <li key={caseItem.id || index} className="font-['Inter'] text-gray-700 pl-4 border-l-2 border-[#F5C400] hover:bg-[#fff7ed] p-2 transition-colors relative group">
                   {isAdmin && (
                     <button
@@ -1062,6 +1082,17 @@ export default function Research() {
                 </li>
               ))}
             </ul>
+            
+            {displayCases.length > 3 && (
+              <div className="text-left mt-6">
+                <button
+                  onClick={() => setShowAllCases(!showAllCases)}
+                  className="inline-block border-2 border-[#F5C400] text-gray-800 hover:bg-[#F5C400] font-semibold py-1.5 px-5 rounded-full transition-colors text-sm"
+                >
+                  {showAllCases ? 'Show Less' : `View All ${displayCases.length} Cases`}
+                </button>
+              </div>
+            )}
           </motion.div>
 
           {/* Technical Notes */}
@@ -1080,7 +1111,7 @@ export default function Research() {
               </h2>
             </div>
             <ul className="space-y-3">
-              {technicalNotes.map((note, index) => (
+              {(showAllNotes ? technicalNotes : technicalNotes.slice(0, 3)).map((note, index) => (
                 <li key={index} className="font-['Inter'] text-gray-700 pl-4 border-l-2 border-[#004B8D] hover:bg-[#dce8f5] p-2 transition-colors">
                   <div className="flex flex-col gap-1">
                     <span className="font-semibold">{note.title}</span>
@@ -1099,6 +1130,17 @@ export default function Research() {
                 </li>
               ))}
             </ul>
+            
+            {technicalNotes.length > 3 && (
+              <div className="text-left mt-6">
+                <button
+                  onClick={() => setShowAllNotes(!showAllNotes)}
+                  className="inline-block border-2 border-[#004B8D] text-[#004B8D] hover:bg-[#004B8D] hover:text-white font-semibold py-1.5 px-5 rounded-full transition-colors text-sm"
+                >
+                  {showAllNotes ? 'Show Less' : `View All ${technicalNotes.length} Notes`}
+                </button>
+              </div>
+            )}
           </motion.div>
         </div>
       </section>
@@ -1141,7 +1183,7 @@ export default function Research() {
           )}
 
           <div className="space-y-6">
-            {displayBookChapters.map((chapter, index) => (
+            {(showAllChapters ? displayBookChapters : displayBookChapters.slice(0, 3)).map((chapter, index) => (
               <motion.div
                 key={chapter.id || index}
                 initial="hidden"
@@ -1182,6 +1224,17 @@ export default function Research() {
                 )}
               </motion.div>
             ))}
+
+            {displayBookChapters.length > 3 && (
+              <div className="text-center mt-8">
+                <button
+                  onClick={() => setShowAllChapters(!showAllChapters)}
+                  className="inline-block border-2 border-[#004B8D] text-[#004B8D] hover:bg-[#004B8D] hover:text-white font-semibold py-2 px-6 rounded-full transition-colors"
+                >
+                  {showAllChapters ? 'Show Less' : `View All ${displayBookChapters.length} Chapters`}
+                </button>
+              </div>
+            )}
 
             {editingChapter && isAdmin && (
               <div className="mt-6 p-6 bg-white rounded-xl border-2 border-[#004B8D] shadow-lg">
@@ -1321,7 +1374,7 @@ export default function Research() {
                 As TAC Chairperson
               </h3>
               <div className="space-y-4">
-                {phdStudents.chairperson.map((student, index) => (
+                {(showAllChairperson ? phdStudents.chairperson : phdStudents.chairperson.slice(0, 3)).map((student, index) => (
                   <div key={index} className="border-l-4 border-[#004B8D] pl-4 py-2 hover:bg-[#dce8f5] transition-colors flex items-center justify-between">
                     <div>
                       <p className="font-['Inter'] font-semibold text-[#1a1a1a]">{student.name}</p>
@@ -1333,18 +1386,30 @@ export default function Research() {
                           const name = prompt('Edit Name', student.name);
                           const position = prompt('Edit Position', student.position);
                           if (name && position) editChairperson(index, { name, position });
-                        }} className="text-blue-600 hover:underline">Edit</button>
-                        <button onClick={() => deleteChairperson(index)} className="text-red-500 hover:underline">Delete</button>
+                        }} className="text-blue-600 hover:underline text-sm">Edit</button>
+                        <button onClick={() => deleteChairperson(index)} className="text-red-500 hover:underline text-sm">Delete</button>
                       </div>
                     )}
                   </div>
                 ))}
+                
+                {phdStudents.chairperson.length > 3 && (
+                  <div className="text-left mt-4 pt-4 border-t border-gray-100">
+                    <button
+                      onClick={() => setShowAllChairperson(!showAllChairperson)}
+                      className="inline-block text-[#004B8D] hover:underline font-semibold text-sm transition-colors"
+                    >
+                      {showAllChairperson ? 'Show Less' : `View All ${phdStudents.chairperson.length} Students`}
+                    </button>
+                  </div>
+                )}
+                
                 {isAdmin && (
                   <button onClick={() => {
                     const name = prompt('Student Name (with institute)');
                     const position = prompt('Position/Status');
                     if (name && position) addChairperson({ name, position });
-                  }} className="mt-2 px-3 py-1 bg-[#004B8D] text-white rounded hover:bg-[#003366]">+ Add Chairperson</button>
+                  }} className="mt-4 px-4 py-2 bg-[#004B8D] text-white rounded hover:bg-[#003366] text-sm w-full font-semibold transition-colors">+ Add Chairperson Student</button>
                 )}
               </div>
             </motion.div>
@@ -1361,7 +1426,7 @@ export default function Research() {
                 As TAC Member
               </h3>
               <div className="space-y-3">
-                {phdStudents.member.map((student, index) => (
+                {(showAllMember ? phdStudents.member : phdStudents.member.slice(0, 3)).map((student, index) => (
                   <div key={index} className="border-l-4 border-[#F5C400] pl-4 py-2 hover:bg-[#fff7ed] transition-colors flex items-center justify-between">
                     <p className="font-['Inter'] text-gray-700">{student}</p>
                     {isAdmin && (
@@ -1369,17 +1434,29 @@ export default function Research() {
                         <button onClick={() => {
                           const newVal = prompt('Edit Member', student);
                           if (newVal) editMember(index, newVal);
-                        }} className="text-orange-600 hover:underline">Edit</button>
-                        <button onClick={() => deleteMember(index)} className="text-red-500 hover:underline">Delete</button>
+                        }} className="text-orange-600 hover:underline text-sm">Edit</button>
+                        <button onClick={() => deleteMember(index)} className="text-red-500 hover:underline text-sm">Delete</button>
                       </div>
                     )}
                   </div>
                 ))}
+                
+                {phdStudents.member.length > 3 && (
+                  <div className="text-left mt-4 pt-4 border-t border-gray-100">
+                    <button
+                      onClick={() => setShowAllMember(!showAllMember)}
+                      className="inline-block text-[#F5C400] hover:text-[#d97706] hover:underline font-semibold text-sm transition-colors"
+                    >
+                      {showAllMember ? 'Show Less' : `View All ${phdStudents.member.length} Members`}
+                    </button>
+                  </div>
+                )}
+                
                 {isAdmin && (
                   <button onClick={() => {
                     const newVal = prompt('Member Name (with details)');
                     if (newVal) addMember(newVal);
-                  }} className="mt-2 px-3 py-1 bg-[#F5C400] text-black rounded hover:bg-[#f5b800]">+ Add Member</button>
+                  }} className="mt-4 px-4 py-2 bg-[#F5C400] text-black rounded hover:bg-[#f5b800] text-sm w-full font-semibold transition-colors">+ Add Member Student</button>
                 )}
               </div>
             </motion.div>

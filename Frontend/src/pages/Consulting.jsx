@@ -160,6 +160,10 @@ export default function Consulting() {
   const [showAddPrivateOrg, setShowAddPrivateOrg] = useState(false);
   const [showAddExecProgram, setShowAddExecProgram] = useState(false);
   const [expandedTraining, setExpandedTraining] = useState(false);
+  const [showAllAssignments, setShowAllAssignments] = useState(false);
+  const [showAllGrants, setShowAllGrants] = useState(false);
+  const [showAllPrivateOrgs, setShowAllPrivateOrgs] = useState(false);
+  const [showAllExecPrograms, setShowAllExecPrograms] = useState(false);
 
   const addAssignment = async (data) => {
     await addDoc(collection(db, 'consultingAssignments'), { ...data, createdAt: new Date() });
@@ -305,25 +309,34 @@ export default function Consulting() {
           )}
 
           <div className="space-y-6">
-            {/* Static assignments */}
-            {STATIC_ASSIGNMENTS.map((a, i) => (
-              <AssignmentCard key={a.id} assignment={a} index={i} />
-            ))}
-            {/* Dynamic assignments */}
-            {dynamicAssignments?.map((a, i) => (
-              <div key={a.id} className="relative">
-                <AssignmentCard assignment={a} index={STATIC_ASSIGNMENTS.length + i} />
-                {isAdmin && (
-                  <button
-                    onClick={() => deleteAssignment(a.id)}
-                    className="absolute top-4 right-4 p-1.5 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg"
-                    title="Delete"
-                  >
-                    <FiTrash2 size={14} />
-                  </button>
-                )}
+            {(showAllAssignments ? allAssignments : allAssignments.slice(0, 3)).map((a, i) => {
+              const isDynamic = dynamicAssignments?.some(da => da.id === a.id);
+              return (
+                <div key={a.id || i} className="relative">
+                  <AssignmentCard assignment={a} index={i} />
+                  {isAdmin && isDynamic && (
+                    <button
+                      onClick={() => deleteAssignment(a.id)}
+                      className="absolute top-4 right-4 p-1.5 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg"
+                      title="Delete"
+                    >
+                      <FiTrash2 size={14} />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+            
+            {allAssignments.length > 3 && (
+              <div className="text-left mt-4 pt-4 border-t border-gray-100">
+                <button
+                  onClick={() => setShowAllAssignments(!showAllAssignments)}
+                  className="inline-block text-[#004B8D] hover:underline font-semibold text-sm transition-colors"
+                >
+                  {showAllAssignments ? 'Show Less' : `View All ${allAssignments.length} Assignments`}
+                </button>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </section>
@@ -358,7 +371,7 @@ export default function Consulting() {
           )}
 
           <div className="grid md:grid-cols-2 gap-6">
-            {allGrants.map((g, i) => {
+            {(showAllGrants ? allGrants : allGrants.slice(0, 4)).map((g, i) => {
               const isDynamic = dynamicGrants?.some(dg => dg.id === g.id);
               return (
                 <motion.div
@@ -393,6 +406,17 @@ export default function Consulting() {
               );
             })}
           </div>
+          
+          {allGrants.length > 4 && (
+            <div className="text-left mt-6 pt-4 border-t border-gray-100">
+              <button
+                onClick={() => setShowAllGrants(!showAllGrants)}
+                className="inline-block text-[#004B8D] hover:underline font-semibold text-sm transition-colors"
+              >
+                {showAllGrants ? 'Show Less' : `View All ${allGrants.length} Grants`}
+              </button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -473,16 +497,22 @@ export default function Consulting() {
                     Show {allGovtOrgs.length - 6} more <FiChevronDown size={14} />
                   </button>
                 )}
+                {expandedTraining && allGovtOrgs.length > 6 && (
+                  <button onClick={() => setExpandedTraining(false)}
+                    className="mt-4 text-[#004B8D] text-sm font-['Inter'] font-semibold flex items-center gap-1 hover:underline">
+                    Show Less <FiChevronDown size={14} className="rotate-180" />
+                  </button>
+                )}
               </div>
             </motion.div>
 
             {/* Private Sector */}
             <motion.div initial="hidden" whileInView="visible" viewport={viewportOptions} variants={fadeInUp}
-              className="bg-[#fff7ed] rounded-xl shadow-md border-l-4 border-[#004B8D] overflow-hidden"
+              className="bg-[#faf8f5] rounded-xl shadow-md border-l-4 border-[#004B8D] overflow-hidden"
             >
               <div className="bg-[#004B8D] p-6 flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="bg-[#fff7ed] p-3 rounded-xl">
+                  <div className="bg-[#dce8f5] p-3 rounded-xl">
                     <FiBriefcase className="w-6 h-6 text-[#004B8D]" />
                   </div>
                   <h3 className="text-2xl font-['Playfair_Display'] font-bold text-white" style={{ color: 'white' }}>
@@ -508,7 +538,7 @@ export default function Consulting() {
 
               <div className="p-6">
                 <div className="flex flex-wrap gap-2">
-                  {allPrivateOrgs.map((org, idx) => {
+                  {(showAllPrivateOrgs ? allPrivateOrgs : allPrivateOrgs.slice(0, 8)).map((org, idx) => {
                     const dynamicDoc = dynamicPrivateOrgs?.find(d => d.name === org);
                     return (
                       <span key={org + idx} className="group relative px-3 py-1.5 bg-white border border-[#f97316]/30 text-[#1a1a1a] font-['Inter'] text-sm rounded-full shadow-sm pr-6">
@@ -523,6 +553,13 @@ export default function Consulting() {
                     );
                   })}
                 </div>
+                
+                {allPrivateOrgs.length > 8 && (
+                  <button onClick={() => setShowAllPrivateOrgs(!showAllPrivateOrgs)}
+                    className="mt-4 text-[#004B8D] text-sm font-['Inter'] font-semibold flex items-center gap-1 hover:underline">
+                    {showAllPrivateOrgs ? 'Show Less' : `Show ${allPrivateOrgs.length - 8} more`} <FiChevronDown size={14} className={`transition-transform ${showAllPrivateOrgs ? 'rotate-180' : ''}`} />
+                  </button>
+                )}
               </div>
             </motion.div>
           </div>
@@ -558,7 +595,7 @@ export default function Consulting() {
             )}
 
             <div className="grid md:grid-cols-2 gap-4">
-              {allExecPrograms.map((p, idx) => {
+              {(showAllExecPrograms ? allExecPrograms : allExecPrograms.slice(0, 4)).map((p, idx) => {
                 const isDynamic = dynamicExecPrograms?.some(dp => dp.id === p.id);
                 return (
                   <div key={(p.id || p.label) + idx} className="flex gap-3 items-start group relative">
@@ -577,6 +614,17 @@ export default function Consulting() {
                 );
               })}
             </div>
+            
+            {allExecPrograms.length > 4 && (
+              <div className="text-left mt-6 pt-4 border-t border-gray-100">
+                <button
+                  onClick={() => setShowAllExecPrograms(!showAllExecPrograms)}
+                  className="inline-block text-[#004B8D] hover:underline font-semibold text-sm transition-colors"
+                >
+                  {showAllExecPrograms ? 'Show Less' : `View All ${allExecPrograms.length} Programs`}
+                </button>
+              </div>
+            )}
           </motion.div>
         </div>
       </section>
@@ -609,17 +657,22 @@ export default function Consulting() {
               </a>
 
               {/* Editable overlay placed outside the interactive anchor to avoid nested interactive elements */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none pl-8">
-                <div className="flex items-center justify-center w-full pointer-events-auto">
-                  <EditableText
-                    collection="content"
-                    docId="consulting"
-                    field="cta_button_text"
-                    defaultValue={pageData?.cta_button_text || 'Get in Touch'}
-                    className="w-full inline-block text-lg font-['Inter'] font-bold text-white text-center px-2"
-                  />
+              {isAdmin && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none pl-8">
+                  <div 
+                    className="flex items-center justify-center w-full pointer-events-auto cursor-pointer"
+                    onClick={(e) => e.currentTarget.parentElement.previousElementSibling?.click()}
+                  >
+                    <EditableText
+                      collection="content"
+                      docId="consulting"
+                      field="cta_button_text"
+                      defaultValue={pageData?.cta_button_text || 'Get in Touch'}
+                      className="w-full inline-block text-lg font-['Inter'] font-bold text-white text-center px-2"
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </motion.div>
         </div>

@@ -79,7 +79,7 @@ export default function Footer() {
             {/* Newsletter Section */}
             <div className="space-y-2 md:space-y-4 text-center md:text-left w-full">
               <h4 className="font-bold uppercase tracking-[0.2em] text-[10px] text-gray-500">Newsletter</h4>
-              <a href="/#newsletter" className="inline-block text-lg md:text-xl border-b border-white pb-1 hover:text-gray-400 hover:border-gray-400 transition-all font-medium">
+              <a href="/newsletter" className="inline-block text-lg md:text-xl border-b border-white pb-1 hover:text-gray-400 hover:border-gray-400 transition-all font-medium">
                 Subscribe for the latest
               </a>
             </div>

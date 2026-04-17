@@ -614,7 +614,15 @@ export default function Home() {
                 {/* Editable overlay placed outside the interactive Link/button to avoid nested interactive elements */}
                 {isAdmin && (
                   <div className="absolute inset-0 flex items-center justify-start pointer-events-none">
-                    <div className="flex items-center justify-center w-full pointer-events-auto">
+                    <div 
+                      className="flex items-center justify-center w-full pointer-events-auto cursor-pointer"
+                      onClick={(e) => {
+                        // The previous sibling is the <Link> wrapping the <button>
+                        // <Link> creates an <a> tag. Let's click it.
+                        // But wait, <Link> wrapper here is actually outside the relative div? NO.
+                        e.currentTarget.parentElement.previousElementSibling?.querySelector('button, a')?.click() || e.currentTarget.parentElement.previousElementSibling?.click();
+                      }}
+                    >
                       <EditableText
                         collection="content"
                         docId="home"

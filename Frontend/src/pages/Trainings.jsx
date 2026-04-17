@@ -603,7 +603,7 @@ export default function Trainings() {
 
           <div className="relative inline-block">
             <a
-              href="/#newsletter"
+              href="/newsletter"
               className="inline-block px-8 py-4 bg-white text-[#004B8D] font-['Inter'] font-semibold rounded-lg shadow-lg hover:shadow-xl hover:bg-gray-50 transition-all duration-300"
             >
               <span className="text-sm font-['Inter'] font-semibold text-[#004B8D]">
@@ -612,17 +612,22 @@ export default function Trainings() {
             </a>
 
             {/* Editable overlay placed outside the interactive anchor to avoid nested interactive elements */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div className="flex items-center justify-center w-full pointer-events-auto">
-                <EditableText
-                  collection="content"
-                  docId="trainings"
-                  field="cta_button_text"
-                  defaultValue={pageData?.cta_button_text || 'Join Newsletter'}
-                  className="w-full inline-block text-sm font-['Inter'] font-semibold text-[#004B8D] text-center px-2"
-                />
+            {isAdmin && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div 
+                  className="flex items-center justify-center w-full pointer-events-auto cursor-pointer"
+                  onClick={(e) => e.currentTarget.parentElement.previousElementSibling?.click()}
+                >
+                  <EditableText
+                    collection="content"
+                    docId="trainings"
+                    field="cta_button_text"
+                    defaultValue={pageData?.cta_button_text || 'Join Newsletter'}
+                    className="w-full inline-block text-sm font-['Inter'] font-semibold text-[#004B8D] text-center px-2"
+                  />
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </section>

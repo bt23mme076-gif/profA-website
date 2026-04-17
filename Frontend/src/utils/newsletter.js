@@ -1,8 +1,10 @@
-import { collection, doc, setDoc, getDocs } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 /**
- * Subscribe user to newsletter
+ * Subscribe user to newsletter & send welcome email via backend
  * @param {string} email - User's email address
  * @returns {Promise<{success: boolean, message: string}>}
  */
@@ -17,31 +19,28 @@ export async function subscribeToNewsletter(email) {
       };
     }
 
-    const normalizedEmail = email.toLowerCase();
-    
-    // We cannot query ('getDocs') the collection due to safety rules, 
-    // so we attempt to create the document with the email as its ID.
-    // If it already exists, Firestore will throw a 'permission-denied' error because over-writing requires update permissions.
-    const newsletterDocRef = doc(db, 'newsletter_subscribers', normalizedEmail);
-    
-    await setDoc(newsletterDocRef, {
-      email: normalizedEmail,
-      subscribedAt: new Date().toISOString(),
-      status: 'active',
-      source: 'website'
+    const response = await fetch(`${API_BASE_URL}/newsletter/subscribe`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email })
     });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        message: data.error || 'Something went wrong. Please try again later.'
+      };
+    }
 
     return {
       success: true,
-      message: 'Thank you for subscribing! Check your inbox for confirmation.'
+      message: 'Thank you for subscribing! Check your inbox for a welcome email.'
     };
   } catch (error) {
-    if (error.code === 'permission-denied') {
-      return {
-        success: false,
-        message: 'This email is already subscribed!'
-      };
-    }
     console.error('Newsletter subscription error:', error);
     return {
       success: false,

@@ -5,6 +5,8 @@ import { db } from '../firebase/config';
 import { doc, getDoc, updateDoc, setDoc, collection, addDoc, deleteDoc, getDocs, query, where, serverTimestamp } from 'firebase/firestore';
 import { FiSave, FiPlus, FiTrash2, FiEdit, FiX, FiBookOpen, FiYoutube, FiFileText, FiDownload, FiStar, FiImage, FiUpload, FiUsers, FiBriefcase, FiExternalLink, FiMail, FiSend, FiInbox, FiRefreshCw } from 'react-icons/fi';
 import { uploadToCloudinary } from '../utils/cloudinaryUpload';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 
 // Add mobile responsive styles
 const mobileStyles = `
@@ -997,20 +999,20 @@ export default function AdminDashboard() {
           </button>
           <button
             className="admin-tab"
-            onClick={() => setActiveTab('about')}
+            onClick={() => setActiveTab('newsletter')}
             style={{
               padding: '1rem 2rem',
               border: 'none',
               background: 'none',
-              borderBottom: activeTab === 'about' ? '3px solid #1a1a1a' : 'none',
-              fontWeight: activeTab === 'about' ? 600 : 400,
+              borderBottom: activeTab === 'newsletter' ? '3px solid #1a1a1a' : 'none',
+              fontWeight: activeTab === 'newsletter' ? 600 : 400,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               gap: '0.5rem'
             }}
           >
-            <FiDownload /> <span>Newsletter</span>
+            <FiMail /> <span>Newsletter</span>
           </button>
           <button
             className="admin-tab"
@@ -1766,6 +1768,64 @@ export default function AdminDashboard() {
               )}
 
               <div style={{ display: 'grid', gap: '1.25rem' }}>
+                {/* Blog to Newsletter Integration */}
+                <div style={{ padding: '1rem', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem', color: '#1e293b' }}>
+                    Automate Newsletter (Select a recently published blog post)
+                  </label>
+                  <select
+                    onChange={(e) => {
+                      if (!e.target.value) return;
+                      const selectedBlog = blogs.find(b => b.id === e.target.value);
+                      if (selectedBlog) {
+                        setNewsletterSubject(selectedBlog.title || 'New Blog Post');
+                        
+                        // Construct nicely styled HTML from the blog data
+                        const blogUrl = `https://your-website.com/blog/${selectedBlog.id}`;
+                        const imageUrl = selectedBlog.image || 'https://images.unsplash.com/photo-1512486130939-2c4f79935e4f?ixlib=rb-4.0.3';
+                        const summary = selectedBlog.summary ? `<p style="font-size:18px; color:#475569; margin-bottom: 24px;">${selectedBlog.summary}</p>` : '';
+                        
+                        const htmlBody = `
+                          <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
+                            <h1 style="color: #0F172A; font-size: 28px; line-height: 1.2; margin-bottom: 16px;">${selectedBlog.title}</h1>
+                            ${summary}
+                            
+                            <img src="${imageUrl}" alt="${selectedBlog.title}" style="width: 100%; max-height: 350px; object-fit: cover; border-radius: 8px; margin-bottom: 24px;" />
+                            
+                            <div style="line-height: 1.6; font-size: 16px; color: #1e293b; margin-bottom: 32px;">
+                              ${selectedBlog.content.substring(0, 300)}...
+                            </div>
+                            
+                            <div style="text-align: center; margin: 32px 0;">
+                              <a href="${blogUrl}" style="background-color: #2563eb; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; display: inline-block;">
+                                Read Full Article
+                              </a>
+                            </div>
+                            
+                            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 32px 0;" />
+                            <p style="font-size: 12px; color: #94a3b8; text-align: center;">
+                              You received this email because you are subscribed to our newsletter.<br/>
+                              Don't want to receive these emails anymore? Unsubscribe <a href="#" style="color: #2563eb; text-decoration: underline;">here</a>.
+                            </p>
+                          </div>
+                        `;
+                        
+                        setNewsletterBody(htmlBody);
+                      }
+                    }}
+                    style={{ width: '100%', padding: '0.75rem', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.95rem' }}
+                  >
+                    <option value="">-- Choose a Blog Post to Broadcast --</option>
+                    {blogs.length > 0 ? (
+                      blogs.map(blog => (
+                        <option key={blog.id} value={blog.id}>{blog.title}</option>
+                      ))
+                    ) : (
+                      <option disabled>No blog posts found</option>
+                    )}
+                  </select>
+                </div>
+
                 <div>
                   <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>Subject *</label>
                   <input
@@ -1778,14 +1838,22 @@ export default function AdminDashboard() {
                 </div>
                 <div>
                   <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.9rem' }}>Message Body *</label>
-                  <p style={{ margin: '0 0 0.5rem', color: '#888', fontSize: '0.8rem' }}>HTML is supported. Use &lt;p&gt;, &lt;b&gt;, &lt;a href="..."&gt; etc.</p>
-                  <textarea
-                    value={newsletterBody}
-                    onChange={(e) => { setNewsletterBody(e.target.value); setNewsletterSent(false); }}
-                    placeholder={`<p>Dear Subscriber,</p>\n<p>I'm excited to share...</p>\n<p>Best regards,<br/>Prof. Vishal Gupta</p>`}
-                    rows={12}
-                    style={{ width: '100%', padding: '0.75rem', border: '1.5px solid #ddd', borderRadius: '6px', fontFamily: 'monospace', fontSize: '0.9rem', resize: 'vertical', boxSizing: 'border-box' }}
-                  />
+                  <p style={{ margin: '0 0 0.5rem', color: '#888', fontSize: '0.8rem' }}>Design your email below. Highlight text to bold, link, or structure.</p>
+                  <div style={{ background: 'white', border: '1.5px solid #ddd', borderRadius: '6px', overflow: 'hidden' }}>
+                    <ReactQuill 
+                      theme="snow" 
+                      value={newsletterBody} 
+                      onChange={(content) => { setNewsletterBody(content); setNewsletterSent(false); }} 
+                      placeholder="Write your newsletter here..."
+                    />
+                  </div>
+                  <style>
+                    {`
+                      .ql-editor { min-height: 250px; font-size: 1rem; }
+                      .ql-toolbar { border: none !important; border-bottom: 1px solid #ddd !important; background: #f9fafb; padding: 12px; }
+                      .ql-container { border: none !important; }
+                    `}
+                  </style>
                 </div>
 
                 {/* Preview */}
